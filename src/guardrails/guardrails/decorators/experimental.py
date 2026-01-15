@@ -7,9 +7,7 @@ def experimental(func):
 
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
-        logger.warn(
-            f"The function '{func.__name__}' is experimental and subject to change."
-        )
+        logger.warn(f"The function '{func.__name__}' is experimental and subject to change.")
         return func(*args, **kwargs)
 
     return wrapper

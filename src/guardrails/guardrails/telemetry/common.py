@@ -20,9 +20,7 @@ def get_tracer(tracer: Optional[Tracer] = None) -> Optional[Tracer]:
 
 def get_current_context() -> Union[Context, None]:
     otel_current_context = (
-        context.get_current()
-        if context is not None and hasattr(context, "get_current")
-        else None
+        context.get_current() if context is not None and hasattr(context, "get_current") else None
     )
     tracer_context = get_tracer_context()
     return otel_current_context or tracer_context

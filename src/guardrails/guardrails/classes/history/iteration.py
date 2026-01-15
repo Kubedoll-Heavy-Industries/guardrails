@@ -33,9 +33,7 @@ class Iteration(IIteration, ArbitraryModel):
 
     # I think these should be containered since their names slightly overlap with
     #  outputs, but could be convinced otherwise
-    inputs: Inputs = Field(
-        description="The inputs for the iteration/step.", default_factory=Inputs
-    )
+    inputs: Inputs = Field(description="The inputs for the iteration/step.", default_factory=Inputs)
     # We might just spread these properties instead of containering them
     outputs: Outputs = Field(
         description="The outputs from the iteration/step.", default_factory=Outputs
@@ -236,12 +234,8 @@ class Iteration(IIteration, ArbitraryModel):
 
     @classmethod
     def from_interface(cls, i_iteration: IIteration) -> "Iteration":
-        inputs = (
-            Inputs.from_interface(i_iteration.inputs) if i_iteration.inputs else None
-        )
-        outputs = (
-            Outputs.from_interface(i_iteration.outputs) if i_iteration.outputs else None
-        )
+        inputs = Inputs.from_interface(i_iteration.inputs) if i_iteration.inputs else None
+        outputs = Outputs.from_interface(i_iteration.outputs) if i_iteration.outputs else None
         iteration = cls(
             call_id=i_iteration.call_id,
             index=i_iteration.index,

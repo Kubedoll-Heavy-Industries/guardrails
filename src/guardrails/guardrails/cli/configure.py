@@ -70,8 +70,7 @@ def configure(
     remote_inferencing: Optional[bool] = typer.Option(
         DEFAULT_USE_REMOTE_INFERENCING,
         "--enable-remote-inferencing/--disable-remote-inferencing",
-        help="Opt in to remote inferencing. "
-        "If not provided, you will be prompted for it.",
+        help="Opt in to remote inferencing. If not provided, you will be prompted for it.",
         prompt="Do you wish to use remote inferencing?",
     ),
     clear_token: Optional[bool] = typer.Option(

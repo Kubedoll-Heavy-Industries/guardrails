@@ -87,9 +87,7 @@ class AsyncStreamRunner(AsyncRunner, StreamRunner):
             stream=True,
         )
         outputs = Outputs()
-        iteration = Iteration(
-            call_id=call_log.id, index=index, inputs=inputs, outputs=outputs
-        )
+        iteration = Iteration(call_id=call_log.id, index=index, inputs=inputs, outputs=outputs)
         set_scope(str(id(iteration)))
         call_log.iterations.push(iteration)
         if output is not None:
@@ -130,13 +128,9 @@ class AsyncStreamRunner(AsyncRunner, StreamRunner):
         for k, v in self.validation_map.items():
             if isinstance(v, list):
                 for validator in v:
-                    property_validation_chunks = ContextVar(
-                        f"{k}_{validator.rail_alias}_chunks"
-                    )
+                    property_validation_chunks = ContextVar(f"{k}_{validator.rail_alias}_chunks")
                     context.run(property_validation_chunks.set, [])
-                    context_vars[f"{k}_{validator.rail_alias}"] = (
-                        property_validation_chunks  # noqa: E501
-                    )
+                    context_vars[f"{k}_{validator.rail_alias}"] = property_validation_chunks  # noqa: E501
         context.run(stream_context_vars.set, context_vars)
 
         if self.output_type == OutputTypes.STRING:
@@ -187,9 +181,7 @@ class AsyncStreamRunner(AsyncRunner, StreamRunner):
                             )
                             if validator_log.validation_result.outcome == "fail":
                                 validation_passed = False
-                            reasks, valid_op = self.introspect(
-                                validator_log.validation_result
-                            )
+                            reasks, valid_op = self.introspect(validator_log.validation_result)
                             if reasks:
                                 raise ValueError(
                                     "Reasks are not yet supported with streaming. "
@@ -199,9 +191,7 @@ class AsyncStreamRunner(AsyncRunner, StreamRunner):
 
                             if isinstance(validator_log.validation_result, PassResult):
                                 chunk = validator_log.validation_result.validated_chunk
-                            elif isinstance(
-                                validator_log.validation_result, FailResult
-                            ):
+                            elif isinstance(validator_log.validation_result, FailResult):
                                 if is_filter or is_refrain:
                                     refrain_triggered = True
                                     chunk = ""
@@ -219,10 +209,7 @@ class AsyncStreamRunner(AsyncRunner, StreamRunner):
                             validation_progress[validator_log.validator_name] += chunk
                     # if there is an entry for every validator
                     # run a merge and emit a validation outcome
-                    if (
-                        len(validation_progress) == len(validators)
-                        or len(validators) == 0
-                    ):
+                    if len(validation_progress) == len(validators) or len(validators) == 0:
                         if refrain_triggered:
                             current = ""
                         else:
@@ -230,9 +217,7 @@ class AsyncStreamRunner(AsyncRunner, StreamRunner):
                             for piece in validation_progress:
                                 merge_chunks.append(validation_progress[piece])
 
-                            current = validator_service.multi_merge(
-                                fragment, merge_chunks
-                            )
+                            current = validator_service.multi_merge(fragment, merge_chunks)
 
                         vo = ValidationOutcome(
                             call_id=call_log.id,  # type: ignore

@@ -39,9 +39,7 @@ class Serializeable:
         snake_case_kwargs = {
             snake_case(k): data.get(k) for k in data if snake_case(k) in attributes
         }
-        snake_case_kwargs["encoder"] = snake_case_kwargs.get(
-            "encoder", SerializeableJSONEncoder
-        )
+        snake_case_kwargs["encoder"] = snake_case_kwargs.get("encoder", SerializeableJSONEncoder)
         return cls(**snake_case_kwargs)  # type: ignore
 
     @property

@@ -24,9 +24,7 @@ class BaseSyncOpenAIClient(BaseOpenAIClient):
     ) -> List[List[float]]:
         raise NotImplementedError
 
-    def create_completion(
-        self, engine: str, prompt: str, *args, **kwargs
-    ) -> LLMResponse:
+    def create_completion(self, engine: str, prompt: str, *args, **kwargs) -> LLMResponse:
         raise NotImplementedError
 
     def create_chat_completion(
@@ -43,9 +41,7 @@ class BaseAsyncOpenAIClient(BaseOpenAIClient):
     ) -> List[List[float]]:
         raise NotImplementedError
 
-    async def create_completion(
-        self, engine: str, prompt: str, *args, **kwargs
-    ) -> LLMResponse:
+    async def create_completion(self, engine: str, prompt: str, *args, **kwargs) -> LLMResponse:
         raise NotImplementedError
 
     async def create_chat_completion(

@@ -47,9 +47,7 @@ class ValidationResult(IValidationResult, ArbitraryModel):
 
     @classmethod
     def from_dict(cls, obj: Dict[str, Any]) -> "ValidationResult":
-        i_validation_result = IValidationResult.from_dict(obj) or IValidationResult(
-            outcome="fail"
-        )
+        i_validation_result = IValidationResult.from_dict(obj) or IValidationResult(outcome="fail")
         return cls.from_interface(i_validation_result)
 
 

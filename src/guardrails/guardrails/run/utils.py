@@ -19,8 +19,7 @@ def messages_source(messages: MessageHistory) -> MessageHistory:
         msg_copy = copy.deepcopy(msg)
         content = (
             msg["content"].source
-            if isinstance(msg["content"], Prompt)
-            or isinstance(msg["content"], Instructions)
+            if isinstance(msg["content"], Prompt) or isinstance(msg["content"], Instructions)
             else msg["content"]
         )
         msg_copy["content"] = content
@@ -82,9 +81,5 @@ def preprocess_prompt(
     use_xml: bool,
 ) -> Tuple[Optional[Instructions], Prompt]:
     if output_type == OutputTypes.STRING:
-        return preprocess_prompt_for_string_output(
-            prompt_callable, instructions, prompt
-        )
-    return preprocess_prompt_for_json_output(
-        prompt_callable, instructions, prompt, use_xml
-    )
+        return preprocess_prompt_for_string_output(prompt_callable, instructions, prompt)
+    return preprocess_prompt_for_json_output(prompt_callable, instructions, prompt, use_xml)

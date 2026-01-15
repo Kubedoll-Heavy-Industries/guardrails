@@ -114,9 +114,7 @@ class SQLiteTraceHandler(TracerMixin):
     @classmethod
     def _get_read_connection(cls, log_path: os.PathLike) -> sqlite3.Connection:
         # A bit of a hack to open in read-only mode...
-        db = sqlite3.connect(
-            "file:" + str(log_path) + "?mode=ro", isolation_level=None, uri=True
-        )
+        db = sqlite3.connect("file:" + str(log_path) + "?mode=ro", isolation_level=None, uri=True)
         db.row_factory = sqlite3.Row
         return db
 
@@ -169,10 +167,7 @@ class SQLiteTraceHandler(TracerMixin):
         assert not self.readonly
         maybe_outcome = (
             str(vlog.validation_result.outcome)
-            if (
-                vlog.validation_result is not None
-                and hasattr(vlog.validation_result, "outcome")
-            )
+            if (vlog.validation_result is not None and hasattr(vlog.validation_result, "outcome"))
             else ""
         )
         with self.db:

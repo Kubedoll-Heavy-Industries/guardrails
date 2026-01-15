@@ -93,9 +93,7 @@ class OpenAIClientV1(BaseOpenAIClient):
         )
         return [r.embedding for r in embeddings.data]
 
-    def create_completion(
-        self, engine: str, prompt: str, *args, **kwargs
-    ) -> LLMResponse:
+    def create_completion(self, engine: str, prompt: str, *args, **kwargs) -> LLMResponse:
         trace_operation(
             input_mime_type="application/json",
             input_value={
@@ -114,9 +112,7 @@ class OpenAIClientV1(BaseOpenAIClient):
             }
         )
 
-        response = self.client.completions.create(
-            model=engine, prompt=prompt, *args, **kwargs
-        )
+        response = self.client.completions.create(model=engine, prompt=prompt, *args, **kwargs)
 
         trace_operation(output_mime_type="application/json", output_value=response)
 
@@ -151,9 +147,7 @@ class OpenAIClientV1(BaseOpenAIClient):
         if openai_response.usage is None:
             raise ValueError("No token counts returned from OpenAI")
         trace_llm_call(
-            output_messages=[
-                {"role": "assistant", "content": openai_response.choices[0].text}
-            ],
+            output_messages=[{"role": "assistant", "content": openai_response.choices[0].text}],
             token_count_completion=openai_response.usage.completion_tokens,
             token_count_prompt=openai_response.usage.prompt_tokens,
             token_count_total=openai_response.usage.total_tokens,
@@ -185,9 +179,7 @@ class OpenAIClientV1(BaseOpenAIClient):
             input_messages=messages,
             model_name=model,
             invocation_parameters={**kwargs, "model": model, "messages": messages},
-            function_call=kwargs.get(
-                "function_call", safe_get(function_calling_tools, 0)
-            ),
+            function_call=kwargs.get("function_call", safe_get(function_calling_tools, 0)),
         )
         response = self.client.chat.completions.create(
             model=model, messages=messages, *args, **kwargs
@@ -239,8 +231,7 @@ class OpenAIClientV1(BaseOpenAIClient):
                     output = choice.message.tool_calls[-1].function.arguments
                 except AttributeError as ae_tools:
                     raise ValueError(
-                        "No message content or function"
-                        " call arguments returned from OpenAI"
+                        "No message content or function call arguments returned from OpenAI"
                     ) from ae_tools
         trace_llm_call(
             output_messages=[choice.message for choice in openai_response.choices],  # type: ignore
@@ -274,9 +265,7 @@ class AsyncOpenAIClientV1(BaseOpenAIClient):
         )
         return [r.embedding for r in embeddings.data]
 
-    async def create_completion(
-        self, engine: str, prompt: str, *args, **kwargs
-    ) -> LLMResponse:
+    async def create_completion(self, engine: str, prompt: str, *args, **kwargs) -> LLMResponse:
         response = await self.client.completions.create(
             model=engine, prompt=prompt, *args, **kwargs
         )
@@ -309,9 +298,7 @@ class AsyncOpenAIClientV1(BaseOpenAIClient):
                 text=prompt,
                 model_name=engine,
             )
-            response_token_count = num_tokens_from_string(
-                text=complete_output, model_name=engine
-            )
+            response_token_count = num_tokens_from_string(text=complete_output, model_name=engine)
 
             # Return the LLMResponse
             return LLMResponse(
@@ -368,9 +355,7 @@ class AsyncOpenAIClientV1(BaseOpenAIClient):
                 chunk_message = chunk["choices"][0]["delta"]
                 collected_messages.append(chunk_message)  # save the message
 
-            complete_output = "".join(
-                [msg.get("content", "") for msg in collected_messages]
-            )
+            complete_output = "".join([msg.get("content", "") for msg in collected_messages])
 
             # Also, it no longer returns usage information
             # So manually count the tokens using tiktoken
@@ -378,9 +363,7 @@ class AsyncOpenAIClientV1(BaseOpenAIClient):
                 messages=prompt,
                 model=model,
             )
-            response_token_count = num_tokens_from_string(
-                text=complete_output, model_name=model
-            )
+            response_token_count = num_tokens_from_string(text=complete_output, model_name=model)
 
             # Return the LLMResponse
             return LLMResponse(
@@ -410,8 +393,7 @@ class AsyncOpenAIClientV1(BaseOpenAIClient):
                     output = choice.message.tool_calls[-1].function.arguments
                 except AttributeError as ae_tools:
                     raise ValueError(
-                        "No message content or function"
-                        " call arguments returned from OpenAI"
+                        "No message content or function call arguments returned from OpenAI"
                     ) from ae_tools
 
         return LLMResponse(

@@ -116,9 +116,7 @@ class SqlAlchemyDriver(SQLDriver):
         return "\n".join(formatted_schema)
 
 
-def create_sql_driver(
-    schema_file: Optional[str] = None, conn: Optional[str] = None
-) -> SQLDriver:
+def create_sql_driver(schema_file: Optional[str] = None, conn: Optional[str] = None) -> SQLDriver:
     if schema_file is None and conn is None:
         return SimpleSqlDriver()
     return SqlAlchemyDriver(schema_file=schema_file, conn=conn)

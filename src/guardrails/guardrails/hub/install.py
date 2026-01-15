@@ -67,9 +67,7 @@ def install(
 
     # 1. Validation
     rc_file_exists = RC.exists()
-    validator_id, validator_version = ValidatorPackageService.get_validator_id(
-        package_uri
-    )
+    validator_id, validator_version = ValidatorPackageService.get_validator_id(package_uri)
 
     installing_msg = f"Installing {package_uri}..."
     cli_logger.log(
@@ -84,8 +82,8 @@ def install(
     # 2. Prep Installation
     fetch_manifest_msg = "Fetching manifest"
     with loader(fetch_manifest_msg, spinner="bouncingBar"):
-        (module_manifest, site_packages) = (
-            ValidatorPackageService.get_manifest_and_site_packages(validator_id)
+        (module_manifest, site_packages) = ValidatorPackageService.get_manifest_and_site_packages(
+            validator_id
         )
 
     # 3. Install - Pip Installation of git module
@@ -100,25 +98,19 @@ def install(
         )
 
     use_remote_endpoint = False
-    module_has_endpoint = (
-        module_manifest.tags and module_manifest.tags.has_guardrails_endpoint
-    )
+    module_has_endpoint = module_manifest.tags and module_manifest.tags.has_guardrails_endpoint
 
     try:
         if rc_file_exists:
             # if we do want to remote then we don't want to install local models
-            use_remote_endpoint = (
-                RC.load(cli_logger).use_remote_inferencing and module_has_endpoint
-            )
+            use_remote_endpoint = RC.load(cli_logger).use_remote_inferencing and module_has_endpoint
         elif install_local_models is None and module_has_endpoint:
             install_local_models = install_local_models_confirm()
     except AttributeError:
         pass
 
     # 4. Post Installation
-    install_local_models = (
-        install_local_models if install_local_models is not None else True
-    )
+    install_local_models = install_local_models if install_local_models is not None else True
     if not use_remote_endpoint and install_local_models is True:
         cli_logger.log(
             level=LEVELS.get("SPAM"),  # type: ignore
@@ -132,15 +124,12 @@ def install(
     else:
         cli_logger.log(
             level=LEVELS.get("SPAM"),  # type: ignore
-            msg="Skipping post install, models will not be "
-            "downloaded for local inference.",
+            msg="Skipping post install, models will not be downloaded for local inference.",
         )
     ValidatorPackageService.add_to_hub_inits(module_manifest, site_packages)
 
     # 5. Get Validator Class for the installed module
-    installed_module = ValidatorPackageService.get_validator_from_manifest(
-        module_manifest
-    )
+    installed_module = ValidatorPackageService.get_validator_from_manifest(module_manifest)
     installed_module = cast(ValidatorModuleType, installed_module)
 
     # Print success messages
@@ -153,9 +142,7 @@ def install(
         if installed_version:
             installed_version_message = f" version {installed_version}"
 
-    verbose_printer(
-        f"✅Successfully installed {validator_id}{installed_version_message}!\n\n"
-    )
+    verbose_printer(f"✅Successfully installed {validator_id}{installed_version_message}!\n\n")
     success_message_cli = Template(
         "[bold]Import validator:[/bold]\n"
         "from guardrails.hub import ${export}\n\n"

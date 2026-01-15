@@ -15,9 +15,7 @@ class ModelSchema(IModelSchema):
 
         i_model_schema = super().from_dict(obj)
 
-        i_model_schema_dict = (
-            i_model_schema.to_dict() if i_model_schema else {"type": "string"}
-        )
+        i_model_schema_dict = i_model_schema.to_dict() if i_model_schema else {"type": "string"}
 
         trimmed = {k: v for k, v in i_model_schema_dict.items() if v is not None}
 

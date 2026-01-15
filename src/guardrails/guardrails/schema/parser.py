@@ -88,9 +88,7 @@ def _get_all_paths(
         _get_all_paths(v, paths=paths, json_path=child_path)
 
     ## Object Schema allows anonymous properties
-    additional_properties: Dict[str, Any] = json_schema.get(
-        "additionalProperties", False
-    )
+    additional_properties: Dict[str, Any] = json_schema.get("additionalProperties", False)
     schema_type = json_schema.get("type")
     # NOTE: Technically we should check for schema compositions
     #   that would yield an object as well,

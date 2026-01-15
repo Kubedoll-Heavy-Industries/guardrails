@@ -66,9 +66,7 @@ class HubTelemetry:
         self._carrier = {}
         self._service_name = service_name
         # self._endpoint = "http://localhost:5318/v1/traces"
-        self._endpoint = (
-            "https://hty0gc1ok3.execute-api.us-east-1.amazonaws.com/v1/traces"
-        )
+        self._endpoint = "https://hty0gc1ok3.execute-api.us-east-1.amazonaws.com/v1/traces"
         self._tracer_name = tracer_name
 
         # Create a resource
@@ -86,9 +84,7 @@ class HubTelemetry:
         if export_locally:
             self._processor = BatchSpanProcessor(ConsoleSpanExporter())
         else:
-            self._processor = BatchSpanProcessor(
-                OTLPSpanExporter(endpoint=self._endpoint)
-            )
+            self._processor = BatchSpanProcessor(OTLPSpanExporter(endpoint=self._endpoint))
 
         # Add the processor to the provider
         self._tracer_provider.add_span_processor(self._processor)

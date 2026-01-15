@@ -28,9 +28,7 @@ def watch_command(
         default=True,
         help="Continuously read the last output commands",
     ),
-    clear: bool = typer.Option(
-        default=False, is_flag=True, help="Clear all log outputs and exit."
-    ),
+    clear: bool = typer.Option(default=False, is_flag=True, help="Clear all log outputs and exit."),
 ):
     settings._watch_mode_enabled = True
     trace_if_enabled("watch")

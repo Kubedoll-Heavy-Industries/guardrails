@@ -24,9 +24,7 @@ ValidatorResult = Optional[Union[ValidationResult, Awaitable[ValidationResult]]]
 
 
 class AsyncValidatorService(ValidatorServiceBase):
-    @async_trace(
-        name="/validator_usage", origin="AsyncValidatorService.execute_validator"
-    )
+    @async_trace(name="/validator_usage", origin="AsyncValidatorService.execute_validator")
     async def execute_validator(
         self,
         validator: Validator,
@@ -37,9 +35,7 @@ class AsyncValidatorService(ValidatorServiceBase):
         validation_session_id: str,
         **kwargs,
     ) -> Optional[ValidationResult]:
-        validate_func = (
-            validator.async_validate_stream if stream else validator.async_validate
-        )
+        validate_func = validator.async_validate_stream if stream else validator.async_validate
         traced_validator = trace_async_validator(
             validator_name=validator.rail_alias,
             obj_id=id(validator),

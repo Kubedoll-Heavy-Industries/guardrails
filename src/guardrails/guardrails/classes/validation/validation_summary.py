@@ -37,9 +37,7 @@ class ValidationSummary(IValidationSummary, ArbitraryModel):
         validator_logs: List[ValidatorLogs],
     ) -> List["ValidationSummary"]:
         summaries = []
-        for summary in ValidationSummary._generate_summaries_from_validator_logs(
-            validator_logs
-        ):
+        for summary in ValidationSummary._generate_summaries_from_validator_logs(validator_logs):
             summaries.append(summary)
         return summaries
 
@@ -48,9 +46,7 @@ class ValidationSummary(IValidationSummary, ArbitraryModel):
         validator_logs: List[ValidatorLogs],
     ) -> List["ValidationSummary"]:
         summaries = []
-        for summary in ValidationSummary._generate_summaries_from_validator_logs(
-            validator_logs
-        ):
+        for summary in ValidationSummary._generate_summaries_from_validator_logs(validator_logs):
             if summary.failure_reason:
                 summaries.append(summary)
         return summaries

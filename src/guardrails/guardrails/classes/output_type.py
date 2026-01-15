@@ -42,18 +42,14 @@ class OutputTypes(str, Enum):
             return cls("dict")
 
         one_of: List[Dict[str, Any]] = [
-            s
-            for s in json_schema.get("oneOf", [])
-            if isinstance(s, dict) and "type" in s
+            s for s in json_schema.get("oneOf", []) if isinstance(s, dict) and "type" in s
         ]
         if one_of:
             first_sub_schema = one_of[0]
             return cls.__from_json_schema__(first_sub_schema)
 
         any_of: List[Dict[str, Any]] = [
-            s
-            for s in json_schema.get("anyOf", [])
-            if isinstance(s, dict) and "type" in s
+            s for s in json_schema.get("anyOf", []) if isinstance(s, dict) and "type" in s
         ]
         if any_of:
             first_sub_schema = any_of[0]

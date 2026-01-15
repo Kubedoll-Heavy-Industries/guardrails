@@ -36,9 +36,7 @@ def parse_rail_arguments(arg_tokens: List[str]) -> List[Any]:
                 #   to parse the values from the string WITHOUT an eval.
                 t = literal_eval(t)
             except (ValueError, SyntaxError, NameError) as e:
-                raise ValueError(
-                    f"Python expression `{t}` is not valid, and raised an error: {e}."
-                )
+                raise ValueError(f"Python expression `{t}` is not valid, and raised an error: {e}.")
         validator_args.append(t)
     return validator_args
 
@@ -53,17 +51,13 @@ def parse_rail_validator(
         max_splits = 2 if is_hub_validator else 1
         parts = validator_spec.split(":", max_splits)
         validator_id = (
-            ":".join([parts[0], parts[1].strip()])
-            if is_hub_validator
-            else parts[0].strip()
+            ":".join([parts[0], parts[1].strip()]) if is_hub_validator else parts[0].strip()
         )
         arg_tokens = []
         if len(parts) > max_splits:
             arg_tokens = [
                 arg.strip()
-                for arg in split_on(
-                    parts[max_splits], r"\s", exceptions=ESCAPED_OR_QUOTED
-                )
+                for arg in split_on(parts[max_splits], r"\s", exceptions=ESCAPED_OR_QUOTED)
             ]
         validator_args = parse_rail_arguments(arg_tokens)
     else:
@@ -156,9 +150,7 @@ def safe_get_validator(v: Union[str, PydanticValidatorSpec]) -> Union[Validator,
         return None
 
 
-def verify_metadata_requirements(
-    metadata: dict, validators: List[Validator]
-) -> List[str]:
+def verify_metadata_requirements(metadata: dict, validators: List[Validator]) -> List[str]:
     missing_keys = set()
     for validator in validators:
         for requirement in validator.required_metadata_keys:
@@ -174,7 +166,5 @@ def parse_validator_reference(ref: ValidatorReference) -> Optional[Validator]:
     if validator_cls:
         args = ref.args or []
         kwargs = ref.kwargs or {}
-        validator = validator_cls(
-            *args, on_fail=OnFailAction.get(ref.on_fail), **kwargs
-        )
+        validator = validator_cls(*args, on_fail=OnFailAction.get(ref.on_fail), **kwargs)
         return validator

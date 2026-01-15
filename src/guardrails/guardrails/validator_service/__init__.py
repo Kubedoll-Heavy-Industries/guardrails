@@ -40,9 +40,7 @@ def should_run_sync():
     run_sync = os.environ.get("GUARDRAILS_RUN_SYNC", "false")
     bool_values = ["true", "false"]
     if run_sync.lower() not in bool_values:
-        warnings.warn(
-            f"GUARDRAILS_RUN_SYNC must be one of {bool_values}! Defaulting to 'false'."
-        )
+        warnings.warn(f"GUARDRAILS_RUN_SYNC must be one of {bool_values}! Defaulting to 'false'.")
     return process_count == 1 or run_sync.lower() == "true"
 
 
@@ -81,10 +79,7 @@ def validate(
             loop = get_loop()
             validator_service = AsyncValidatorService(disable_tracer)
         except RuntimeError:
-            warnings.warn(
-                "Could not obtain an event loop."
-                " Falling back to synchronous validation."
-            )
+            warnings.warn("Could not obtain an event loop. Falling back to synchronous validation.")
             validator_service = SequentialValidatorService(disable_tracer)
 
     return validator_service.validate(
@@ -146,8 +141,6 @@ def post_process_validation(
     # Remove all keys that have `Filter` values.
     validated_response = apply_filters(validated_response)
 
-    trace_validation_result(
-        validation_logs=iteration.validator_logs, attempt_number=attempt_number
-    )
+    trace_validation_result(validation_logs=iteration.validator_logs, attempt_number=attempt_number)
 
     return validated_response

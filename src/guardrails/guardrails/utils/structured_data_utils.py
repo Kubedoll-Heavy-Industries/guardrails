@@ -25,9 +25,7 @@ def set_additional_properties_false_iteratively(schema):
         current = stack.pop()
         if isinstance(current, dict):
             if "properties" in current:
-                current["required"] = list(
-                    current["properties"].keys()
-                )  # this has to be set
+                current["required"] = list(current["properties"].keys())  # this has to be set
             if "maximum" in current:
                 logger.warn("Property maximum is not supported. Dropping")
                 current.pop("maximum")  # the api does not like these set

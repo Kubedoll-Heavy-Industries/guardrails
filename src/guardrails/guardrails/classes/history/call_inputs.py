@@ -23,8 +23,7 @@ class CallInputs(Inputs, ICallInputs, ArbitraryModel):
     """
 
     llm_api: Optional[Callable[[Any], Awaitable[Any]]] = Field(
-        description="The LLM function provided by the user"
-        "during Guard.__call__ or Guard.parse.",
+        description="The LLM function provided by the userduring Guard.__call__ or Guard.parse.",
         default=None,
     )
     messages: Optional[list[dict[str, str]]] = Field(

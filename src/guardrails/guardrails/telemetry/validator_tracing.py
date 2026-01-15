@@ -65,9 +65,7 @@ def add_validator_attributes(
     validator_span.set_attribute("validator.validate.input.metadata", metadata_arg)
     for k, v in kwargs.items():
         if v is not None:
-            validator_span.set_attribute(
-                f"validator.validate.input.{k}", serialize(v) or ""
-            )
+            validator_span.set_attribute(f"validator.validate.input.{k}", serialize(v) or "")
     trace_operation(
         input_value={"value": value_arg, "metadata": metadata_arg},
         input_mime_type="application/json",
@@ -81,9 +79,7 @@ def add_validator_attributes(
         )
         for k, v in output.items():
             if v is not None:
-                validator_span.set_attribute(
-                    f"validator.validate.output.{k}", serialize(v) or ""
-                )
+                validator_span.set_attribute(f"validator.validate.output.{k}", serialize(v) or "")
 
 
 def trace_validator(
@@ -129,9 +125,7 @@ def trace_validator(
                         )
                         return resp
                     except Exception as e:
-                        validator_span.set_status(
-                            status=StatusCode.ERROR, description=str(e)
-                        )
+                        validator_span.set_status(status=StatusCode.ERROR, description=str(e))
                         add_user_attributes(validator_span)
                         add_validator_attributes(
                             *args,
@@ -198,9 +192,7 @@ def trace_async_validator(
                         )
                         return resp
                     except Exception as e:
-                        validator_span.set_status(
-                            status=StatusCode.ERROR, description=str(e)
-                        )
+                        validator_span.set_status(status=StatusCode.ERROR, description=str(e))
                         add_user_attributes(validator_span)
                         add_validator_attributes(
                             *args,

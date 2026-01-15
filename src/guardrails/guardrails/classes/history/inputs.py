@@ -39,9 +39,7 @@ class Inputs(IInputs, ArbitraryModel):
         "provided by the user via Guard.parse.",
         default=None,
     )
-    messages: Optional[
-        Union[List[Dict[str, Union[str, Prompt, Instructions]]], Messages]
-    ] = Field(
+    messages: Optional[Union[List[Dict[str, Union[str, Prompt, Instructions]]], Messages]] = Field(
         description="The message history provided by the user for chat model calls.",
         default=None,
     )
@@ -59,8 +57,7 @@ class Inputs(IInputs, ArbitraryModel):
         default=None,
     )
     full_schema_reask: Optional[bool] = Field(
-        description="Whether to perform reasks across the entire schema"
-        "or at the field level.",
+        description="Whether to perform reasks across the entire schemaor at the field level.",
         default=None,
     )
     stream: Optional[bool] = Field(
@@ -76,9 +73,7 @@ class Inputs(IInputs, ArbitraryModel):
                 ser_msg = {**msg}
                 content = ser_msg.get("content")
                 if content:
-                    ser_msg["content"] = (
-                        content.source if isinstance(content, Prompt) else content
-                    )
+                    ser_msg["content"] = content.source if isinstance(content, Prompt) else content
                 serialized_messages.append(ser_msg)
 
         return IInputs(
@@ -107,9 +102,7 @@ class Inputs(IInputs, ArbitraryModel):
                     ser_msg["content"] = Prompt(content)
                 deserialized_messages.append(ser_msg)
 
-        num_reasks = (
-            int(i_inputs.num_reasks) if i_inputs.num_reasks is not None else None
-        )
+        num_reasks = int(i_inputs.num_reasks) if i_inputs.num_reasks is not None else None
         return cls(
             llm_api=None,
             llm_output=i_inputs.llm_output,

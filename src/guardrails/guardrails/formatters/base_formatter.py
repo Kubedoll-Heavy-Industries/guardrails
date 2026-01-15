@@ -19,9 +19,7 @@ class BaseFormatter(ABC):
     def wrap_callable(self, llm_callable: PromptCallableBase) -> ArbitraryCallable: ...
 
     @abstractmethod
-    def wrap_async_callable(
-        self, llm_callable: PromptCallableBase
-    ) -> AsyncPromptCallableBase: ...
+    def wrap_async_callable(self, llm_callable: PromptCallableBase) -> AsyncPromptCallableBase: ...
 
 
 class PassthroughFormatter(BaseFormatter):

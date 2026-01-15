@@ -35,9 +35,7 @@ def remove_from_hub_inits(manifest: Manifest, site_packages: str):
     sorted_exports = sorted(exports, reverse=True)
 
     validator_id = manifest.id
-    import_path = ValidatorPackageService.get_import_path_from_validator_id(
-        validator_id
-    )
+    import_path = ValidatorPackageService.get_import_path_from_validator_id(validator_id)
     import_line = f"from {import_path} import {', '.join(sorted_exports)}"
 
     # Remove import line from main __init__.py

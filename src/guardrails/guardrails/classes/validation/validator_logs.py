@@ -41,9 +41,7 @@ class ValidatorLogs(IValidatorLog, ArbitraryModel):
         start_time = self.start_time.isoformat() if self.start_time else None
         end_time = self.end_time.isoformat() if self.end_time else None
         validation_result = (
-            ValidatorLogValidationResult(self.validation_result)
-            if self.validation_result
-            else None
+            ValidatorLogValidationResult(self.validation_result) if self.validation_result else None
         )
         # pyright doesn't understand aliases so all type aliases are ignored.
         return IValidatorLog(
@@ -64,14 +62,10 @@ class ValidatorLogs(IValidatorLog, ArbitraryModel):
     @classmethod
     def from_interface(cls, i_validator_log: IValidatorLog) -> "ValidatorLogs":
         instance_id = (
-            i_validator_log.instance_id.actual_instance
-            if i_validator_log.instance_id
-            else None
+            i_validator_log.instance_id.actual_instance if i_validator_log.instance_id else None
         )
         validation_result = (
-            ValidationResult.from_interface(
-                i_validator_log.validation_result.actual_instance
-            )
+            ValidationResult.from_interface(i_validator_log.validation_result.actual_instance)
             if (
                 i_validator_log.validation_result
                 and i_validator_log.validation_result.actual_instance

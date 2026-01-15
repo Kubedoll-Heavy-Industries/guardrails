@@ -68,9 +68,7 @@ class EmbeddingBase(ABC):
             chunk_lens.append(len(chunk))
 
         if average:
-            chunk_embeddings = np.average(
-                chunk_embeddings_list, axis=0, weights=chunk_lens
-            )
+            chunk_embeddings = np.average(chunk_embeddings_list, axis=0, weights=chunk_lens)
             chunk_embeddings = chunk_embeddings / np.linalg.norm(
                 chunk_embeddings
             )  # normalizes length to 1
@@ -178,8 +176,7 @@ class ManifestEmbedding(EmbeddingBase):
             from manifest import Manifest  # type: ignore
         except ImportError:
             raise ImportError(
-                "The `manifest` package is not installed. "
-                "Install with `poetry add manifest-ml`"
+                "The `manifest` package is not installed. Install with `poetry add manifest-ml`"
             )
         super().__init__(engine, encoding_name, max_tokens)
         self._client_name = client_name

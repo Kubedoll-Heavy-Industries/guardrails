@@ -43,9 +43,7 @@ def _jsonschema_to_jsonformer(
 
     # We may get something we don't expect...
     if not isinstance(schema, dict):
-        raise Exception(
-            f"Error: could not convert/parse base schema. Encountered `{schema}`"
-        )
+        raise Exception(f"Error: could not convert/parse base schema. Encountered `{schema}`")
 
     if "$defs" in schema:
         # We have some sub-schemas defined here.  We need to convert them.
@@ -78,9 +76,7 @@ def _jsonschema_to_jsonformer(
             result["type"] = "array"
             result["items"] = _jsonschema_to_jsonformer(schema["items"], path, objdefs)
         elif k == "$ref":
-            result = _jsonschema_to_jsonformer(
-                _deref_schema_path(objdefs, v), path, objdefs
-            )
+            result = _jsonschema_to_jsonformer(_deref_schema_path(objdefs, v), path, objdefs)
         else:
             result[k] = v
     return result
@@ -146,9 +142,7 @@ class JsonFormatter(BaseFormatter):
 
             return ArbitraryCallable(fn)
         else:
-            raise ValueError(
-                "JsonFormatter can only be used with HuggingFace*Callable."
-            )
+            raise ValueError("JsonFormatter can only be used with HuggingFace*Callable.")
 
     def wrap_async_callable(self, llm_callable):
         raise NotImplementedError()

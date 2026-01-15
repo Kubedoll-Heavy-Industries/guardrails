@@ -72,9 +72,7 @@ class Messages:
 
             # Return another instance of the class with the formatted message.
             formatted_message = Template(msg_str).safe_substitute(**filtered_kwargs)
-            formatted_messages.append(
-                {"role": message["role"], "content": formatted_message}
-            )
+            formatted_messages.append({"role": message["role"], "content": formatted_message})
         return Messages(formatted_messages)
 
     def substitute_constants(self, text):

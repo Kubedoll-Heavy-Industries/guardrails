@@ -45,12 +45,9 @@ class Outputs(IOutputs, ArbitraryModel):
     llm_response_info: Optional[LLMResponse] = Field(
         description="Information from the LLM response.", default=None
     )
-    raw_output: Optional[str] = Field(
-        description="The exact output from the LLM.", default=None
-    )
+    raw_output: Optional[str] = Field(description="The exact output from the LLM.", default=None)
     parsed_output: Optional[Union[str, List, Dict]] = Field(
-        description="The output parsed from the LLM response"
-        "as it was passed into validation.",
+        description="The output parsed from the LLM responseas it was passed into validation.",
         default=None,
     )
     validation_response: Optional[Union[str, ReAsk, List, Dict]] = Field(
@@ -73,8 +70,7 @@ class Outputs(IOutputs, ArbitraryModel):
         description="The results of each individual validation.", default_factory=list
     )
     error: Optional[str] = Field(
-        description="The error message from any exception"
-        "that raised and interrupted the process.",
+        description="The error message from any exceptionthat raised and interrupted the process.",
         default=None,
     )
     exception: Optional[Exception] = Field(
@@ -124,18 +120,14 @@ class Outputs(IOutputs, ArbitraryModel):
                     for error_span in result.error_spans:
                         spans_in_output.append(
                             ErrorSpan(
-                                start=error_span.start
-                                + total_len_by_validator[validator_name],
-                                end=error_span.end
-                                + total_len_by_validator[validator_name],
+                                start=error_span.start + total_len_by_validator[validator_name],
+                                end=error_span.end + total_len_by_validator[validator_name],
                                 reason=error_span.reason,
                             )
                         )
             if isinstance(result, ValidationResult):
                 if result and result.validated_chunk is not None:
-                    total_len_by_validator[validator_name] += len(
-                        result.validated_chunk
-                    )
+                    total_len_by_validator[validator_name] += len(result.validated_chunk)
         return spans_in_output
 
     @property
@@ -148,9 +140,7 @@ class Outputs(IOutputs, ArbitraryModel):
         for reask in self.reasks:
             all_fail_results.extend(reask.fail_results)
 
-        all_reasks_have_fixes = all(
-            list(fail.fix_value is not None for fail in all_fail_results)
-        )
+        all_reasks_have_fixes = all(list(fail.fix_value is not None for fail in all_fail_results))
 
         if self._all_empty() is True:
             return not_run_status
@@ -158,18 +148,14 @@ class Outputs(IOutputs, ArbitraryModel):
             return error_status
         elif not all_reasks_have_fixes:
             return fail_status
-        elif self.guarded_output is None and isinstance(
-            self.validation_response, ReAsk
-        ):
+        elif self.guarded_output is None and isinstance(self.validation_response, ReAsk):
             return fail_status
         return pass_status
 
     def to_interface(self) -> IOutputs:
         return IOutputs(
             llm_response_info=(  # type: ignore - pydantic alias
-                self.llm_response_info.to_interface()
-                if self.llm_response_info
-                else None
+                self.llm_response_info.to_interface() if self.llm_response_info else None
             ),
             raw_output=self.raw_output,  # type: ignore - pydantic alias
             parsed_output=(  # type: ignore - pydantic alias
@@ -181,15 +167,11 @@ class Outputs(IOutputs, ArbitraryModel):
                 else None
             ),
             guarded_output=(  # type: ignore - pydantic alias
-                OutputsParsedOutput(self.guarded_output)
-                if self.guarded_output
-                else None
+                OutputsParsedOutput(self.guarded_output) if self.guarded_output else None
             ),
             reasks=self.reasks,  # type: ignore - pydantic alias
             validator_logs=[  # type: ignore - pydantic alias
-                v.to_interface()
-                for v in self.validator_logs
-                if isinstance(v, ValidatorLogs)
+                v.to_interface() for v in self.validator_logs if isinstance(v, ValidatorLogs)
             ],
             error=self.error,
         )
@@ -205,9 +187,7 @@ class Outputs(IOutputs, ArbitraryModel):
 
         validator_logs = []
         if i_outputs.validator_logs:
-            validator_logs = [
-                ValidatorLogs.from_interface(v) for v in i_outputs.validator_logs
-            ]
+            validator_logs = [ValidatorLogs.from_interface(v) for v in i_outputs.validator_logs]
 
         return cls(
             llm_response_info=(  # type: ignore
@@ -217,9 +197,7 @@ class Outputs(IOutputs, ArbitraryModel):
             ),
             raw_output=i_outputs.raw_output,  # type: ignore
             parsed_output=(  # type: ignore
-                i_outputs.parsed_output.actual_instance
-                if i_outputs.parsed_output
-                else None
+                i_outputs.parsed_output.actual_instance if i_outputs.parsed_output else None
             ),
             validation_response=(  # type: ignore
                 i_outputs.validation_response.actual_instance
@@ -227,9 +205,7 @@ class Outputs(IOutputs, ArbitraryModel):
                 else None
             ),
             guarded_output=(  # type: ignore
-                i_outputs.guarded_output.actual_instance
-                if i_outputs.guarded_output
-                else None
+                i_outputs.guarded_output.actual_instance if i_outputs.guarded_output else None
             ),
             reasks=reasks,  # type: ignore
             validator_logs=validator_logs,  # type: ignore

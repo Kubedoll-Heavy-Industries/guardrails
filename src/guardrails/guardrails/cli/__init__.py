@@ -7,9 +7,7 @@ from guardrails.cli.hub import hub_command
 from guardrails.cli.watch import watch_command  # noqa: F401
 
 
-cli.add_typer(
-    hub_command, name="hub", help="Manage validators installed from the Guardrails Hub."
-)
+cli.add_typer(hub_command, name="hub", help="Manage validators installed from the Guardrails Hub.")
 
 
 if __name__ == "__main__":

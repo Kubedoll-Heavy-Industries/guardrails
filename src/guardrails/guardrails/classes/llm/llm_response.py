@@ -50,9 +50,7 @@ class LLMResponse(ILLMResponse):
         # dont do this again if already aiter-able were updating
         # ourselves here so in memory
         # this can cause issues
-        if self.async_stream_output and not hasattr(
-            self.async_stream_output, "__aiter__"
-        ):
+        if self.async_stream_output and not hasattr(self.async_stream_output, "__aiter__"):
             # tee doesn't work with async iterators
             # This may be destructive
             async_stream_output = []

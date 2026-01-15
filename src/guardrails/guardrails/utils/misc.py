@@ -50,16 +50,12 @@ def generate_test_artifacts(
 
         # Save the compiled prompt.
         compiled_messages = logs.inputs.messages
-        with open(
-            os.path.join(artifact_dir, f"compiled_prompt_{on_fail_type}{ext}.txt"), "w"
-        ) as f:
+        with open(os.path.join(artifact_dir, f"compiled_prompt_{on_fail_type}{ext}.txt"), "w") as f:
             f.write(str(compiled_messages or ""))
 
         # Save the llm output.
         llm_output = logs.raw_output
-        with open(
-            os.path.join(artifact_dir, f"llm_output_{on_fail_type}{ext}.txt"), "w"
-        ) as f:
+        with open(os.path.join(artifact_dir, f"llm_output_{on_fail_type}{ext}.txt"), "w") as f:
             f.write(llm_output or "")
 
         # Save the validated response.
@@ -110,9 +106,7 @@ def generate_random_schemas(n: int, depth: int = 4, width: int = 10) -> List[str
                 children = []
                 for _ in range(num_children):
                     children.append(generate_schema(curr_depth + 1))
-                return E.object(
-                    *children, name=f"random_object_{random.randint(0, 1000)}"
-                )
+                return E.object(*children, name=f"random_object_{random.randint(0, 1000)}")
             elif node_type == "list":
                 # If "list", then generate a single child
                 return E.list(

@@ -29,9 +29,7 @@ class PromptCallableBase:
 
     def __call__(self, *args, **kwargs) -> LLMResponse:
         try:
-            result = self._invoke_llm(
-                *self.init_args, *args, **self.init_kwargs, **kwargs
-            )
+            result = self._invoke_llm(*self.init_args, *args, **self.init_kwargs, **kwargs)
         except Exception as e:
             raise PromptCallableException(
                 "The callable `fn` passed to `Guard(fn, ...)` failed"

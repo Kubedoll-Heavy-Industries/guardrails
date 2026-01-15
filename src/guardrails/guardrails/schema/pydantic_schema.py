@@ -112,8 +112,7 @@ def get_base_model(
 
     if not is_base_model_type(schema_model):
         raise ValueError(
-            "'output_class' must be of Type[pydantic.BaseModel]"
-            " or List[Type[pydantic.BaseModel]]!"
+            "'output_class' must be of Type[pydantic.BaseModel] or List[Type[pydantic.BaseModel]]!"
         )
 
     return (schema_model, type_origin, key_type_origin)
@@ -183,21 +182,15 @@ def extract_validators(
             for alias_path in aliases:
                 alias_paths.append(f"{alias_path}.{alias}")
 
-        if field.json_schema_extra is not None and isinstance(
-            field.json_schema_extra, dict
-        ):
+        if field.json_schema_extra is not None and isinstance(field.json_schema_extra, dict):
             # NOTE: It's impossible to copy a class type so using
             #   'pop' here mutates the original Pydantic Model.
             # Using 'get' adds a pointless 'validators' field to the
             #   json schema but that doesn't break anything.
             validators = field.json_schema_extra.get("validators", [])
 
-            if not isinstance(validators, list) and not isinstance(
-                validators, Validator
-            ):
-                logger.warning(
-                    f"Invalid value assigned to {field_name}.validators! {validators}"
-                )
+            if not isinstance(validators, list) and not isinstance(validators, Validator):
+                logger.warning(f"Invalid value assigned to {field_name}.validators! {validators}")
                 continue
             validator_instances: List[Validator] = []
 
@@ -227,9 +220,7 @@ def extract_validators(
                 ]
                 processed_schema.validators.extend(validator_references)
         if field.annotation:
-            field_model, field_type_origin, key_type_origin = try_get_base_model(
-                field.annotation
-            )
+            field_model, field_type_origin, key_type_origin = try_get_base_model(field.annotation)
             if field_model:
                 if field_type_origin is Union:
                     union_members = list(get_args(field_model))
@@ -255,17 +246,13 @@ def extract_validators(
                         aliases=alias_paths,
                     )
                     if field_type_origin is list:
-                        model.model_fields[field_name].annotation = List[
-                            extracted_field_model
-                        ]
+                        model.model_fields[field_name].annotation = List[extracted_field_model]
                     elif field_type_origin is dict:
                         model.model_fields[field_name].annotation = Dict[
                             key_type_origin, extracted_field_model  # type: ignore
                         ]
                     else:
-                        model.model_fields[
-                            field_name
-                        ].annotation = extracted_field_model  # noqa
+                        model.model_fields[field_name].annotation = extracted_field_model  # noqa
     return model
 
 
@@ -293,9 +280,7 @@ def pydantic_model_to_schema(
 
     schema_model, type_origin, _key_type_origin = get_base_model(pydantic_class)
 
-    processed_schema.output_type = (
-        OutputTypes.LIST if type_origin is list else OutputTypes.DICT
-    )
+    processed_schema.output_type = OutputTypes.LIST if type_origin is list else OutputTypes.DICT
 
     model = extract_validators(schema_model, processed_schema, "$")
     json_schema = pydantic_to_json_schema(model, type_origin)

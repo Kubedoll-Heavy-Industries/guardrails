@@ -66,14 +66,10 @@ class MlFlowInstrumentor:
         wrapped_runner_step = self._instrument_runner_step(Runner.step)
         setattr(Runner, "step", wrapped_runner_step)
 
-        wrapped_stream_runner_step = self._instrument_stream_runner_step(
-            StreamRunner.step
-        )
+        wrapped_stream_runner_step = self._instrument_stream_runner_step(StreamRunner.step)
         setattr(StreamRunner, "step", wrapped_stream_runner_step)
 
-        wrapped_async_runner_step = self._instrument_async_runner_step(
-            AsyncRunner.async_step
-        )
+        wrapped_async_runner_step = self._instrument_async_runner_step(AsyncRunner.async_step)
         setattr(AsyncRunner, "async_step", wrapped_async_runner_step)
 
         wrapped_async_stream_runner_step = self._instrument_async_stream_runner_step(
@@ -84,9 +80,7 @@ class MlFlowInstrumentor:
         wrapped_runner_call = self._instrument_runner_call(Runner.call)
         setattr(Runner, "call", wrapped_runner_call)
 
-        wrapped_async_runner_call = self._instrument_async_runner_call(
-            AsyncRunner.async_call
-        )
+        wrapped_async_runner_call = self._instrument_async_runner_call(AsyncRunner.async_call)
         setattr(AsyncRunner, "async_call", wrapped_async_runner_call)
 
         import guardrails
@@ -96,13 +90,11 @@ class MlFlowInstrumentor:
         for validator_name in validators:
             export = getattr(guardrails.hub, validator_name)  # type: ignore
             if isinstance(export, type) and issubclass(export, Validator):
-                wrapped_validator_validate = self._instrument_validator_validate(
-                    export.validate
-                )
+                wrapped_validator_validate = self._instrument_validator_validate(export.validate)
                 setattr(export, "validate", wrapped_validator_validate)
 
-                wrapped_validator_async_validate = (
-                    self._instrument_validator_async_validate(export.async_validate)
+                wrapped_validator_async_validate = self._instrument_validator_async_validate(
+                    export.async_validate
                 )
                 setattr(export, "async_validate", wrapped_validator_async_validate)
 
@@ -110,9 +102,7 @@ class MlFlowInstrumentor:
 
     def _instrument_guard(
         self,
-        guard_execute: Callable[
-            ..., Union[ValidationOutcome[OT], Iterator[ValidationOutcome[OT]]]
-        ],
+        guard_execute: Callable[..., Union[ValidationOutcome[OT], Iterator[ValidationOutcome[OT]]]],
     ):
         @wraps(guard_execute)
         def _guard_execute_wrapper(
@@ -135,9 +125,7 @@ class MlFlowInstrumentor:
 
                 try:
                     result = guard_execute(*args, **kwargs)
-                    if isinstance(result, Iterator) and not isinstance(
-                        result, ValidationOutcome
-                    ):
+                    if isinstance(result, Iterator) and not isinstance(result, ValidationOutcome):
                         return trace_stream_guard(guard_span, result, history)  # type: ignore
                     add_guard_attributes(guard_span, history, result)  # type: ignore
                     return result
@@ -227,9 +215,7 @@ class MlFlowInstrumentor:
         self, runner_step: Callable[..., Iterator[ValidationOutcome[OT]]]
     ):
         @wraps(runner_step)
-        def trace_stream_step_wrapper(
-            *args, **kwargs
-        ) -> Iterator[ValidationOutcome[OT]]:
+        def trace_stream_step_wrapper(*args, **kwargs) -> Iterator[ValidationOutcome[OT]]:
             with mlflow.start_span(
                 name="guardrails/guard/step",
                 span_type="step",
@@ -261,9 +247,7 @@ class MlFlowInstrumentor:
 
         return trace_stream_step_wrapper
 
-    def _instrument_async_runner_step(
-        self, runner_step: Callable[..., Awaitable[Iteration]]
-    ):
+    def _instrument_async_runner_step(self, runner_step: Callable[..., Awaitable[Iteration]]):
         @wraps(runner_step)
         async def trace_async_step_wrapper(*args, **kwargs) -> Iteration:
             with mlflow.start_span(
@@ -349,9 +333,7 @@ class MlFlowInstrumentor:
 
         return trace_call_wrapper
 
-    def _instrument_async_runner_call(
-        self, runner_call: Callable[..., Awaitable[LLMResponse]]
-    ):
+    def _instrument_async_runner_call(self, runner_call: Callable[..., Awaitable[LLMResponse]]):
         @wraps(runner_call)
         async def trace_async_call_wrapper(*args, **kwargs):
             with mlflow.start_span(
@@ -374,9 +356,7 @@ class MlFlowInstrumentor:
 
         return trace_async_call_wrapper
 
-    def _instrument_validator_validate(
-        self, validator_validate: Callable[..., ValidationResult]
-    ):
+    def _instrument_validator_validate(self, validator_validate: Callable[..., ValidationResult]):
         @wraps(validator_validate)
         def trace_validator_wrapper(*args, **kwargs):
             validator_name = "validator"

@@ -225,9 +225,7 @@ class Runner:
             full_schema_reask=self.full_schema_reask,
         )
         outputs = Outputs()
-        iteration = Iteration(
-            call_id=call_log.id, index=index, inputs=inputs, outputs=outputs
-        )
+        iteration = Iteration(call_id=call_log.id, index=index, inputs=inputs, outputs=outputs)
         set_scope(str(id(iteration)))
         call_log.iterations.push(iteration)
 
@@ -266,9 +264,7 @@ class Runner:
                 reasks, _ = self.introspect(parsed_output)
             else:
                 # Validate: run output validation.
-                validated_output = self.validate(
-                    iteration, index, parsed_output, output_schema
-                )
+                validated_output = self.validate(iteration, index, parsed_output, output_schema)
                 iteration.outputs.validation_response = validated_output
 
                 # Introspect: inspect validated output for reasks.
@@ -290,16 +286,12 @@ class Runner:
     ) -> None:
         for msg in messages:
             content = (
-                msg["content"].source
-                if isinstance(msg["content"], Prompt)
-                else msg["content"]
+                msg["content"].source if isinstance(msg["content"], Prompt) else msg["content"]
             )
             inputs = Inputs(
                 llm_output=content,
             )
-            iteration = Iteration(
-                call_id=call_log.id, index=attempt_number, inputs=inputs
-            )
+            iteration = Iteration(call_id=call_log.id, index=attempt_number, inputs=inputs)
             call_log.iterations.insert(0, iteration)
             value, _metadata = validator_service.validate(
                 value=content,
@@ -394,9 +386,7 @@ class Runner:
             raise UserFacingException(ValueError("API must be provided."))
 
         if messages:
-            messages = self.prepare_messages(
-                call_log, messages, prompt_params, attempt_number
-            )
+            messages = self.prepare_messages(call_log, messages, prompt_params, attempt_number)
 
         return messages
 

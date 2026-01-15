@@ -34,16 +34,10 @@ class GuardrailsApiClient:
             if base_url is not None
             else os.environ.get("GUARDRAILS_BASE_URL", "http://localhost:8000")
         )
-        self.api_key = (
-            api_key if api_key is not None else os.environ.get("GUARDRAILS_API_KEY", "")
-        )
+        self.api_key = api_key if api_key is not None else os.environ.get("GUARDRAILS_API_KEY", "")
         self.timeout = 300
 
-        _api_key = (
-            self.api_key
-            if sys.version_info.minor < 10
-            else {"ApiKeyAuth": self.api_key}
-        )
+        _api_key = self.api_key if sys.version_info.minor < 10 else {"ApiKeyAuth": self.api_key}
 
         self._api_client = ApiClient(
             configuration=Configuration(api_key=_api_key, host=self.base_url)  # type: ignore
@@ -71,9 +65,7 @@ class GuardrailsApiClient:
     ):
         try:
             _openai_api_key = (
-                openai_api_key
-                if openai_api_key is not None
-                else os.environ.get("OPENAI_API_KEY")
+                openai_api_key if openai_api_key is not None else os.environ.get("OPENAI_API_KEY")
             )
             return self._validate_api.validate(
                 guard_name=guard.name,
@@ -90,9 +82,7 @@ class GuardrailsApiClient:
         openai_api_key: Optional[str] = None,
     ) -> Iterator[Any]:
         _openai_api_key = (
-            openai_api_key
-            if openai_api_key is not None
-            else os.environ.get("OPENAI_API_KEY")
+            openai_api_key if openai_api_key is not None else os.environ.get("OPENAI_API_KEY")
         )
 
         url = f"{self.base_url}/guards/{guard.name}/validate"

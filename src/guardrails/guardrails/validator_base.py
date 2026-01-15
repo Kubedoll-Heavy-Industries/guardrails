@@ -71,9 +71,7 @@ def split_sentence_word_tokenizers_jl_separator(
     is_minimum_length = third_chunk is not None
 
     # check for potential line endings, which is what split_sentences does
-    chunk_with_potential_line_endings, count = re.subn(
-        r"([?!.])(?=\s|$)", rf"\1{separator}", chunk
-    )
+    chunk_with_potential_line_endings, count = re.subn(r"([?!.])(?=\s|$)", rf"\1{separator}", chunk)
     any_potential_line_endings = count > 0
     if not is_minimum_length or not any_potential_line_endings:
         return []
@@ -117,8 +115,7 @@ class Validator:
         #   and if this doesn't raise then we should remove this.
         if not settings.rc:
             raise ValueError(
-                "No .guardrailsrc file found."
-                " Please run `guardrails configure` and try again."
+                "No .guardrailsrc file found. Please run `guardrails configure` and try again."
             )
         self.hub_jwt_token = get_jwt_token(settings.rc)
 
@@ -128,9 +125,7 @@ class Validator:
 
         if not self.validation_endpoint:
             validator_id = self.rail_alias.split("/")[-1]
-            submission_url = (
-                f"{VALIDATOR_HUB_SERVICE}/validator/{validator_id}/inference"
-            )
+            submission_url = f"{VALIDATOR_HUB_SERVICE}/validator/{validator_id}/inference"
             self.validation_endpoint = submission_url
         self.on_fail_descriptor: Union[str, OnFailAction] = "custom"
 
@@ -144,10 +139,7 @@ class Validator:
         if isinstance(on_fail, OnFailAction):
             self.on_fail_descriptor = on_fail
             self.on_fail_method = None
-        elif (
-            isinstance(on_fail, str)
-            and OnFailAction.__members__.get(on_fail.upper()) is not None
-        ):
+        elif isinstance(on_fail, str) and OnFailAction.__members__.get(on_fail.upper()) is not None:
             self.on_fail_descriptor = (
                 OnFailAction.__members__.get(on_fail.upper())
                 or ""  # this default isn't needed, it's just for pyright
@@ -241,9 +233,7 @@ class Validator:
         validation_result = self._validate(value, metadata)
         return validation_result
 
-    async def async_validate(
-        self, value: Any, metadata: Dict[str, Any]
-    ) -> ValidationResult:
+    async def async_validate(self, value: Any, metadata: Dict[str, Any]) -> ValidationResult:
         """Use this function if your validation logic requires asyncio.
 
         Guaranteed to work with AsyncGuard
@@ -370,9 +360,7 @@ class Validator:
         self, chunk: Any, metadata: Dict[str, Any], **kwargs
     ) -> Optional[ValidationResult]:
         loop = asyncio.get_event_loop()
-        validate_stream_partial = partial(
-            self.validate_stream, chunk, metadata, **kwargs
-        )
+        validate_stream_partial = partial(self.validate_stream, chunk, metadata, **kwargs)
         return await loop.run_in_executor(None, validate_stream_partial)
 
     def _hub_inference_request(
@@ -576,15 +564,12 @@ def register_validator(
             func.rail_alias = name  # type: ignore
             # ensure function takes two args
             if not func.__code__.co_argcount == 2:
-                raise ValueError(
-                    f"Validator function {func.__name__} must take two arguments."
-                )
+                raise ValueError(f"Validator function {func.__name__} must take two arguments.")
             # dynamically create Validator subclass with `validate` method as `func`
             cls = validator_factory(name, func)
         else:
             raise ValueError(
-                "Only functions and Validator subclasses "
-                "can be registered as validators."
+                "Only functions and Validator subclasses can be registered as validators."
             )
         validators_registry[name] = cls
         return cls

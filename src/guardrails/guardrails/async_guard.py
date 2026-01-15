@@ -186,9 +186,7 @@ class AsyncGuard(Guard, Generic[OT]):
         # check if validator requirements are fulfilled
         missing_keys = verify_metadata_requirements(metadata, self._validators)
         if missing_keys:
-            raise ValueError(
-                f"Missing required metadata keys: {', '.join(missing_keys)}"
-            )
+            raise ValueError(f"Missing required metadata keys: {', '.join(missing_keys)}")
 
         async def __exec(
             self: AsyncGuard,
@@ -218,8 +216,7 @@ class AsyncGuard(Guard, Generic[OT]):
             self._set_num_reasks(num_reasks=num_reasks)
             if self._num_reasks is None:
                 raise RuntimeError(
-                    "`num_reasks` is `None` after calling `configure()`. "
-                    "This should never happen."
+                    "`num_reasks` is `None` after calling `configure()`. This should never happen."
                 )
 
             messages = messages or self._exec_opts.messages
@@ -353,9 +350,7 @@ class AsyncGuard(Guard, Generic[OT]):
                 exec_options=self._exec_opts,
             )
             # Here we have an async generator
-            async_generator = runner.async_run(
-                call_log=call_log, prompt_params=prompt_params
-            )
+            async_generator = runner.async_run(call_log=call_log, prompt_params=prompt_params)
             return async_generator
         else:
             runner = AsyncRunner(
@@ -377,9 +372,7 @@ class AsyncGuard(Guard, Generic[OT]):
                 exec_options=self._exec_opts,
             )
             # Why are we using a different method here instead of just overriding?
-            call = await runner.async_run(
-                call_log=call_log, prompt_params=prompt_params
-            )
+            call = await runner.async_run(call_log=call_log, prompt_params=prompt_params)
             return ValidationOutcome[OT].from_guard_history(call)
 
     @async_trace(name="/guard_call", origin="AsyncGuard.__call__")
@@ -549,7 +542,5 @@ class AsyncGuard(Guard, Generic[OT]):
             raise ValueError("AsyncGuard does not have an api client!")
 
     @async_trace(name="/guard_call", origin="AsyncGuard.validate")
-    async def validate(
-        self, llm_output: str, *args, **kwargs
-    ) -> Awaitable[ValidationOutcome[OT]]:
+    async def validate(self, llm_output: str, *args, **kwargs) -> Awaitable[ValidationOutcome[OT]]:
         return await self.parse(llm_output=llm_output, *args, **kwargs)

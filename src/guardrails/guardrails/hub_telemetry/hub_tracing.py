@@ -25,14 +25,10 @@ def get_guard_call_attributes(
     if guard_self is not None:
         attrs["guard_id"] = guard_self.id
         attrs["user_id"] = guard_self._user_id
-        attrs["custom_reask_messages"] = (
-            guard_self._exec_opts.reask_messages is not None
-        )
+        attrs["custom_reask_messages"] = guard_self._exec_opts.reask_messages is not None
         attrs["output_type"] = (
             "unstructured"
-            if PrimitiveTypes.is_primitive(
-                guard_self.output_schema.type.actual_instance
-            )
+            if PrimitiveTypes.is_primitive(guard_self.output_schema.type.actual_instance)
             else "structured"
         )
         return attrs
@@ -43,30 +39,22 @@ def get_guard_call_attributes(
         llm_api = safe_get(args, 1, llm_api)
 
     if llm_api:
-        llm_api_module_name = (
-            llm_api.__module__ if hasattr(llm_api, "__module__") else ""
-        )
-        llm_api_name = (
-            llm_api.__name__ if hasattr(llm_api, "__name__") else type(llm_api).__name__
-        )
+        llm_api_module_name = llm_api.__module__ if hasattr(llm_api, "__module__") else ""
+        llm_api_name = llm_api.__name__ if hasattr(llm_api, "__name__") else type(llm_api).__name__
         llm_api_str = f"{llm_api_module_name}.{llm_api_name}"
     attrs["llm_api"] = llm_api_str if llm_api_str else "None"
 
     return attrs
 
 
-def get_validator_inference_attributes(
-    attrs: Dict[str, Any], *args, **kwargs
-) -> Dict[str, Any]:
+def get_validator_inference_attributes(attrs: Dict[str, Any], *args, **kwargs) -> Dict[str, Any]:
     validator_self = safe_get(args, 0)
     if validator_self is not None:
         used_guardrails_endpoint = (
             VALIDATOR_HUB_SERVICE in validator_self.validation_endpoint
             and not validator_self.use_local
         )
-        used_custom_endpoint = (
-            not validator_self.use_local and not used_guardrails_endpoint
-        )
+        used_custom_endpoint = not validator_self.use_local and not used_guardrails_endpoint
         attrs["validator_name"] = validator_self.rail_alias
         attrs["used_remote_inference"] = not validator_self.use_local
         attrs["used_local_inference"] = validator_self.use_local
@@ -142,9 +130,7 @@ def trace(
                     origin = origin if origin is not None else name
 
                     resp = fn(*args, **kwargs)
-                    add_attributes(
-                        span, attrs, name, origin, *args, response=resp, **kwargs
-                    )
+                    add_attributes(span, attrs, name, origin, *args, response=resp, **kwargs)
                     return resp
             else:
                 return fn(*args, **kwargs)

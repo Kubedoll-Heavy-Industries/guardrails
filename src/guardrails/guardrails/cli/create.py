@@ -83,9 +83,7 @@ def create_command(
             if len(installed_validators) > 0:
                 guard_name = installed_validators[0] + "Guard"
 
-            console.print(
-                "No guard name provided for guard. Defaulting to {guard_name}"
-            )
+            console.print("No guard name provided for guard. Defaulting to {guard_name}")
         new_config_file = generate_config_file(installed_validators, guard_name)
 
     if dry_run:
@@ -99,19 +97,14 @@ def create_command(
             fout.write(new_config_file)
         console.print(f"Saved configuration to {filepath}")
     console.print(
-        f"Replace TODOs in {filepath} and run with `guardrails start"
-        f" --config {filepath}`"
+        f"Replace TODOs in {filepath} and run with `guardrails start --config {filepath}`"
     )
 
 
-def generate_template_config(
-    template: dict, installed_validators, template_file_name
-) -> str:
+def generate_template_config(template: dict, installed_validators, template_file_name) -> str:
     # Read the template file
     script_dir = os.path.dirname(os.path.realpath(__file__))
-    config_template_path = os.path.join(
-        script_dir, "hub", "template_config.py.template"
-    )
+    config_template_path = os.path.join(script_dir, "hub", "template_config.py.template")
 
     with open(config_template_path, "r") as file:
         template_content = file.read()
@@ -139,9 +132,7 @@ def check_filename(filename: Union[str, os.PathLike]) -> str:
     """
     if os.path.exists(filename):
         # Alert the user and get confirmation of overwrite.
-        overwrite = typer.confirm(
-            f"The configuration file {filename} already exists. Overwrite?"
-        )
+        overwrite = typer.confirm(f"The configuration file {filename} already exists. Overwrite?")
         if not overwrite:
             console.print("Aborting")
             typer.Abort()
@@ -226,10 +217,7 @@ def generate_config_file(validators: List[str], name: Optional[str] = None) -> s
         config_lines.append(f"guard.use({validators[0]}())  # TODO: Add parameters.")
     elif len(validators) > 1:
         multi_use = "".join(
-            [
-                "\t" + validator + "(),  # TODO: Add parameters.\n"
-                for validator in validators
-            ]
+            ["\t" + validator + "(),  # TODO: Add parameters.\n" for validator in validators]
         )
         config_lines.append(f"guard.use_many(\n{multi_use})")
 

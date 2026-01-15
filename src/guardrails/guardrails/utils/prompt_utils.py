@@ -25,14 +25,10 @@ def prompt_content_for_string_schema(
     prompt_content = ""
     description = output_schema.get("description")
     if description:
-        prompt_content += (
-            f"Here's a description of what I want you to generate: {description}"
-        )
+        prompt_content += f"Here's a description of what I want you to generate: {description}"
     validators = validator_map.get(json_path, [])
     if len(validators):
-        prompt_content += (
-            "\n\nYour generated response should satisfy the following properties:"
-        )
+        prompt_content += "\n\nYour generated response should satisfy the following properties:"
         for validator in validators:
             prompt_content += f"\n- {validator.to_prompt()}"
 
@@ -59,8 +55,7 @@ def messages_to_prompt_string(
     for msg in messages:
         content = (
             msg["content"].source  # type: ignore
-            if isinstance(msg["content"], Prompt)
-            or isinstance(msg["content"], Instructions)  # type: ignore
+            if isinstance(msg["content"], Prompt) or isinstance(msg["content"], Instructions)  # type: ignore
             else msg["content"]  # type: ignore
         )
         messages_copy += content

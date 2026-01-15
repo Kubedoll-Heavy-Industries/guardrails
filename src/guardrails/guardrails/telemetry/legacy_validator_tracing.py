@@ -48,13 +48,10 @@ def trace_validator_result(
     )(validator_log)
     result = (
         validation_result.outcome
-        if hasattr(validation_result, "outcome")
-        and validation_result.outcome is not None
+        if hasattr(validation_result, "outcome") and validation_result.outcome is not None
         else "unknown"
     )
-    result_type = get_result_type(
-        value_before_validation, value_after_validation, result
-    )
+    result_type = get_result_type(value_before_validation, value_after_validation, result)
 
     event = {
         "validator_name": validator_name,

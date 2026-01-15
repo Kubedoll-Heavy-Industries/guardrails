@@ -33,8 +33,7 @@ class ReAsk(IReask):
         fail_results = []
         if reask.fail_results:
             fail_results: List[FailResult] = [
-                FailResult.from_interface(fail_result)
-                for fail_result in reask.fail_results
+                FailResult.from_interface(fail_result) for fail_result in reask.fail_results
             ]
 
         if reask.additional_properties.get("path"):
@@ -251,9 +250,7 @@ def get_reask_setup_for_string(
     prompt_params = prompt_params or {}
     exec_options = exec_options or GuardExecutionOptions()
 
-    schema_prompt_content = prompt_content_for_schema(
-        output_type, output_schema, validation_map
-    )
+    schema_prompt_content = prompt_content_for_schema(output_type, output_schema, validation_map)
     xml_output_schema = json_schema_to_rail_output(
         json_schema=output_schema, validator_map=validation_map
     )
@@ -261,16 +258,11 @@ def get_reask_setup_for_string(
     reask_prompt_template = None
 
     reask_prompt_template = Prompt(
-        constants["high_level_string_reask_prompt"]
-        + constants["complete_string_suffix"]
+        constants["high_level_string_reask_prompt"] + constants["complete_string_suffix"]
     )
 
     error_messages = "\n".join(
-        [
-            f"- {fail_result.error_message}"
-            for reask in reasks
-            for fail_result in reask.fail_results
-        ]
+        [f"- {fail_result.error_message}" for reask in reasks for fail_result in reask.fail_results]
     )
 
     prompt = reask_prompt_template.format(
@@ -340,9 +332,7 @@ def get_reask_setup_for_json(
 ) -> Tuple[Dict[str, Any], Messages]:
     reask_schema = output_schema
     is_skeleton_reask = not any(isinstance(reask, FieldReAsk) for reask in reasks)
-    is_nonparseable_reask = any(
-        isinstance(reask, NonParseableReAsk) for reask in reasks
-    )
+    is_nonparseable_reask = any(isinstance(reask, NonParseableReAsk) for reask in reasks)
     error_messages = {}
     prompt_params = prompt_params or {}
     exec_options = exec_options or GuardExecutionOptions()
@@ -361,9 +351,7 @@ def get_reask_setup_for_json(
             reask_prompt_template = Prompt(
                 constants["high_level_json_parsing_reask_prompt"] + suffix
             )
-        np_reask: NonParseableReAsk = next(
-            r for r in reasks if isinstance(r, NonParseableReAsk)
-        )
+        np_reask: NonParseableReAsk = next(r for r in reasks if isinstance(r, NonParseableReAsk))
         # Give the LLM what it gave us that couldn't be parsed as JSON
         reask_value = np_reask.incorrect_value
     elif is_skeleton_reask:
@@ -371,9 +359,7 @@ def get_reask_setup_for_json(
             reask_prompt = constants["high_level_skeleton_reask_prompt"]
 
             if use_xml:
-                reask_prompt = (
-                    reask_prompt + constants["xml_suffix_with_structure_example"]
-                )
+                reask_prompt = reask_prompt + constants["xml_suffix_with_structure_example"]
             else:
                 reask_prompt = (
                     reask_prompt
@@ -387,9 +373,7 @@ def get_reask_setup_for_json(
         #   and the problem is with the json the LLM gave us.
         # Give it this same json and tell it to fix it.
         reask_value = validation_response if use_xml else parsing_response
-        skeleton_reask: SkeletonReAsk = next(
-            r for r in reasks if isinstance(r, SkeletonReAsk)
-        )
+        skeleton_reask: SkeletonReAsk = next(r for r in reasks if isinstance(r, SkeletonReAsk))
         error_messages = skeleton_reask.fail_results[0].error_message
     else:
         if use_full_schema:
@@ -412,9 +396,7 @@ def get_reask_setup_for_json(
                 if use_xml
                 else constants["json_suffix_without_examples"]
             )
-            reask_prompt_template = Prompt(
-                constants["high_level_json_reask_prompt"] + suffix
-            )
+            reask_prompt_template = Prompt(constants["high_level_json_reask_prompt"] + suffix)
 
         error_messages = {
             ".".join(str(p) for p in r.path): "; ".join(  # type: ignore
@@ -424,9 +406,7 @@ def get_reask_setup_for_json(
             if isinstance(r, FieldReAsk)
         }
 
-    stringified_schema = prompt_content_for_schema(
-        output_type, reask_schema, validation_map
-    )
+    stringified_schema = prompt_content_for_schema(output_type, reask_schema, validation_map)
     xml_output_schema = json_schema_to_rail_output(
         json_schema=output_schema, validator_map=validation_map
     )
@@ -642,28 +622,20 @@ def merge_reask_output(previous_response, reask_response) -> Dict:
             for key, value in pruned_reask_json.items():
                 if isinstance(value, FieldReAsk):
                     if value.path is None:
-                        raise RuntimeError(
-                            "FieldReAsk object must have a path attribute."
-                        )
+                        raise RuntimeError("FieldReAsk object must have a path attribute.")
                     corrected_value = reask_response_dict.get(key)
                     update_response_by_path(merged_json, value.path, corrected_value)
                 else:
-                    update_reasked_elements(
-                        pruned_reask_json[key], reask_response_dict[key]
-                    )
+                    update_reasked_elements(pruned_reask_json[key], reask_response_dict[key])
         elif isinstance(pruned_reask_json, list):
             for i, item in enumerate(pruned_reask_json):
                 if isinstance(item, FieldReAsk):
                     if item.path is None:
-                        raise RuntimeError(
-                            "FieldReAsk object must have a path attribute."
-                        )
+                        raise RuntimeError("FieldReAsk object must have a path attribute.")
                     corrected_value = reask_response_dict[i]
                     update_response_by_path(merged_json, item.path, corrected_value)
                 else:
-                    update_reasked_elements(
-                        pruned_reask_json[i], reask_response_dict[i]
-                    )
+                    update_reasked_elements(pruned_reask_json[i], reask_response_dict[i])
 
     update_reasked_elements(pruned_reask_json, reask_response)
 

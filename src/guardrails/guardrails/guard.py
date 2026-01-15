@@ -210,9 +210,7 @@ class Guard(IGuard, Generic[OT]):
         if settings.use_server:
             self._api_key = api_key
             self._base_url = base_url
-            self._api_client = GuardrailsApiClient(
-                api_key=self._api_key, base_url=self._base_url
-            )
+            self._api_client = GuardrailsApiClient(api_key=self._api_key, base_url=self._base_url)
             _loaded = False
             if _try_to_load:
                 loaded_guard = self._api_client.fetch_guard(self.name)
@@ -220,16 +218,13 @@ class Guard(IGuard, Generic[OT]):
                     self.id = loaded_guard.id
                     self.description = loaded_guard.description
                     self.validators = [  # type: ignore
-                        ValidatorReference.from_interface(v)
-                        for v in loaded_guard.validators or []
+                        ValidatorReference.from_interface(v) for v in loaded_guard.validators or []
                     ]
 
-                    loaded_output_schema = (
-                        ModelSchema.from_dict(  # trims out extra keys
-                            loaded_guard.output_schema.to_dict()
-                            if loaded_guard.output_schema
-                            else {"type": "string"}
-                        )
+                    loaded_output_schema = ModelSchema.from_dict(  # trims out extra keys
+                        loaded_guard.output_schema.to_dict()
+                        if loaded_guard.output_schema
+                        else {"type": "string"}
                     )
                     self.output_schema = loaded_output_schema
                     _loaded = True
@@ -309,9 +304,7 @@ class Guard(IGuard, Generic[OT]):
         rc = RC.load(logger)
         settings.rc = rc
 
-    def _configure_hub_telemtry(
-        self, allow_metrics_collection: Optional[bool] = None
-    ) -> None:
+    def _configure_hub_telemtry(self, allow_metrics_collection: Optional[bool] = None) -> None:
         allow_metrics_collection = (
             settings.rc.enable_metrics is True
             if allow_metrics_collection is None
@@ -356,9 +349,7 @@ class Guard(IGuard, Generic[OT]):
 
     def _fill_validators(self):
         self._validators = [
-            v
-            for v_list in [self._validator_map[k] for k in self._validator_map]
-            for v in v_list
+            v for v_list in [self._validator_map[k] for k in self._validator_map] for v in v_list
         ]
 
     def _fill_exec_opts(
@@ -408,9 +399,7 @@ class Guard(IGuard, Generic[OT]):
         guard._fill_validators()
         return guard
 
-    @deprecated(
-        "Use `for_rail` instead. This method will be removed in 0.6.x.", category=None
-    )
+    @deprecated("Use `for_rail` instead. This method will be removed in 0.6.x.", category=None)
     @classmethod
     def from_rail(cls, rail_file: str, *args, **kwargs):
         return cls.for_rail(rail_file, *args, **kwargs)
@@ -713,9 +702,7 @@ class Guard(IGuard, Generic[OT]):
         # check if validator requirements are fulfilled
         missing_keys = verify_metadata_requirements(metadata, self._validators)
         if missing_keys:
-            raise ValueError(
-                f"Missing required metadata keys: {', '.join(missing_keys)}"
-            )
+            raise ValueError(f"Missing required metadata keys: {', '.join(missing_keys)}")
 
         def __exec(
             self: Guard,
@@ -742,8 +729,7 @@ class Guard(IGuard, Generic[OT]):
             self._set_num_reasks(num_reasks=num_reasks)
             if self._num_reasks is None:
                 raise RuntimeError(
-                    "`num_reasks` is `None` after calling `configure()`. "
-                    "This should never happen."
+                    "`num_reasks` is `None` after calling `configure()`. This should never happen."
                 )
 
             input_messages = messages or self._exec_opts.messages
@@ -758,9 +744,7 @@ class Guard(IGuard, Generic[OT]):
                 kwargs=kwargs,
             )
 
-            if settings.use_server and model_is_supported_server_side(
-                llm_api, *args, **kwargs
-            ):
+            if settings.use_server and model_is_supported_server_side(llm_api, *args, **kwargs):
                 return self._call_server(
                     llm_output=llm_output,
                     llm_api=llm_api,
@@ -1031,9 +1015,7 @@ class Guard(IGuard, Generic[OT]):
     def use(self, validator: Validator, *, on: str = "output") -> "Guard": ...
 
     @overload
-    def use(
-        self, validator: Type[Validator], *args, on: str = "output", **kwargs
-    ) -> "Guard": ...
+    def use(self, validator: Type[Validator], *args, on: str = "output", **kwargs) -> "Guard": ...
 
     def use(
         self,
@@ -1128,9 +1110,7 @@ class Guard(IGuard, Generic[OT]):
                     error="The response from the server was empty!",
                 )
             if os.environ.get("GUARD_HISTORY_ENABLED", "true").lower() == "true":
-                guard_history = self._api_client.get_history(
-                    self.name, validation_output.call_id
-                )
+                guard_history = self._api_client.get_history(self.name, validation_output.call_id)
                 call_log = safe_get(
                     [c for c in guard_history if c.id == validation_output.call_id], 0
                 )
@@ -1207,9 +1187,7 @@ class Guard(IGuard, Generic[OT]):
                     guard_history = self._api_client.get_history(
                         self.name, validation_output.call_id
                     )
-                    self.history.extend(
-                        [Call.from_interface(call) for call in guard_history]
-                    )
+                    self.history.extend([Call.from_interface(call) for call in guard_history])
         else:
             raise ValueError("Guard does not have an api client!")
 
@@ -1316,25 +1294,20 @@ class Guard(IGuard, Generic[OT]):
         i_guard = IGuard.from_dict(obj)
         if not i_guard:
             return i_guard
-        output_schema = (
-            i_guard.output_schema.to_dict() if i_guard.output_schema else None
-        )
+        output_schema = i_guard.output_schema.to_dict() if i_guard.output_schema else None
 
         guard = cls(
             id=i_guard.id,
             name=i_guard.name,
             description=i_guard.description,
             validators=[
-                ValidatorReference.from_interface(i_val)
-                for i_val in i_guard.validators or []
+                ValidatorReference.from_interface(i_val) for i_val in i_guard.validators or []
             ],
             output_schema=output_schema,
         )
 
         history = (
-            [Call.from_interface(i_call) for i_call in i_guard.history]
-            if i_guard.history
-            else []
+            [Call.from_interface(i_call) for i_call in i_guard.history] if i_guard.history else []
         )
         guard.history = Stack(*history)
         return guard

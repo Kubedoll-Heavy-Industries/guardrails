@@ -43,9 +43,7 @@ I will give you a list of examples. Write a SQL query similar to the examples be
 """
 
 
-def example_formatter(
-    input: str, output: str, output_schema: Optional[Callable] = None
-) -> str:
+def example_formatter(input: str, output: str, output_schema: Optional[Callable] = None) -> str:
     if output_schema is not None:
         output = output_schema(output)
 
@@ -171,9 +169,7 @@ class Text2Sql:
         else:
             raise NotImplementedError(f"VectorDB {vector_db} is not implemented.")
         store = document_store(db)
-        store.add_texts(
-            {example["question"]: {"ctx": example["query"]} for example in examples}
-        )
+        store.add_texts({example["question"]: {"ctx": example["query"]} for example in examples})
         return store
 
     @staticmethod
@@ -194,8 +190,7 @@ class Text2Sql:
 
         if asyncio.iscoroutinefunction(self.llm_api):
             raise ValueError(
-                "Async API is not supported in Text2SQL application. "
-                "Please use a synchronous API."
+                "Async API is not supported in Text2SQL application. Please use a synchronous API."
             )
         else:
             if self.llm_api is None:

@@ -98,25 +98,15 @@ class GuardrailsChatEngine(BaseChatEngine):
         self._engine_response.response = content
         return self._engine_response
 
-    async def achat(
-        self, message: str, chat_history: Optional[List["ChatMessage"]] = None
-    ):
+    async def achat(self, message: str, chat_history: Optional[List["ChatMessage"]] = None):
         """Async version of chat."""
-        raise NotImplementedError(
-            "Async chat is not yet supported in the GuardrailsChatEngine."
-        )
+        raise NotImplementedError("Async chat is not yet supported in the GuardrailsChatEngine.")
 
-    def stream_chat(
-        self, message: str, chat_history: Optional[List["ChatMessage"]] = None
-    ):
+    def stream_chat(self, message: str, chat_history: Optional[List["ChatMessage"]] = None):
         """Stream chat responses."""
-        raise NotImplementedError(
-            "Stream chat is not yet supported in the GuardrailsChatEngine."
-        )
+        raise NotImplementedError("Stream chat is not yet supported in the GuardrailsChatEngine.")
 
-    async def astream_chat(
-        self, message: str, chat_history: Optional[List["ChatMessage"]] = None
-    ):
+    async def astream_chat(self, message: str, chat_history: Optional[List["ChatMessage"]] = None):
         """Async stream chat responses."""
         raise NotImplementedError(
             "Async stream chat is not yet supported in the GuardrailsChatEngine."

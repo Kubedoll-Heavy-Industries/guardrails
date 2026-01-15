@@ -126,11 +126,7 @@ def gen_string(schema: Dict[str, Any], *, property_name: Optional[str] = None) -
     # Look at format first, then pattern; not xor
     gen_func = fake.word
     # Lazy attempt to choose a relevant faker function
-    if (
-        property_name
-        and hasattr(fake, property_name)
-        and callable(getattr(fake, property_name))
-    ):
+    if property_name and hasattr(fake, property_name) and callable(getattr(fake, property_name)):
         gen_func = getattr(fake, property_name)
 
     value = gen_func()
@@ -147,9 +143,7 @@ def gen_string(schema: Dict[str, Any], *, property_name: Optional[str] = None) -
     return value
 
 
-def gen_array(
-    schema: Dict[str, Any], *, property_name: Optional[str] = None
-) -> List[Any]:
+def gen_array(schema: Dict[str, Any], *, property_name: Optional[str] = None) -> List[Any]:
     """
     What we do support:
         - items
@@ -208,9 +202,7 @@ def gen_object(schema: Dict[str, Any]) -> Dict[str, Any]:
     return value
 
 
-def gen_from_type(
-    schema: Dict[str, Any], *, property_name: Optional[str] = None
-) -> Any:
+def gen_from_type(schema: Dict[str, Any], *, property_name: Optional[str] = None) -> Any:
     schema_type = schema.get("type")
     if schema_type == SimpleTypes.ARRAY:
         return gen_array(schema, property_name=property_name)
@@ -291,9 +283,7 @@ def evaluate_all_of(
 
         other_blocks = [sub for sub in all_of if not sub.get("if")]
         for sub_schema in other_blocks:
-            sub_schema_value = _generate_example(
-                sub_schema, property_name=property_name
-            )
+            sub_schema_value = _generate_example(sub_schema, property_name=property_name)
             value = {**value, **sub_schema_value}
         return value
     else:
@@ -303,9 +293,7 @@ def evaluate_all_of(
         return _generate_example(compressed_schema, property_name=property_name)
 
 
-def _generate_example(
-    json_schema: Dict[str, Any], *, property_name: Optional[str] = None
-) -> Any:
+def _generate_example(json_schema: Dict[str, Any], *, property_name: Optional[str] = None) -> Any:
     # Apply base schema
     schema_type = json_schema.get("type")
     const = json_schema.get("const")
@@ -342,9 +330,7 @@ def _generate_example(
     return value
 
 
-def generate_example(
-    json_schema: Dict[str, Any], *, property_name: Optional[str] = None
-) -> Any:
+def generate_example(json_schema: Dict[str, Any], *, property_name: Optional[str] = None) -> Any:
     """Takes a json schema and generates a sample object."""
     dereferenced_schema = cast(Dict[str, Any], jsonref.replace_refs(json_schema))
     return _generate_example(dereferenced_schema, property_name=property_name)

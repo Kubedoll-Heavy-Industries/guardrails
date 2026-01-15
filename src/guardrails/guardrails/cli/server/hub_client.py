@@ -24,12 +24,8 @@ to update your token. The token is only required to install validators and run r
 inference. It is not needed for local validation.
 {FIND_NEW_TOKEN}"""
 
-VALIDATOR_HUB_SERVICE = os.getenv(
-    "GR_VALIDATOR_HUB_SERVICE", "https://hub.api.guardrailsai.com"
-)
-validator_manifest_endpoint = Template(
-    "validator/${namespace}/${validator_name}/manifest"
-)
+VALIDATOR_HUB_SERVICE = os.getenv("GR_VALIDATOR_HUB_SERVICE", "https://hub.api.guardrailsai.com")
+validator_manifest_endpoint = Template("validator/${namespace}/${validator_name}/manifest")
 
 
 class AuthenticationError(Exception):
@@ -112,9 +108,7 @@ def fetch_module(module_name: str) -> Optional[Manifest]:
 def fetch_template(template_address: str) -> Dict[str, Any]:
     token = get_jwt_token(settings.rc)
 
-    namespace, template_name = template_address.replace("hub:template://", "").split(
-        "/", 1
-    )
+    namespace, template_name = template_address.replace("hub:template://", "").split("/", 1)
     template_path = f"guard-templates/{namespace}/{template_name}"
     template_url = f"{VALIDATOR_HUB_SERVICE}/{template_path}"
     return fetch(template_url, token, settings.rc.id)

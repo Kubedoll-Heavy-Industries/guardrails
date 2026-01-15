@@ -94,9 +94,7 @@ class ValidatorPackageService:
         """
 
         validator_id = manifest.id
-        import_path = ValidatorPackageService.get_import_path_from_validator_id(
-            validator_id
-        )
+        import_path = ValidatorPackageService.get_import_path_from_validator_id(validator_id)
 
         import_line = f"{import_path}"
 
@@ -109,14 +107,10 @@ class ValidatorPackageService:
         exports: List[str] = manifest.exports or []
         sorted_exports = sorted(exports, reverse=True)
 
-        import_path = ValidatorPackageService.get_import_path_from_validator_id(
-            validator_id
-        )
+        import_path = ValidatorPackageService.get_import_path_from_validator_id(validator_id)
         import_line = f"from {import_path} import {', '.join(sorted_exports)}"
 
-        hub_init_location = os.path.join(
-            site_packages, "guardrails", "hub", "__init__.py"
-        )
+        hub_init_location = os.path.join(site_packages, "guardrails", "hub", "__init__.py")
         with open(hub_init_location, "a+") as hub_init:
             hub_init.seek(0, 0)
             content = hub_init.read()
@@ -153,41 +147,31 @@ class ValidatorPackageService:
     @staticmethod
     def get_validator_id(validator_uri: str):
         if not validator_uri.startswith("hub://"):
-            raise InvalidHubInstallURL(
-                "Invalid URI! The package URI must start with 'hub://'"
-            )
+            raise InvalidHubInstallURL("Invalid URI! The package URI must start with 'hub://'")
 
         validator_uri_with_version = validator_uri.replace("hub://", "")
 
-        validator_id_version_regex = (
-            r"(?P<validator_id>[\/a-zA-Z0-9\-_]+)(?P<version>.*)"
-        )
+        validator_id_version_regex = r"(?P<validator_id>[\/a-zA-Z0-9\-_]+)(?P<version>.*)"
         match = re.match(validator_id_version_regex, validator_uri_with_version)
         validator_version = None
 
         if match:
             validator_id = match.group("validator_id")
-            validator_version = (
-                match.group("version").strip() if match.group("version") else None
-            )
+            validator_version = match.group("version").strip() if match.group("version") else None
         else:
             validator_id = validator_uri_with_version
 
         return (validator_id, validator_version)
 
     @staticmethod
-    def run_post_install(
-        manifest: Manifest, site_packages: str, logger=guardrails_logger
-    ):
+    def run_post_install(manifest: Manifest, site_packages: str, logger=guardrails_logger):
         validator_id = manifest.id
         post_install_script = manifest.post_install
 
         if not post_install_script:
             return
 
-        import_path = ValidatorPackageService.get_import_path_from_validator_id(
-            validator_id
-        )
+        import_path = ValidatorPackageService.get_import_path_from_validator_id(validator_id)
 
         relative_path = os.path.join(
             site_packages,
@@ -226,17 +210,13 @@ class ValidatorPackageService:
     @staticmethod
     def get_normalized_package_name(validator_id: str):
         validator_id_parts = validator_id.split("/")
-        concatanated_package_name = (
-            f"{validator_id_parts[0]}-grhub-{validator_id_parts[1]}"
-        )
+        concatanated_package_name = f"{validator_id_parts[0]}-grhub-{validator_id_parts[1]}"
         pep_503_package_name = canonicalize_name(concatanated_package_name)
         return pep_503_package_name
 
     @staticmethod
     def get_import_path_from_validator_id(validator_id):
-        pep_503_package_name = ValidatorPackageService.get_normalized_package_name(
-            validator_id
-        )
+        pep_503_package_name = ValidatorPackageService.get_normalized_package_name(validator_id)
         return pep_503_package_name.replace("-", "_")
 
     @staticmethod
@@ -247,9 +227,7 @@ class ValidatorPackageService:
         upgrade: bool = False,
         logger=guardrails_logger,
     ):
-        pep_503_package_name = ValidatorPackageService.get_normalized_package_name(
-            validator_id
-        )
+        pep_503_package_name = ValidatorPackageService.get_normalized_package_name(validator_id)
         validator_version = validator_version if validator_version else ""
 
         guardrails_token = settings.rc.token
@@ -299,8 +277,7 @@ class ValidatorPackageService:
                 raise
             except Exception as e:
                 logger.error(
-                    "An unexpected exception occurred while "
-                    f"installing {validator_id}: ",
+                    f"An unexpected exception occurred while installing {validator_id}: ",
                     e,
                 )
                 raise

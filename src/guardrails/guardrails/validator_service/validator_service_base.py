@@ -104,8 +104,7 @@ class ValidatorServiceBase:
             )
         if on_fail_descriptor == OnFailAction.EXCEPTION:
             raise ValidationError(
-                "Validation failed for field with errors: "
-                + ", ".join([result.error_message])
+                "Validation failed for field with errors: " + ", ".join([result.error_message])
             )
         if on_fail_descriptor == OnFailAction.FILTER:
             return Filter()
@@ -115,8 +114,7 @@ class ValidatorServiceBase:
             return value
         else:
             raise ValueError(
-                f"Invalid on_fail_descriptor {on_fail_descriptor}, "
-                f"expected 'fix' or 'exception'."
+                f"Invalid on_fail_descriptor {on_fail_descriptor}, expected 'fix' or 'exception'."
             )
 
     def before_run_validator(
@@ -182,9 +180,7 @@ class ValidatorServiceBase:
         current = new_values.pop()
         while len(new_values) > 0:
             nextval = new_values.pop()
-            current = merge(
-                serialize(current), serialize(nextval), serialize(original_value)
-            )
+            current = merge(serialize(current), serialize(nextval), serialize(original_value))
             current = deserialize(original_value, current)
         if current is None and original_value is not None:
             # QUESTION: How do we escape hatch

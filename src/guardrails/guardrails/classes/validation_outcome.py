@@ -77,14 +77,10 @@ class ValidationOutcome(IValidationOutcome, ArbitraryModel, Generic[OT]):
     def from_guard_history(cls, call: Call):
         """Create a ValidationOutcome from a history Call object."""
         last_iteration = call.iterations.last or Iteration(call_id=call.id, index=0)
-        last_output = last_iteration.validation_response or safe_get(
-            list(last_iteration.reasks), 0
-        )
+        last_output = last_iteration.validation_response or safe_get(list(last_iteration.reasks), 0)
         validation_passed = call.status == pass_status
         validator_logs = last_iteration.validator_logs or []
-        validation_summaries = ValidationSummary.from_validator_logs_only_fails(
-            validator_logs
-        )
+        validation_summaries = ValidationSummary.from_validator_logs_only_fails(validator_logs)
         reask = last_output if isinstance(last_output, ReAsk) else None
         error = call.error
         output = cast(OT, call.guarded_output)
@@ -100,13 +96,9 @@ class ValidationOutcome(IValidationOutcome, ArbitraryModel, Generic[OT]):
 
     def __iter__(
         self,
-    ) -> Iterator[
-        Union[Optional[str], Optional[OT], Optional[ReAsk], bool, Optional[str]]
-    ]:
+    ) -> Iterator[Union[Optional[str], Optional[OT], Optional[ReAsk], bool, Optional[str]]]:
         """Iterate over the ValidationOutcome's fields."""
-        as_tuple: Tuple[
-            Optional[str], Optional[OT], Optional[ReAsk], bool, Optional[str]
-        ] = (
+        as_tuple: Tuple[Optional[str], Optional[OT], Optional[ReAsk], bool, Optional[str]] = (
             self.raw_llm_output,
             self.validated_output,
             self.reask,

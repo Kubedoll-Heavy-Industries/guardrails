@@ -22,16 +22,13 @@ if nltk is not None:
 
 
 def messages_to_prompt_string(
-    messages: t.Union[
-        list[dict[str, t.Union[str, Prompt, Instructions]]], MessageHistory
-    ],
+    messages: t.Union[list[dict[str, t.Union[str, Prompt, Instructions]]], MessageHistory],
 ) -> str:
     messages_copy = ""
     for msg in messages:
         content = (
             msg["content"].source  # type: ignore
-            if isinstance(msg["content"], Prompt)
-            or isinstance(msg["content"], Instructions)  # type: ignore
+            if isinstance(msg["content"], Prompt) or isinstance(msg["content"], Instructions)  # type: ignore
             else msg["content"]  # type: ignore
         )
         messages_copy += content
@@ -93,8 +90,7 @@ def sentence_split(text: str) -> t.List[str]:
         from nltk import sent_tokenize  # type: ignore
     except ImportError:
         raise ImportError(
-            "nltk is required for sentence splitting. Please install it using "
-            "`poetry add nltk`"
+            "nltk is required for sentence splitting. Please install it using `poetry add nltk`"
         )
 
     # Download the nltk punkt tokenizer if it's not already downloaded.
@@ -141,12 +137,10 @@ def get_chunks_from_text(
     """
 
     nltk_error = (
-        "nltk is required for sentence splitting. Please install it using "
-        "`poetry add nltk`"
+        "nltk is required for sentence splitting. Please install it using `poetry add nltk`"
     )
     tiktoken_error = (
-        "tiktoken is required for token splitting. Please install it using "
-        "`poetry add tiktoken`"
+        "tiktoken is required for token splitting. Please install it using `poetry add tiktoken`"
     )
 
     if chunk_strategy == "sentence":
@@ -167,9 +161,7 @@ def get_chunks_from_text(
     elif chunk_strategy == "full":
         atomic_chunks = [text]
     else:
-        raise ValueError(
-            "chunk_strategy must be 'sentence', 'word', 'char', or 'token'."
-        )
+        raise ValueError("chunk_strategy must be 'sentence', 'word', 'char', or 'token'.")
 
     chunks = []
     for i in range(0, len(atomic_chunks), chunk_size - chunk_overlap):

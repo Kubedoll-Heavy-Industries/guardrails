@@ -32,9 +32,7 @@ class HttpError(Exception):
     message: str
 
 
-VALIDATOR_HUB_SERVICE = os.getenv(
-    "GR_VALIDATOR_HUB_SERVICE", "https://hub.api.guardrailsai.com"
-)
+VALIDATOR_HUB_SERVICE = os.getenv("GR_VALIDATOR_HUB_SERVICE", "https://hub.api.guardrailsai.com")
 
 
 def get_jwt_token(rc: RC) -> Optional[str]:

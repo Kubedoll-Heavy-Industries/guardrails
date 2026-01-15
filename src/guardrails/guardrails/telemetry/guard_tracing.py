@@ -158,9 +158,7 @@ def trace_stream_guard(
                     add_guard_attributes(guard_span, history, res)
                     add_user_attributes(guard_span)
                     if SpanAttributes is not None:
-                        new_span.set_attribute(
-                            SpanAttributes.OPENINFERENCE_SPAN_KIND, "GUARDRAIL"
-                        )
+                        new_span.set_attribute(SpanAttributes.OPENINFERENCE_SPAN_KIND, "GUARDRAIL")
                     yield res
         except StopIteration:
             next_exists = False
@@ -169,9 +167,7 @@ def trace_stream_guard(
 def trace_guard_execution(
     guard_name: str,
     history: Stack[Call],
-    _execute_fn: Callable[
-        ..., Union[ValidationOutcome[OT], Iterator[ValidationOutcome[OT]]]
-    ],
+    _execute_fn: Callable[..., Union[ValidationOutcome[OT], Iterator[ValidationOutcome[OT]]]],
     tracer: Optional[Tracer] = None,
     *args,
     **kwargs,
@@ -188,14 +184,10 @@ def trace_guard_execution(
             guard_span.set_attribute("type", "guardrails/guard")
             guard_span.set_attribute("guard.name", guard_name)
             if SpanAttributes is not None:
-                guard_span.set_attribute(
-                    SpanAttributes.OPENINFERENCE_SPAN_KIND, "GUARDRAIL"
-                )
+                guard_span.set_attribute(SpanAttributes.OPENINFERENCE_SPAN_KIND, "GUARDRAIL")
             try:
                 result = _execute_fn(*args, **kwargs)
-                if isinstance(result, Iterator) and not isinstance(
-                    result, ValidationOutcome
-                ):
+                if isinstance(result, Iterator) and not isinstance(result, ValidationOutcome):
                     return trace_stream_guard(guard_span, result, history)
 
                 add_guard_attributes(guard_span, history, result)
@@ -275,9 +267,7 @@ async def trace_async_guard_execution(
             guard_span.set_attribute("type", "guardrails/guard")
             guard_span.set_attribute("guard.name", guard_name)
             if SpanAttributes is not None:
-                guard_span.set_attribute(
-                    SpanAttributes.OPENINFERENCE_SPAN_KIND, "GUARDRAIL"
-                )
+                guard_span.set_attribute(SpanAttributes.OPENINFERENCE_SPAN_KIND, "GUARDRAIL")
             try:
                 result = await _execute_fn(*args, **kwargs)
                 if isinstance(result, AsyncIterator):

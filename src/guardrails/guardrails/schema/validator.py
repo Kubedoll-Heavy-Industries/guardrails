@@ -24,17 +24,13 @@ def validate_against_schema(
     fields: Dict[str, List[str]] = {}
     error: ValidationError
     for error in validator.iter_errors(payload):
-        if validate_subschema is True and error.message.endswith(
-            "is a required property"
-        ):
+        if validate_subschema is True and error.message.endswith("is a required property"):
             continue
         fields[error.json_path] = fields.get(error.json_path, [])
         fields[error.json_path].append(error.message)
 
     if fields:
-        error_message = (
-            "The provided payload is not compliant with the provided schema!"
-        )
+        error_message = "The provided payload is not compliant with the provided schema!"
         raise SchemaValidationError(error_message, fields=fields)
 
 
@@ -52,9 +48,7 @@ def validate_json_schema(json_schema: Dict[str, Any]):
         validate_against_schema(json_schema, json_schema_validator)
     except SchemaValidationError as e:
         schema_name = json_schema.get("title", json_schema.get("$id"))
-        error_message = (
-            f"Schema {schema_name} is not compliant with JSON Schema Draft 2020-12!"
-        )
+        error_message = f"Schema {schema_name} is not compliant with JSON Schema Draft 2020-12!"
         raise SchemaValidationError(error_message, fields=e.fields)
 
 
@@ -94,9 +88,7 @@ def schema_validation(llm_output: Any, output_schema: Dict[str, Any], **kwargs):
 
     schema_error = None
     try:
-        validate_payload(
-            llm_output, output_schema, validate_subschema=validate_subschema
-        )
+        validate_payload(llm_output, output_schema, validate_subschema=validate_subschema)
     except SchemaValidationError as sve:
         formatted_error_fields = json.dumps(sve.fields, indent=2)
         schema_error = f"JSON does not match schema:\n{formatted_error_fields}"

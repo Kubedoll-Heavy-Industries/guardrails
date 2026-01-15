@@ -43,9 +43,7 @@ if sys.version_info.minor < 10:
 
 
 # TODO: Track input arguments and outputs explicitly as named attributes
-def add_step_attributes(
-    step_span: Span, response: Optional[Iteration], *args, **kwargs
-):
+def add_step_attributes(step_span: Span, response: Optional[Iteration], *args, **kwargs):
     step_number = safe_get(args, 1, kwargs.get("index", 0))
     guard_name = get_guard_name()
 
@@ -89,9 +87,7 @@ def trace_step(fn: Callable[..., Iteration]):
                 context=current_otel_context,  # type: ignore
             ) as step_span:
                 if SpanAttributes is not None:
-                    step_span.set_attribute(
-                        SpanAttributes.OPENINFERENCE_SPAN_KIND, "GUARDRAIL"
-                    )
+                    step_span.set_attribute(SpanAttributes.OPENINFERENCE_SPAN_KIND, "GUARDRAIL")
                 try:
                     response = fn(*args, **kwargs)
                     add_step_attributes(step_span, response, *args, **kwargs)
@@ -169,9 +165,7 @@ def trace_async_step(fn: Callable[..., Awaitable[Iteration]]):
                 context=current_otel_context,  # type: ignore
             ) as step_span:
                 if SpanAttributes is not None:
-                    step_span.set_attribute(
-                        SpanAttributes.OPENINFERENCE_SPAN_KIND, "GUARDRAIL"
-                    )
+                    step_span.set_attribute(SpanAttributes.OPENINFERENCE_SPAN_KIND, "GUARDRAIL")
                 try:
                     response = await fn(*args, **kwargs)
                     add_user_attributes(step_span)
@@ -252,9 +246,7 @@ def trace_async_stream_step(
 
 
 # TODO: Track input arguments and outputs explicitly as named attributes
-def add_call_attributes(
-    call_span: Span, response: Optional[LLMResponse], *args, **kwargs
-):
+def add_call_attributes(call_span: Span, response: Optional[LLMResponse], *args, **kwargs):
     guard_name = get_guard_name()
 
     call_span.set_attribute("guardrails.version", GUARDRAILS_VERSION)

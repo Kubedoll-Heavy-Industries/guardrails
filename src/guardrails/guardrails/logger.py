@@ -96,9 +96,9 @@ def _setup_handler(log_level=logging.NOTSET, scope=base_scope) -> ScopeHandler:
 def get_scope_handler() -> ScopeHandler:
     global _logger
     try:
-        scope_handler: ScopeHandler = [
-            h for h in _logger.handlers if isinstance(h, ScopeHandler)
-        ][0]
+        scope_handler: ScopeHandler = [h for h in _logger.handlers if isinstance(h, ScopeHandler)][
+            0
+        ]
         return scope_handler
     except IndexError:
         hdlr = _setup_handler()

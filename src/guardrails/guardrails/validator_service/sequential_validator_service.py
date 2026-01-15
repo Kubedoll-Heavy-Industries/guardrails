@@ -59,9 +59,7 @@ class SequentialValidatorService(ValidatorServiceBase):
         stream: Optional[bool] = False,
         **kwargs,
     ) -> ValidatorLogs:
-        validator_logs = self.before_run_validator(
-            iteration, validator, value, property_path
-        )
+        validator_logs = self.before_run_validator(iteration, validator, value, property_path)
 
         result = self.run_validator_sync(
             validator,
@@ -183,9 +181,7 @@ class SequentialValidatorService(ValidatorServiceBase):
 
             if refrain_triggered:
                 # if we have a failresult from a refrain/filter validator, yield empty
-                yield StreamValidationResult(
-                    chunk="", original_text=acc_output, metadata=metadata
-                )
+                yield StreamValidationResult(chunk="", original_text=acc_output, metadata=metadata)
             else:
                 # if every validator has yielded a concrete value, merge and yield
                 # only merge and yield if all validators have run

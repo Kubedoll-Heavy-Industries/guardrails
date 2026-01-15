@@ -175,6 +175,10 @@ authorized_licenses = [
   "zpl 2.1",
   "mit and python-2.0",
   "apache-2.0 and mit",
+  # Compound licenses for numpy, faiss-cpu, pypdfium2
+  "mit and bsd-3-clause",
+  "bsd-3-clause and 0bsd and mit and zlib and cc0-1.0",
+  "bsd-3-clause, apache-2.0, dependency licenses",
 ]
 unauthorized_licenses = [
   "gpl v3",

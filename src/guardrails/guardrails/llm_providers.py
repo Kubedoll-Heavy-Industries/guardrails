@@ -76,9 +76,7 @@ def litellm_messages(
     if messages:
         return messages
     if prompt is None:
-        raise PromptCallableException(
-            "Either `text` or `messages` required for `guard.__call__`."
-        )
+        raise PromptCallableException("Either `text` or `messages` required for `guard.__call__`.")
 
     if instructions:
         prompt = "\n\n".join([instructions, prompt])
@@ -110,8 +108,7 @@ class ManifestCallable(PromptCallableBase):
             import manifest  # noqa: F401 # type: ignore
         except ImportError:
             raise PromptCallableException(
-                "The `manifest` package is not installed. "
-                "Install with `poetry add manifest-ml`"
+                "The `manifest` package is not installed. Install with `poetry add manifest-ml`"
             )
         client = cast(manifest.Manifest, client)
         prompt = nonchat_prompt(prompt=text, instructions=instructions)
@@ -132,12 +129,8 @@ class ManifestCallable(PromptCallableBase):
             },
         )
         manifest_response = client.run(prompt, *args, **kwargs)
-        trace_operation(
-            output_mime_type="application/json", output_value=manifest_response
-        )
-        trace_llm_call(
-            output_messages=[{"role": "assistant", "content": manifest_response}]
-        )
+        trace_operation(output_mime_type="application/json", output_value=manifest_response)
+        trace_llm_call(output_messages=[{"role": "assistant", "content": manifest_response}])
         return LLMResponse(
             output=manifest_response,
         )
@@ -171,8 +164,7 @@ class LiteLLMCallable(PromptCallableBase):
             from litellm import completion  # type: ignore
         except ImportError as e:
             raise PromptCallableException(
-                "The `litellm` package is not installed. "
-                "Install with `pip install litellm`"
+                "The `litellm` package is not installed. Install with `pip install litellm`"
             ) from e
         if messages is not None:
             messages = litellm_messages(prompt=text, messages=messages)
@@ -198,9 +190,7 @@ class LiteLLMCallable(PromptCallableBase):
                 **kwargs,
                 "model": model,
             },
-            function_call=kwargs.get(
-                "function_call", safe_get(function_calling_tools, 0)
-            ),
+            function_call=kwargs.get("function_call", safe_get(function_calling_tools, 0)),
         )
 
         # these are gr only and should not be getting passed to llms
@@ -234,8 +224,7 @@ class LiteLLMCallable(PromptCallableBase):
                     output = choice.message.tool_calls[-1].function.arguments  # type: ignore
                 except AttributeError as ae_tools:
                     raise ValueError(
-                        "No message content or function"
-                        " call arguments returned from OpenAI"
+                        "No message content or function call arguments returned from OpenAI"
                     ) from ae_tools
 
         completion_tokens = response.usage.completion_tokens  # type: ignore
@@ -262,9 +251,7 @@ class HuggingFaceModelCallable(PromptCallableBase):
         self,
         model_generate: Any,
         *args,
-        messages: Union[
-            list[dict[str, Union[str, Prompt, Instructions]]], MessageHistory
-        ],
+        messages: Union[list[dict[str, Union[str, Prompt, Instructions]]], MessageHistory],
         **kwargs,
     ) -> LLMResponse:
         try:
@@ -284,9 +271,7 @@ class HuggingFaceModelCallable(PromptCallableBase):
         tokenizer = kwargs.pop("tokenizer")
         if not tokenizer:
             raise UserFacingException(
-                ValueError(
-                    "'tokenizer' must be provided in order to use Hugging Face models!"
-                )
+                ValueError("'tokenizer' must be provided in order to use Hugging Face models!")
             )
 
         torch_device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -306,9 +291,7 @@ class HuggingFaceModelCallable(PromptCallableBase):
             and pixel_values is None
             and not model_inputs
         ):
-            model_inputs = tokenizer(prompt, return_tensors=return_tensors).to(
-                torch_device
-            )
+            model_inputs = tokenizer(prompt, return_tensors=return_tensors).to(torch_device)
         else:
             model_inputs["input_ids"] = input_ids
             model_inputs["input_values"] = input_values
@@ -351,13 +334,9 @@ class HuggingFaceModelCallable(PromptCallableBase):
         # We would need to either validate all of them
         # and choose the one with the least failures,
         # or accept a selection function
-        decoded_output = tokenizer.decode(
-            output[0], skip_special_tokens=skip_special_tokens
-        )
+        decoded_output = tokenizer.decode(output[0], skip_special_tokens=skip_special_tokens)
 
-        trace_llm_call(
-            output_messages=[{"role": "assistant", "content": decoded_output}]
-        )
+        trace_llm_call(output_messages=[{"role": "assistant", "content": decoded_output}])
 
         return LLMResponse(output=decoded_output)
 
@@ -367,9 +346,7 @@ class HuggingFacePipelineCallable(PromptCallableBase):
         self,
         pipeline: Any,
         *args,
-        messages: Union[
-            list[dict[str, Union[str, Prompt, Instructions]]], MessageHistory
-        ],
+        messages: Union[list[dict[str, Union[str, Prompt, Instructions]]], MessageHistory],
         **kwargs,
     ) -> LLMResponse:
         try:
@@ -470,9 +447,7 @@ class ArbitraryCallable(PromptCallableBase):
         )
 
         trace_llm_call(
-            input_messages=chat_prompt(
-                kwargs.get("prompt", ""), kwargs.get("instructions")
-            ),
+            input_messages=chat_prompt(kwargs.get("prompt", ""), kwargs.get("instructions")),
             invocation_parameters={
                 **kwargs,
             },
@@ -553,8 +528,7 @@ def get_llm_ask(
             or isinstance(api_self, FlaxPreTrainedModel)
         ):
             if (
-                hasattr(llm_api, "__func__")
-                and llm_api.__func__ == GenerationMixin.generate  # type: ignore
+                hasattr(llm_api, "__func__") and llm_api.__func__ == GenerationMixin.generate  # type: ignore
             ):
                 return HuggingFaceModelCallable(*args, model_generate=llm_api, **kwargs)
             raise ValueError("Only text generation models are supported at this time.")
@@ -568,9 +542,7 @@ def get_llm_ask(
             # Couldn't find a constant for this
             if llm_api.task == "text-generation":
                 return HuggingFacePipelineCallable(*args, pipeline=llm_api, **kwargs)
-            raise ValueError(
-                "Only text generation pipelines are supported at this time."
-            )
+            raise ValueError("Only text generation pipelines are supported at this time.")
     except ImportError:
         pass
 
@@ -594,9 +566,7 @@ class AsyncPromptCallableBase(PromptCallableBase):
 
     async def __call__(self, *args, **kwargs) -> LLMResponse:
         try:
-            result = await self.invoke_llm(
-                *self.init_args, *args, **self.init_kwargs, **kwargs
-            )
+            result = await self.invoke_llm(*self.init_args, *args, **self.init_kwargs, **kwargs)
         except Exception as e:
             raise PromptCallableException(
                 "The callable `fn` passed to `Guard(fn, ...)` failed"
@@ -638,8 +608,7 @@ class AsyncLiteLLMCallable(AsyncPromptCallableBase):
             from litellm import acompletion  # type: ignore
         except ImportError as e:
             raise PromptCallableException(
-                "The `litellm` package is not installed. "
-                "Install with `pip install litellm`"
+                "The `litellm` package is not installed. Install with `pip install litellm`"
             ) from e
 
         if text is not None or instructions is not None or messages is not None:
@@ -666,9 +635,7 @@ class AsyncLiteLLMCallable(AsyncPromptCallableBase):
         trace_llm_call(
             input_messages=kwargs.get("messages"),
             invocation_parameters={**kwargs},
-            function_call=kwargs.get(
-                "function_call", safe_get(function_calling_tools, 0)
-            ),
+            function_call=kwargs.get("function_call", safe_get(function_calling_tools, 0)),
         )
 
         # these are gr only and should not be getting passed to llms
@@ -702,8 +669,7 @@ class AsyncLiteLLMCallable(AsyncPromptCallableBase):
                     output = choice.message.tool_calls[-1].function.arguments  # type: ignore
                 except AttributeError as ae_tools:
                     raise ValueError(
-                        "No message content or function"
-                        " call arguments returned from OpenAI"
+                        "No message content or function call arguments returned from OpenAI"
                     ) from ae_tools
 
         completion_tokens = response.usage.completion_tokens  # type: ignore
@@ -748,8 +714,7 @@ class AsyncManifestCallable(AsyncPromptCallableBase):
             import manifest  # noqa: F401 # type: ignore
         except ImportError:
             raise PromptCallableException(
-                "The `manifest` package is not installed. "
-                "Install with `poetry add manifest-ml`"
+                "The `manifest` package is not installed. Install with `poetry add manifest-ml`"
             )
 
         prompts = [nonchat_prompt(prompt=text, instructions=instructions)]
@@ -778,15 +743,9 @@ class AsyncManifestCallable(AsyncPromptCallableBase):
             **kwargs,
         )
         if kwargs.get("stream", False):
-            raise NotImplementedError(
-                "Manifest async streaming is not yet supported by manifest."
-            )
-        trace_operation(
-            output_mime_type="application/json", output_value=manifest_response
-        )
-        trace_llm_call(
-            output_messages=[{"role": "assistant", "content": manifest_response[0]}]
-        )
+            raise NotImplementedError("Manifest async streaming is not yet supported by manifest.")
+        trace_operation(output_mime_type="application/json", output_value=manifest_response)
+        trace_llm_call(output_messages=[{"role": "assistant", "content": manifest_response[0]}])
         return LLMResponse(
             output=manifest_response[0],
         )
@@ -830,9 +789,7 @@ class AsyncArbitraryCallable(AsyncPromptCallableBase):
         )
 
         trace_llm_call(
-            input_messages=chat_prompt(
-                kwargs.get("prompt", ""), kwargs.get("instructions")
-            ),
+            input_messages=chat_prompt(kwargs.get("prompt", ""), kwargs.get("instructions")),
             invocation_parameters={
                 **kwargs,
             },

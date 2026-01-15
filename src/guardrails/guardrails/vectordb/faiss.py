@@ -10,16 +10,11 @@ try:
 except ImportError:
     pass
 
-faiss_error = (
-    "`faiss` is required for using vectordb.faiss."
-    "Install it with `poetry add faiss-cpu`."
-)
+faiss_error = "`faiss` is required for using vectordb.faiss.Install it with `poetry add faiss-cpu`."
 
 
 class Faiss(VectorDBBase):
-    def __init__(
-        self, index: "Index", embedder: EmbeddingBase, path: Optional[str] = None
-    ) -> None:
+    def __init__(self, index: "Index", embedder: EmbeddingBase, path: Optional[str] = None) -> None:
         try:
             import faiss  # noqa: F401
         except ImportError:

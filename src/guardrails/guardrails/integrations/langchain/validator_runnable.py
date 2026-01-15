@@ -14,9 +14,6 @@ class ValidatorRunnable(BaseRunnable):
         response = self.validator.validate(input, self.validator._metadata)
         if isinstance(response, FailResult):
             raise ValidationError(
-                (
-                    "The response from the LLM failed validation!"
-                    f" {response.error_message}"
-                )
+                (f"The response from the LLM failed validation! {response.error_message}")
             )
         return input

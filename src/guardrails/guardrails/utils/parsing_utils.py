@@ -43,9 +43,7 @@ def has_code_block(
     return (False, None, None)
 
 
-def get_code_block(
-    string_value: str, start: int, end: int, code_type: Optional[str] = ""
-) -> str:
+def get_code_block(string_value: str, start: int, end: int, code_type: Optional[str] = "") -> str:
     """Takes a string, start and end indexes, and an optional code type to
     extract a code block from a string.
 
@@ -88,9 +86,7 @@ def extract_json_from_ouput(
             json_pattern = regex.compile(r"\{(?:[^{}]+|\{(?:(?R)|[^{}]+)*\})*\}")
             json_groups = json_pattern.findall(output)
             json_start, json_end = output.find("{"), output.rfind("}")
-            if len(json_groups) > 0 and len(json_groups[0]) == (
-                json_end - json_start + 1
-            ):
+            if len(json_groups) > 0 and len(json_groups[0]) == (json_end - json_start + 1):
                 extracted_code_block = json_groups[0]
 
     # Treat the output as a JSON string, and load it into a dict.
@@ -143,9 +139,7 @@ def parse_fragment(fragment: str) -> Tuple[Union[str, List, Dict], Optional[str]
             stack.append(char)
         elif char in "}]":
             # Pop from stack if matching opening bracket is found
-            if stack and (
-                (char == "}" and stack[-1] == "{") or (char == "]" and stack[-1] == "[")
-            ):
+            if stack and ((char == "}" and stack[-1] == "{") or (char == "]" and stack[-1] == "[")):
                 stack.pop()
 
     # Add the necessary closing brackets in reverse order
@@ -226,9 +220,7 @@ def prune_extra_keys(
 
     if isinstance(payload, dict):
         # Do full lookbehind
-        wildcards: List[str] = [
-            path.split(".*")[0] for path in all_json_paths if ".*" in path
-        ]
+        wildcards: List[str] = [path.split(".*")[0] for path in all_json_paths if ".*" in path]
         ancestor_is_wildcard = any(w in json_path for w in wildcards)
         actual_keys = list(payload.keys())
         for key in actual_keys:
@@ -356,22 +348,16 @@ def coerce_property(
                 payload[k] = coerce_property(payload_value, v)
 
     ### Object Additional Properties ###
-    additional_properties_schema: Dict[str, Any] = schema.get(
-        "additionalProperties", {}
-    )
+    additional_properties_schema: Dict[str, Any] = schema.get("additionalProperties", {})
     if isinstance(additional_properties_schema, bool):
         additional_properties_schema = {}
     if additional_properties_schema and isinstance(payload, dict):
         declared_properties = properties.keys()
-        additional_properties = [
-            key for key in payload.keys() if key not in declared_properties
-        ]
+        additional_properties = [key for key in payload.keys() if key not in declared_properties]
         for prop in additional_properties:
             payload_value = payload.get(prop)
             if payload_value:
-                payload[prop] = coerce_property(
-                    payload_value, additional_properties_schema
-                )
+                payload[prop] = coerce_property(payload_value, additional_properties_schema)
 
     ### Conditional SubSchema ###
     if_block: Dict[str, Any] = schema.get("if", {})
@@ -390,9 +376,7 @@ def coerce_property(
         for k, v in if_properties.items():
             actual_value = safe_get(payload, k)
             condition_value = safe_get(v, "const")
-            condition_satisfied = (
-                condition_satisfied and actual_value == condition_value
-            )
+            condition_satisfied = condition_satisfied and actual_value == condition_value
 
         if condition_satisfied:
             conditional_schema = then_properties
@@ -417,7 +401,5 @@ def coerce_property(
 def coerce_types(
     payload: Union[str, List[Any], Dict[str, Any], Any], schema: Dict[str, Any]
 ) -> Union[str, List[Any], Dict[str, Any]]:
-    dereferenced_schema = cast(
-        Dict[str, Any], jsonref.replace_refs(schema)
-    )  # for pyright
+    dereferenced_schema = cast(Dict[str, Any], jsonref.replace_refs(schema))  # for pyright
     return coerce_property(payload, dereferenced_schema)

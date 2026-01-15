@@ -51,9 +51,7 @@ class GuardrailsQueryEngine(BaseQueryEngine):
 
     def _query(self, query_bundle: "QueryBundle") -> RESPONSE_TYPE:
         if not isinstance(self._engine, BaseQueryEngine):
-            raise ValueError(
-                "Cannot perform query with a ChatEngine. Use chat() method instead."
-            )
+            raise ValueError("Cannot perform query with a ChatEngine. Use chat() method instead.")
         if isinstance(query_bundle, str):
             query_bundle = QueryBundle(query_bundle)
         try:
@@ -77,12 +75,8 @@ class GuardrailsQueryEngine(BaseQueryEngine):
             if validated_output.validation_passed:
                 if isinstance(self._engine_response, Response):
                     self._engine_response.response = validated_output.validated_output
-                elif isinstance(
-                    self._engine_response, (StreamingResponse, AsyncStreamingResponse)
-                ):
-                    self._engine_response.response_txt = (
-                        validated_output.validated_output
-                    )
+                elif isinstance(self._engine_response, (StreamingResponse, AsyncStreamingResponse)):
+                    self._engine_response.response_txt = validated_output.validated_output
                 elif isinstance(self._engine_response, PydanticResponse):
                     if self._engine_response.response:
                         import json
@@ -92,8 +86,10 @@ class GuardrailsQueryEngine(BaseQueryEngine):
                             if isinstance(validated_output.validated_output, str)
                             else json.dumps(validated_output.validated_output)
                         )
-                        self._engine_response.response = self._engine_response.response.__class__.model_validate_json(  # noqa: E501
-                            json_str
+                        self._engine_response.response = (
+                            self._engine_response.response.__class__.model_validate_json(  # noqa: E501
+                                json_str
+                            )
                         )
                 else:
                     raise ValueError("Unsupported response type")

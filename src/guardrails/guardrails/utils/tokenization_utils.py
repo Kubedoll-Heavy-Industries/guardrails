@@ -36,13 +36,9 @@ def postproc_splits(sentences, separator):
     sentences = sentences.replace("\r", "")
 
     # Breaks sometimes missing after "?", "safe" cases
-    sentences = re.sub(
-        r"\b([a-z]+\?)\s+([A-Z][a-z]+)\b", rf"\1{separator}\2", sentences
-    )
+    sentences = re.sub(r"\b([a-z]+\?)\s+([A-Z][a-z]+)\b", rf"\1{separator}\2", sentences)
     # Breaks sometimes missing after ".", "safe" cases
-    sentences = re.sub(
-        r"\b([a-z]+ \.)\s+([A-Z][a-z]+)\b", rf"\1{separator}\2", sentences
-    )
+    sentences = re.sub(r"\b([a-z]+ \.)\s+([A-Z][a-z]+)\b", rf"\1{separator}\2", sentences)
 
     # No breaks producing lines only containing sentence-ending punctuation
     sentences = re.sub(rf"{separator}([.!?]+){separator}", r"\1" + separator, sentences)
@@ -190,9 +186,7 @@ def postproc_splits(sentences, separator):
         r"i\. ?e\.",
     ]
     for abbr in abbreviations:
-        sentences = re.sub(
-            rf"(\b{abbr}){separator}", r"\1", sentences, flags=re.IGNORECASE
-        )
+        sentences = re.sub(rf"(\b{abbr}){separator}", r"\1", sentences, flags=re.IGNORECASE)
 
     return sentences
 

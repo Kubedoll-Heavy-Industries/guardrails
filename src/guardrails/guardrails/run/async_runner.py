@@ -62,9 +62,7 @@ class AsyncRunner(Runner):
     # TODO: Refactor this to use inheritance and overrides
     # Why are we using a different method here instead of just overriding?
     @async_trace(name="/reasks", origin="AsyncRunner.async_run")
-    async def async_run(
-        self, call_log: Call, prompt_params: Optional[Dict] = None
-    ) -> Call:
+    async def async_run(self, call_log: Call, prompt_params: Optional[Dict] = None) -> Call:
         """Execute the runner by repeatedly calling step until the reask budget
         is exhausted.
 
@@ -150,9 +148,7 @@ class AsyncRunner(Runner):
             full_schema_reask=self.full_schema_reask,
         )
         outputs = Outputs()
-        iteration = Iteration(
-            call_id=call_log.id, index=index, inputs=inputs, outputs=outputs
-        )
+        iteration = Iteration(call_id=call_log.id, index=index, inputs=inputs, outputs=outputs)
         set_scope(str(id(iteration)))
         call_log.iterations.push(iteration)
 
@@ -342,16 +338,12 @@ class AsyncRunner(Runner):
     ):
         for msg in messages:
             content = (
-                msg["content"].source
-                if isinstance(msg["content"], Prompt)
-                else msg["content"]
+                msg["content"].source if isinstance(msg["content"], Prompt) else msg["content"]
             )
             inputs = Inputs(
                 llm_output=content,
             )
-            iteration = Iteration(
-                call_id=call_log.id, index=attempt_number, inputs=inputs
-            )
+            iteration = Iteration(call_id=call_log.id, index=attempt_number, inputs=inputs)
             call_log.iterations.insert(0, iteration)
             value, _metadata = await validator_service.async_validate(
                 value=content,

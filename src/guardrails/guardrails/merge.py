@@ -11,9 +11,7 @@ DELETION = -1
 ADDITION = 1
 
 
-def merge(
-    source: Optional[str], target: Optional[str], base: Optional[str]
-) -> Optional[str]:
+def merge(source: Optional[str], target: Optional[str], base: Optional[str]) -> Optional[str]:
     if source is None or target is None or base is None:
         return None
 

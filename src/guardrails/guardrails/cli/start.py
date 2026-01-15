@@ -33,9 +33,7 @@ def start(
         default=8000,
         help="The port to run the server on.",
     ),
-    watch: bool = typer.Option(
-        default=False, is_flag=True, help="Enable watch mode for logs."
-    ),
+    watch: bool = typer.Option(default=False, is_flag=True, help="Enable watch mode for logs."),
 ):
     logger.debug("Checking for prerequisites...")
     if not api_is_installed():

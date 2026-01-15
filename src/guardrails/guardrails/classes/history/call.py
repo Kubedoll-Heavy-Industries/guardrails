@@ -44,8 +44,7 @@ class Call(ICall, ArbitraryModel):
     """
 
     iterations: Stack[Iteration] = Field(
-        description="A stack of iterations for each"
-        "step/reask that occurred during this call."
+        description="A stack of iterations for eachstep/reask that occurred during this call."
     )
     inputs: CallInputs = Field(
         description="The inputs as passed in to Guard.__call__ or Guard.parse"
@@ -241,9 +240,7 @@ class Call(ICall, ArbitraryModel):
             self.iterations.first.validation_response  # type: ignore
         )
         while current_index < number_of_iterations:
-            current_validation_output = self.iterations.at(
-                current_index
-            ).validation_response  # type: ignore
+            current_validation_output = self.iterations.at(current_index).validation_response  # type: ignore
             merged_validation_responses = merge_reask_output(
                 merged_validation_responses, current_validation_output
             )
@@ -276,11 +273,7 @@ class Call(ICall, ArbitraryModel):
         if self.status == pass_status:
             return self.fixed_output
         last_iteration = self.iterations.last
-        if (
-            not self.status == pass_status
-            and last_iteration
-            and last_iteration.failed_validations
-        ):
+        if not self.status == pass_status and last_iteration and last_iteration.failed_validations:
             # check that all failed validations are noop or none
             all_noop = True
             for failed_validation in last_iteration.failed_validations:
@@ -413,12 +406,8 @@ class Call(ICall, ArbitraryModel):
 
     @classmethod
     def from_interface(cls, i_call: ICall) -> "Call":
-        iterations = Stack(
-            *[Iteration.from_interface(i) for i in (i_call.iterations or [])]
-        )
-        inputs = (
-            CallInputs.from_interface(i_call.inputs) if i_call.inputs else CallInputs()
-        )
+        iterations = Stack(*[Iteration.from_interface(i) for i in (i_call.iterations or [])])
+        inputs = CallInputs.from_interface(i_call.inputs) if i_call.inputs else CallInputs()
         exception = Exception(i_call.exception) if i_call.exception else None
         call_inst = cls(iterations=iterations, inputs=inputs, exception=exception)
         call_inst.id = i_call.id

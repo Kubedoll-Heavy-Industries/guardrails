@@ -47,17 +47,13 @@ def get_validators(element: _Element) -> List[Validator]:
         validator: Validator = get_validator(v)
         if not validator:
             continue
-        on_fail = on_fail_handlers.get(
-            validator.rail_alias.replace("/", "_"), OnFailAction.NOOP
-        )
+        on_fail = on_fail_handlers.get(validator.rail_alias.replace("/", "_"), OnFailAction.NOOP)
         validator.on_fail_descriptor = on_fail
         validators.append(validator)
     return validators
 
 
-def extract_validators(
-    element: _Element, processed_schema: ProcessedSchema, json_path: str
-):
+def extract_validators(element: _Element, processed_schema: ProcessedSchema, json_path: str):
     validators = get_validators(element)
     for validator in validators:
         validator_reference = ValidatorReference(
@@ -142,9 +138,7 @@ def parse_element(
             format=format,
         )
     elif schema_type == RailTypes.BOOL:
-        return ModelSchema(
-            type=ValidationType(SimpleTypes.BOOLEAN), description=description
-        )
+        return ModelSchema(type=ValidationType(SimpleTypes.BOOLEAN), description=description)
     elif schema_type == RailTypes.DATE:
         format = extract_format(
             element=element,
@@ -204,16 +198,12 @@ def parse_element(
         children = list(element)
         num_of_children = len(children)
         if num_of_children > 1:
-            raise ValueError(
-                "<list /> RAIL elements must have precisely 1 child element!"
-            )
+            raise ValueError("<list /> RAIL elements must have precisely 1 child element!")
         elif num_of_children == 0:
             items = {}
         else:
             first_child = children[0]
-            child_schema = parse_element(
-                first_child, processed_schema, f"{json_path}.*"
-            )
+            child_schema = parse_element(first_child, processed_schema, f"{json_path}.*")
             items = child_schema.to_dict()
         return ModelSchema(
             type=ValidationType(SimpleTypes.ARRAY), items=items, description=description
@@ -226,9 +216,7 @@ def parse_element(
             child_required = child.get("required", "true") == "true"
             if not name:
                 output_path = json_path.replace("$.", "output.")
-                logger.warning(
-                    f"{output_path} has a nameless child which is not allowed!"
-                )
+                logger.warning(f"{output_path} has a nameless child which is not allowed!")
                 continue
             if child_required:
                 required.append(name)
@@ -263,9 +251,7 @@ def parse_element(
         discriminator = element.get("discriminator")
         if not discriminator:
             raise ValueError("<choice /> elements must specify a discriminator!")
-        discriminator_model = ModelSchema(
-            type=ValidationType(SimpleTypes.STRING), enum=[]
-        )
+        discriminator_model = ModelSchema(type=ValidationType(SimpleTypes.STRING), enum=[])
         for choice_case in element:
             case_name = choice_case.get("name")
             if not case_name:
@@ -284,8 +270,7 @@ def parse_element(
                 if not case_child_name:
                     output_path = json_path.replace("$.", "output.")
                     logger.warning(
-                        f"{output_path}.{case_name} has a nameless child"
-                        " which is not allowed!"
+                        f"{output_path}.{case_name} has a nameless child which is not allowed!"
                     )
                     continue
                 if child_required:
@@ -295,12 +280,8 @@ def parse_element(
                 )
                 case_properties[case_child_name] = case_child_schema.to_dict()
 
-            case_if_then_properties[discriminator] = ModelSchema(
-                const=case_name
-            ).to_dict()
-            case_if_then_model.var_if = ModelSchema(
-                properties=case_if_then_properties
-            ).to_dict()
+            case_if_then_properties[discriminator] = ModelSchema(const=case_name).to_dict()
+            case_if_then_model.var_if = ModelSchema(properties=case_if_then_properties).to_dict()
             case_if_then_model.then = ModelSchema(
                 properties=case_properties, required=required
             ).to_dict()
@@ -373,8 +354,7 @@ def rail_string_to_schema(rail_string: str) -> ProcessedSchema:
     output_schema_type = output_schema.type
     if not output_schema_type:
         raise ValueError(
-            "The type attribute of the <output /> tag must be one of:"
-            ' "string", "object", or "list"'
+            'The type attribute of the <output /> tag must be one of: "string", "object", or "list"'
         )
     if output_schema_type.actual_instance == SimpleTypes.STRING:
         processed_schema.output_type = OutputTypes.STRING
@@ -384,8 +364,7 @@ def rail_string_to_schema(rail_string: str) -> ProcessedSchema:
         processed_schema.output_type = OutputTypes.DICT
     else:
         raise ValueError(
-            "The type attribute of the <output /> tag must be one of:"
-            ' "string", "object", or "list"'
+            'The type attribute of the <output /> tag must be one of: "string", "object", or "list"'
         )
 
     messages = rail_xml.find("messages")
@@ -505,9 +484,7 @@ def build_choice_case(
         case_value = case.get("case")
         if case_value:
             case_attributes["name"] = case_value
-        case_elem = SubElement(
-            _parent=choice, _tag=RailTypes.CASE, attrib=case_attributes
-        )
+        case_elem = SubElement(_parent=choice, _tag=RailTypes.CASE, attrib=case_attributes)
 
         case_schema: Dict[str, Any] = case.get("schema", {})
         case_properties: Dict[str, Any] = case_schema.get("properties", {})
@@ -582,16 +559,12 @@ def build_choice_case_element_from_if(
                 for k, v in {**factored_properties, **else_block}.items()
                 if k not in discriminators
             }
-            case_combo.append(
-                {"discriminator": joint_discriminator, "schema": else_schema}
-            )
+            case_combo.append({"discriminator": joint_discriminator, "schema": else_schema})
         discriminator_combos[joint_discriminator] = case_combo
 
     if len(discriminator_combos) > 1:
         # FIXME: This can probably be refactored
-        anonymous_choice = init_elem(
-            elem, _parent=parent, _tag=RailTypes.CHOICE, attrib={}
-        )
+        anonymous_choice = init_elem(elem, _parent=parent, _tag=RailTypes.CHOICE, attrib={})
         for discriminator, discriminator_cases in discriminator_combos.items():
             anonymous_case = SubElement(_parent=anonymous_choice, _tag=RailTypes.CASE)
             build_choice_case(
@@ -604,9 +577,9 @@ def build_choice_case_element_from_if(
             )
         return anonymous_choice
     else:
-        first_discriminator: Tuple[str, List[Dict[str, Any]]] = list(
-            discriminator_combos.items()
-        )[0] or ("", [])
+        first_discriminator: Tuple[str, List[Dict[str, Any]]] = list(discriminator_combos.items())[
+            0
+        ] or ("", [])
         discriminator, discriminator_cases = first_discriminator
         return build_choice_case(
             discriminator=discriminator,
@@ -645,9 +618,7 @@ def build_choice_case_element_from_discriminator(
             },
         }
         case = {"schema": sub_schema}
-        discriminator_value = (
-            sub.get("properties", {}).get(discriminator, {}).get("const")
-        )
+        discriminator_value = sub.get("properties", {}).get(discriminator, {}).get("const")
         if discriminator_value in case_values:
             case["case"] = discriminator_value
         cases.append(case)
@@ -681,11 +652,7 @@ def build_object_element(
 
     one_of = json_schema.get("oneOf", [])
 
-    any_of = [
-        sub
-        for sub in json_schema.get("anyOf", [])
-        if sub.get("type") != SimpleTypes.NULL
-    ]
+    any_of = [sub for sub in json_schema.get("anyOf", []) if sub.get("type") != SimpleTypes.NULL]
 
     all_of_contains_if = [sub for sub in all_of if sub.get("if")]
     discriminator = json_schema.get("discriminator")
@@ -912,9 +879,7 @@ def build_element(
     return element
 
 
-def json_schema_to_rail_output(
-    json_schema: Dict[str, Any], validator_map: ValidatorMap
-) -> str:
+def json_schema_to_rail_output(json_schema: Dict[str, Any], validator_map: ValidatorMap) -> str:
     """Takes a JSON Schema and converts it to the RAIL output specification.
 
     Limited support. Only guaranteed to work for JSON Schemas that were
@@ -928,6 +893,4 @@ def json_schema_to_rail_output(
         elem=Element,
         tag_override="output",
     )
-    return canonicalize(ET.tostring(output_element, pretty_print=True)).replace(
-        "&#xA;", ""
-    )
+    return canonicalize(ET.tostring(output_element, pretty_print=True)).replace("&#xA;", "")

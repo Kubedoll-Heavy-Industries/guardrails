@@ -105,9 +105,7 @@ def trace_llm_call(
                     )
 
     ser_invocation_parameters = serialize(invocation_parameters)
-    redacted_ser_invocation_parameters = recursive_key_operation(
-        ser_invocation_parameters, redact
-    )
+    redacted_ser_invocation_parameters = recursive_key_operation(ser_invocation_parameters, redact)
     reser_invocation_parameters = (
         json.dumps(redacted_ser_invocation_parameters)
         if isinstance(redacted_ser_invocation_parameters, dict)
@@ -115,9 +113,7 @@ def trace_llm_call(
         else redacted_ser_invocation_parameters
     )
     if reser_invocation_parameters:
-        current_span.set_attribute(
-            "llm.invocation_parameters", reser_invocation_parameters
-        )
+        current_span.set_attribute("llm.invocation_parameters", reser_invocation_parameters)
 
     ser_model_name = serialize(model_name)
     if ser_model_name:
@@ -137,21 +133,15 @@ def trace_llm_call(
 
     ser_prompt_template_template = serialize(prompt_template_template)
     if ser_prompt_template_template:
-        current_span.set_attribute(
-            "llm.prompt_template.template", ser_prompt_template_template
-        )
+        current_span.set_attribute("llm.prompt_template.template", ser_prompt_template_template)
 
     ser_prompt_template_variables = serialize(prompt_template_variables)
     if ser_prompt_template_variables:
-        current_span.set_attribute(
-            "llm.prompt_template.variables", ser_prompt_template_variables
-        )
+        current_span.set_attribute("llm.prompt_template.variables", ser_prompt_template_variables)
 
     ser_prompt_template_version = serialize(prompt_template_version)
     if ser_prompt_template_version:
-        current_span.set_attribute(
-            "llm.prompt_template.version", ser_prompt_template_version
-        )
+        current_span.set_attribute("llm.prompt_template.version", ser_prompt_template_version)
 
     if token_count_completion:
         current_span.set_attribute("llm.token_count.completion", token_count_completion)

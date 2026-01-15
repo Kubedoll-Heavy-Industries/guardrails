@@ -86,9 +86,7 @@ class StreamRunner(Runner):
             stream=True,
         )
         outputs = Outputs()
-        iteration = Iteration(
-            call_id=call_log.id, index=index, inputs=inputs, outputs=outputs
-        )
+        iteration = Iteration(call_id=call_log.id, index=index, inputs=inputs, outputs=outputs)
         call_log.iterations.push(iteration)
 
         # Prepare: run pre-processing, and input validation.
@@ -241,9 +239,7 @@ class StreamRunner(Runner):
     def is_last_chunk(self, chunk: Any, api: Union[PromptCallableBase, None]) -> bool:
         """Detect if chunk is final chunk."""
         try:
-            if (
-                not chunk.choices or len(chunk.choices) == 0
-            ) and chunk.usage is not None:
+            if (not chunk.choices or len(chunk.choices) == 0) and chunk.usage is not None:
                 # This is the last extra chunk for usage statistics
                 return True
             finished = chunk.choices[0].finish_reason
@@ -276,9 +272,7 @@ class StreamRunner(Runner):
             if not first_choice:
                 return chunk_text
 
-            if hasattr(first_choice, "delta") and hasattr(
-                first_choice.delta, "content"
-            ):
+            if hasattr(first_choice, "delta") and hasattr(first_choice.delta, "content"):
                 chunk_text = first_choice.delta.content
             elif hasattr(first_choice, "text"):
                 chunk_text = first_choice.text
@@ -310,9 +304,7 @@ class StreamRunner(Runner):
                 "a generator of strings."
             )
 
-    def parse(
-        self, output: str, output_schema: Dict[str, Any], *, verified: set, **kwargs
-    ):
+    def parse(self, output: str, output_schema: Dict[str, Any], *, verified: set, **kwargs):
         """Parse the output."""
         parsed_output, error = parse_llm_output(
             output, self.output_type, stream=True, verified=verified

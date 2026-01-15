@@ -134,9 +134,7 @@ try:
             # would raise an exception and we assume the document and
             # vectors are present.
             try:
-                self._storage.add_docs(
-                    [document], vdb_last_index=self._vector_db.last_index()
-                )
+                self._storage.add_docs([document], vdb_last_index=self._vector_db.last_index())
             except IntegrityError:
                 return
             self._vector_db.add_texts(list(document.pages.values()))
@@ -163,9 +161,7 @@ try:
             filtered_ids = list(filter(lambda x: x != -1, vector_db_indexes))
             return self._storage.get_pages_for_for_indexes(filtered_ids)
 
-        def search_with_threshold(
-            self, query: str, threshold: float, k: int = 4
-        ) -> List[Page]:
+        def search_with_threshold(self, query: str, threshold: float, k: int = 4) -> List[Page]:
             vector_db_indexes = self._vector_db.similarity_search_with_threshold(
                 query, k, threshold
             )
