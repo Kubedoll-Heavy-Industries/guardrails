@@ -9,6 +9,7 @@ from guardrails.cli.server.hub_client import (
     TOKEN_INVALID_MESSAGE,
     ExpiredTokenError,
     InvalidTokenError,
+    _pep440_to_semver,
     get_jwt_token,
 )
 
@@ -68,3 +69,18 @@ def test_get_jwt_token():
         get_jwt_token(RC.from_dict({"token": invalid_jwt}))
 
     assert str(e.value) == TOKEN_INVALID_MESSAGE
+
+
+@pytest.mark.parametrize(
+    "pep440,expected",
+    [
+        ("0.1.0", "0.1.0"),
+        ("0.1.0rc1", "0.1.0-rc1"),
+        ("0.1.0a1", "0.1.0-a1"),
+        ("0.1.0b2", "0.1.0-b2"),
+        ("0.1.0.dev1", "0.1.0-dev1"),
+        ("1.2.3", "1.2.3"),
+    ],
+)
+def test_pep440_to_semver(pep440, expected):
+    assert _pep440_to_semver(pep440) == expected

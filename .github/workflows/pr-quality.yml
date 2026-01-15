@@ -62,13 +62,14 @@ jobs:
     env:
       GUARDRAILS_API_KEY: ${{ secrets.GUARDRAILS_API_KEY }}
     steps:
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.13"
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
 
-      - name: pip install from branch
-        run: pip install git+https://github.com/${{ github.repository }}.git@${{ github.sha }}
+      - name: Set up Python
+        run: uv python install 3.13
+
+      - name: Install from branch
+        run: uv pip install --system "guardrails-ai @ git+https://github.com/${{ github.repository }}.git@${{ github.sha }}#subdirectory=src/guardrails"
 
       - name: Install PII validator
         if: ${{ env.GUARDRAILS_API_KEY != '' }}

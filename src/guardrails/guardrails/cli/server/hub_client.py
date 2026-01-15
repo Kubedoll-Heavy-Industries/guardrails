@@ -5,13 +5,27 @@ from typing import Any
 
 import jwt
 import requests
+import semver
 from guardrails_hub_types import Manifest
 from jwt import DecodeError, ExpiredSignatureError
+from packaging.version import Version
 
 from guardrails.classes.rc import RC
 from guardrails.cli.logger import logger
 from guardrails.settings import settings
 from guardrails.version import GUARDRAILS_VERSION
+
+
+def _pep440_to_semver(version: str) -> str:
+    """Convert PEP 440 to SemVer: 0.8.0rc1 -> 0.8.0-rc1"""
+    pep = Version(version)
+    prerelease = None
+    if pep.pre:
+        prerelease = f"{pep.pre[0]}{pep.pre[1]}"
+    elif pep.dev is not None:
+        prerelease = f"dev{pep.dev}"
+    return str(semver.Version(pep.major, pep.minor, pep.micro, prerelease=prerelease))
+
 
 FIND_NEW_TOKEN = "You can find a new token at https://hub.guardrailsai.com/keys"
 
@@ -51,7 +65,7 @@ def fetch(url: str, token: str | None, anonymousUserId: str | None):
         headers = {
             "Authorization": f"Bearer {token}",
             "x-anonymous-user-id": anonymousUserId,
-            "x-guardrails-version": GUARDRAILS_VERSION,
+            "x-guardrails-version": _pep440_to_semver(GUARDRAILS_VERSION),
         }
         req = requests.get(url, headers=headers)
         body = req.json()

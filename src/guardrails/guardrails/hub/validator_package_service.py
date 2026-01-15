@@ -107,7 +107,11 @@ class ValidatorPackageService:
         import_path = ValidatorPackageService.get_import_path_from_validator_id(validator_id)
         import_line = f"from {import_path} import {', '.join(sorted_exports)}"
 
-        hub_init_location = os.path.join(site_packages, "guardrails", "hub", "__init__.py")
+        # Find guardrails package location (works for both editable and regular installs)
+        import guardrails
+
+        guardrails_path = guardrails.__path__[0]
+        hub_init_location = os.path.join(guardrails_path, "hub", "__init__.py")
         with open(hub_init_location, "a+") as hub_init:
             hub_init.seek(0, 0)
             content = hub_init.read()
