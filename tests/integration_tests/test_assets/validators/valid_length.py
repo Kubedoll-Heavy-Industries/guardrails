@@ -1,5 +1,6 @@
 import string
-from typing import Callable, Dict, List, Optional, Union
+from collections.abc import Callable
+from typing import Union
 
 import rstr
 
@@ -29,13 +30,13 @@ class ValidLength(Validator):
     Args:
         min: The inclusive minimum length.
         max: The inclusive maximum length.
-    """  # noqa
+    """
 
     def __init__(
         self,
-        min: Optional[int] = None,
-        max: Optional[int] = None,
-        on_fail: Optional[Callable] = None,
+        min: int | None = None,
+        max: int | None = None,
+        on_fail: Callable | None = None,
     ):
         super().__init__(
             on_fail=on_fail,
@@ -45,27 +46,19 @@ class ValidLength(Validator):
         self._min = to_int(min)
         self._max = to_int(max)
 
-    def validate(self, value: Union[str, List], metadata: Dict) -> ValidationResult:
+    def validate(self, value: Union[str, list], metadata: dict) -> ValidationResult:
         """Validates that the length of value is within the expected range."""
-        logger.debug(
-            f"Validating {value} is in length range {self._min} - {self._max}..."
-        )
+        logger.debug(f"Validating {value} is in length range {self._min} - {self._max}...")
 
         if self._min is not None and len(value) < self._min:
             logger.debug(f"Value {value} is less than {self._min}.")
 
             # Repeat the last character to make the value the correct length.
             if isinstance(value, str):
-                if not value:
-                    last_val = rstr.rstr(string.ascii_lowercase, 1)
-                else:
-                    last_val = value[-1]
+                last_val = rstr.rstr(string.ascii_lowercase, 1) if not value else value[-1]
                 corrected_value = value + last_val * (self._min - len(value))
             else:
-                if not value:
-                    last_val = [rstr.rstr(string.ascii_lowercase, 1)]
-                else:
-                    last_val = [value[-1]]
+                last_val = [rstr.rstr(string.ascii_lowercase, 1)] if not value else [value[-1]]
                 # extend value by padding it out with last_val
                 corrected_value = value.extend([last_val] * (self._min - len(value)))
 

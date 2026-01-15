@@ -10,7 +10,7 @@ from guardrails.utils.docs_utils import (  # sentence_split,
 
 class MockTokenizer:
     def encode(self, text):
-        return [token_id for token_id in range(1, len(text) + 1)]
+        return list(range(1, len(text) + 1))
 
     def decode(self, tokens):
         return " ".join([str(token_id) for token_id in tokens])
@@ -78,9 +78,7 @@ class MockNLTK:
 
 def test_get_chunks_from_text_char():
     text = "This is a test."
-    chunks = get_chunks_from_text(
-        text, chunk_strategy="char", chunk_size=4, chunk_overlap=1
-    )
+    chunks = get_chunks_from_text(text, chunk_strategy="char", chunk_size=4, chunk_overlap=1)
     assert len(chunks) == 5
     assert chunks[0] == "T h i s"
     assert chunks[1] == "s   i s"

@@ -1,15 +1,16 @@
+import sys
 from pathlib import Path
 from typing import cast
-import pytest
-import sys
-from unittest.mock import call, patch, MagicMock
+from unittest.mock import MagicMock, call, patch
 
+import pytest
 from guardrails_hub_types import Manifest
+
 from guardrails.cli.hub.utils import PipProcessError
 from guardrails.hub.validator_package_service import (
     FailedToLocateModule,
-    ValidatorPackageService,
     InvalidHubInstallURL,
+    ValidatorPackageService,
 )
 from tests.unit_tests.mocks.mock_file import MockFile
 
@@ -69,9 +70,7 @@ class TestAddToHubInits:
         mock_open.side_effect = [hub_init_file]
 
         mock_hub_read = mocker.patch.object(hub_init_file, "read")
-        mock_hub_read.return_value = (
-            "from guardrails_ai_grhub_id import helper, TestValidator"  # noqa
-        )
+        mock_hub_read.return_value = "from guardrails_ai_grhub_id import helper, TestValidator"
 
         hub_seek_spy = mocker.spy(hub_init_file, "seek")
         hub_write_spy = mocker.spy(hub_init_file, "write")
@@ -116,7 +115,9 @@ class TestAddToHubInits:
         mock_open.side_effect = [hub_init_file]
 
         mock_hub_read = mocker.patch.object(hub_init_file, "read")
-        mock_hub_read.return_value = "from guardrails.hub.other_org.other_validator.validator import OtherValidator"  # noqa
+        mock_hub_read.return_value = (
+            "from guardrails.hub.other_org.other_validator.validator import OtherValidator"
+        )
 
         hub_seek_spy = mocker.spy(hub_init_file, "seek")
         hub_write_spy = mocker.spy(hub_init_file, "write")
@@ -142,9 +143,7 @@ class TestAddToHubInits:
         assert hub_write_spy.call_count == 2
         hub_write_calls = [
             call("\n"),
-            call(
-                "from guardrails_ai_grhub_id import TestValidator"  # noqa
-            ),
+            call("from guardrails_ai_grhub_id import TestValidator"),
         ]
         hub_write_spy.assert_has_calls(hub_write_calls)
 
@@ -173,11 +172,9 @@ class TestAddToHubInits:
         mock_open.side_effect = [hub_init_file]
 
         mock_hub_read = mocker.patch.object(hub_init_file, "read")
-        mock_hub_read.return_value = "from guardrails_ai_grhub_id import TestValidator"  # noqa
+        mock_hub_read.return_value = "from guardrails_ai_grhub_id import TestValidator"
 
-        mock_is_file = mocker.patch(
-            "guardrails.hub.validator_package_service.os.path.isfile"
-        )
+        mock_is_file = mocker.patch("guardrails.hub.validator_package_service.os.path.isfile")
         mock_is_file.return_value = False
 
         from guardrails.hub.validator_package_service import ValidatorPackageService
@@ -195,9 +192,7 @@ class TestAddToHubInits:
 class TestReloadModule:
     @patch("guardrails.hub.validator_package_service.importlib")
     @patch.dict("sys.modules")
-    def test_reload_module__guardrails_hub_reload_if_in_sys_modules(
-        self, mock_importlib
-    ):
+    def test_reload_module__guardrails_hub_reload_if_in_sys_modules(self, mock_importlib):
         sys.modules["guardrails.hub"] = MagicMock()
         mock_module = MagicMock()
         mock_importlib.reload.return_value = mock_module
@@ -206,9 +201,7 @@ class TestReloadModule:
 
     @patch("guardrails.hub.validator_package_service.importlib")
     @patch.dict("sys.modules")
-    def test_reload_module__guardrails_hub_reload_if_not_in_sys_modules(
-        self, mock_importlib
-    ):
+    def test_reload_module__guardrails_hub_reload_if_not_in_sys_modules(self, mock_importlib):
         sys.modules.pop("guardrails.hub", None)
         ValidatorPackageService.reload_module("guardrails.hub")
         # assert not called
@@ -217,9 +210,7 @@ class TestReloadModule:
     @patch("guardrails.hub.validator_package_service.importlib")
     @patch.dict("sys.modules")
     def test_reload_module__module_not_found(self, mock_importlib):
-        mock_importlib.import_module.side_effect = ModuleNotFoundError(
-            "Module not found"
-        )
+        mock_importlib.import_module.side_effect = ModuleNotFoundError("Module not found")
 
         with pytest.raises(ModuleNotFoundError):
             ValidatorPackageService.reload_module(
@@ -240,9 +231,7 @@ class TestReloadModule:
     @patch.dict("sys.modules")
     def test_reload_module__module_already_imported(self, mock_importlib):
         mock_validator_module = MagicMock()
-        sys.modules["guardrails.hub.guardrails.contains_string.validator"] = (
-            mock_validator_module
-        )
+        sys.modules["guardrails.hub.guardrails.contains_string.validator"] = mock_validator_module
 
         reloaded_module = ValidatorPackageService.reload_module(
             "guardrails.hub.guardrails.contains_string.validator"
@@ -318,9 +307,7 @@ class TestRunPostInstall:
         mock_sys_executable = mocker.patch(
             "guardrails.hub.validator_package_service.sys.executable"
         )
-        mock_isfile = mocker.patch(
-            "guardrails.hub.validator_package_service.os.path.isfile"
-        )
+        mock_isfile = mocker.patch("guardrails.hub.validator_package_service.os.path.isfile")
         mock_isfile.return_value = True
         from guardrails.hub.validator_package_service import ValidatorPackageService
 
@@ -348,7 +335,7 @@ class TestRunPostInstall:
         mock_subprocess_check_output.assert_called_once_with(
             [
                 mock_sys_executable,
-                "./site_packages/guardrails_ai_grhub_id/post_install.py",  # noqa
+                "./site_packages/guardrails_ai_grhub_id/post_install.py",
             ]
         )
 
@@ -384,8 +371,8 @@ class TestValidatorPackageService:
         mock_get_site_packages_location.return_value = self.site_packages
 
         # Test
-        manifest, site_packages = (
-            ValidatorPackageService.get_manifest_and_site_packages("test-module")
+        manifest, site_packages = ValidatorPackageService.get_manifest_and_site_packages(
+            "test-module"
         )
 
         # Assert
@@ -394,17 +381,13 @@ class TestValidatorPackageService:
         mock_get_validator_manifest.assert_called_once_with("test-module")
         mock_get_site_packages_location.assert_called_once()
 
-    @patch(
-        "guardrails.hub.validator_package_service.ValidatorPackageService.get_module_path"
-    )
+    @patch("guardrails.hub.validator_package_service.ValidatorPackageService.get_module_path")
     def test_get_site_packages_location(self, mock_get_module_path):
         mock_get_module_path.return_value = Path("/fake/site-packages/pip")
         site_packages_path = ValidatorPackageService.get_site_packages_location()
         assert site_packages_path == "/fake/site-packages"
 
-    @patch(
-        "guardrails.hub.validator_package_service.ValidatorPackageService.reload_module"
-    )
+    @patch("guardrails.hub.validator_package_service.ValidatorPackageService.reload_module")
     def test_get_validator_from_manifest(self, mock_reload_module):
         mock_validator_module = MagicMock()
         mock_reload_module.return_value = mock_validator_module
@@ -429,9 +412,7 @@ class TestValidatorPackageService:
         mock_pip_process = mocker.patch(
             "guardrails.hub.validator_package_service.pip_process_with_custom_exception"
         )
-        mock_settings = mocker.patch(
-            "guardrails.hub.validator_package_service.settings"
-        )
+        mock_settings = mocker.patch("guardrails.hub.validator_package_service.settings")
         mock_settings.rc.token = "mock-token"
 
         mock_pip_process.side_effect = [Exception()]
@@ -462,9 +443,7 @@ class TestValidatorPackageService:
         mock_pip_process = mocker.patch(
             "guardrails.hub.validator_package_service.pip_process_with_custom_exception"
         )
-        mock_settings = mocker.patch(
-            "guardrails.hub.validator_package_service.settings"
-        )
+        mock_settings = mocker.patch("guardrails.hub.validator_package_service.settings")
         mock_settings.rc.token = "mock-token"
 
         mock_pip_process.side_effect = [
@@ -517,9 +496,7 @@ class TestValidatorPackageService:
         mock_pip_process = mocker.patch(
             "guardrails.hub.validator_package_service.pip_process_with_custom_exception"
         )
-        mock_settings = mocker.patch(
-            "guardrails.hub.validator_package_service.settings"
-        )
+        mock_settings = mocker.patch("guardrails.hub.validator_package_service.settings")
         mock_settings.rc.token = "mock-token"
 
         inspect_report = {

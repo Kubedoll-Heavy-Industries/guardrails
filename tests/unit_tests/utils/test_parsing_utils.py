@@ -1,4 +1,5 @@
 import json
+
 import pytest
 
 from guardrails.utils.parsing_utils import (
@@ -75,30 +76,26 @@ js_code = """js
     ],
 )
 def test_get_code_block(llm_ouput, expected_output, code_type):
-    has, start, end = has_code_block(llm_ouput)
+    _has, start, end = has_code_block(llm_ouput)
     actual_output = get_code_block(llm_ouput, start, end, code_type)
 
     assert actual_output == expected_output
 
 
 with open(
-    "tests/integration_tests/test_assets/json_schemas/choice_case_openapi.json", "r"
+    "tests/integration_tests/test_assets/json_schemas/choice_case_openapi.json"
 ) as choice_case_openapi_file:
     choice_case_openapi_schema = json.loads(choice_case_openapi_file.read())
 
-with open(
-    "tests/integration_tests/test_assets/json_schemas/choice_case.json", "r"
-) as choice_case_file:
+with open("tests/integration_tests/test_assets/json_schemas/choice_case.json") as choice_case_file:
     choice_case_schema = json.loads(choice_case_file.read())
 
 with open(
-    "tests/integration_tests/test_assets/json_schemas/credit_card_agreement.json", "r"
+    "tests/integration_tests/test_assets/json_schemas/credit_card_agreement.json"
 ) as credit_card_agreement_file:
     credit_card_agreement_schema = json.loads(credit_card_agreement_file.read())
 
-with open(
-    "tests/integration_tests/test_assets/json_schemas/string.json", "r"
-) as string_file:
+with open("tests/integration_tests/test_assets/json_schemas/string.json") as string_file:
     string_schema = json.loads(string_file.read())
 
 
@@ -143,7 +140,7 @@ with open(
                     {
                         "index": 5,
                         "name": "Foreign Transactions",
-                        "explanation": "3% of the amount of each transaction in U.S. dollars.",  # noqa
+                        "explanation": "3% of the amount of each transaction in U.S. dollars.",
                         "value": 0,
                         "extra": "some value",
                     },
@@ -165,7 +162,7 @@ with open(
                     {
                         "index": 5,
                         "name": "Foreign Transactions",
-                        "explanation": "3% of the amount of each transaction in U.S. dollars.",  # noqa
+                        "explanation": "3% of the amount of each transaction in U.S. dollars.",
                         "value": 0,
                     },
                     {

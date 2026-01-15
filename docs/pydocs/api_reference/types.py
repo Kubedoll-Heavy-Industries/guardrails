@@ -1,10 +1,10 @@
 from docspec_python import ParserOptions
-from docs.pydocs.pydocs_markdown_impl import render_loader
 from pydoc_markdown.contrib.loaders.python import PythonLoader
 from pydoc_markdown.contrib.processors.filter import FilterProcessor
 from pydoc_markdown.contrib.renderers.markdown import MarkdownRenderer
-from docs.pydocs.helpers import write_to_file
 
+from docs.pydocs.helpers import write_to_file
+from docs.pydocs.pydocs_markdown_impl import render_loader
 
 exports = [
     "guardrails.types.on_fail",
@@ -44,7 +44,7 @@ write_to_file(
             ),
         ),
         processor=FilterProcessor(
-            expression=f"name in [{export_string}]",  # noqa
+            expression=f"name in [{export_string}]",
             skip_empty_modules=True,
         ),
         renderer=MarkdownRenderer(

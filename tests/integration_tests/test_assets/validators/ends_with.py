@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 from guardrails.logger import logger
 from guardrails.validator_base import (
@@ -34,10 +34,10 @@ class EndsWith(Validator):
         )
         self._end = end
 
-    def validate(self, value: Any, metadata: Dict) -> ValidationResult:
+    def validate(self, value: Any, metadata: dict) -> ValidationResult:
         logger.debug(f"Validating {value} ends with {self._end}...")
 
-        if not value[-1] == self._end:
+        if value[-1] != self._end:
             return FailResult(
                 error_message=f"{value} must end with {self._end}",
                 fix_value=value + [self._end],

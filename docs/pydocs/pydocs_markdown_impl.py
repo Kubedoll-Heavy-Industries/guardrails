@@ -1,10 +1,11 @@
-from pydoc_markdown.interfaces import Context
-from pydoc_markdown.contrib.renderers.markdown import (
-    MarkdownRenderer,
-    MarkdownReferenceResolver,
-)
 from pydoc_markdown.contrib.processors.filter import FilterProcessor
 from pydoc_markdown.contrib.processors.google import GoogleProcessor
+from pydoc_markdown.contrib.renderers.markdown import (
+    MarkdownReferenceResolver,
+    MarkdownRenderer,
+)
+from pydoc_markdown.interfaces import Context
+
 # from pydoc_markdown.contrib.processors.crossref import CrossrefProcessor
 
 

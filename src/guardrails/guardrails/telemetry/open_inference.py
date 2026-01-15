@@ -1,0 +1,141 @@
+import json
+from typing import Any
+
+from guardrails.telemetry.common import (
+    get_span,
+    recursive_key_operation,
+    redact,
+    serialize,
+    to_dict,
+)
+
+try:
+    from openinference.semconv.trace import SpanAttributes  # type: ignore
+except ImportError:
+    SpanAttributes = None
+
+
+def trace_operation(
+    *,
+    input_mime_type: str | None = None,
+    input_value: Any | None = None,
+    output_mime_type: str | None = None,
+    output_value: Any | None = None,
+):
+    """Traces an operation (any function call) using OpenInference semantic
+    conventions."""
+    current_span = get_span()
+
+    if current_span is None:
+        return
+
+    ser_input_mime_type = serialize(input_mime_type)
+    if ser_input_mime_type:
+        current_span.set_attribute("input.mime_type", ser_input_mime_type)
+
+    ser_input_value = serialize(input_value)
+    if ser_input_value:
+        current_span.set_attribute("input.value", ser_input_value)
+
+    ser_output_mime_type = serialize(output_mime_type)
+    if ser_output_mime_type:
+        current_span.set_attribute("output.mime_type", ser_output_mime_type)
+
+    ser_output_value = serialize(output_value)
+    if ser_output_value:
+        current_span.set_attribute("output.value", ser_output_value)
+
+
+def trace_llm_call(
+    *,
+    function_call: dict[str, Any]
+    | None = None,  # JSON String	"{function_name: 'add', args: [1, 2]}"	Object recording details of a function call in models or APIs
+    input_messages: list[dict[str, Any]]
+    | None = None,  # List of objects†	[{"message.role": "user", "message.content": "hello"}]	List of messages sent to the LLM in a chat API request
+    invocation_parameters: dict[str, Any]
+    | None = None,  # JSON string	"{model_name: 'gpt-3', temperature: 0.7}"	Parameters used during the invocation of an LLM or API
+    model_name: str
+    | None = None,  # String	"gpt-3.5-turbo"	The name of the language model being utilized
+    output_messages: list[dict[str, Any]]
+    | None = None,  # List of objects	[{"message.role": "user", "message.content": "hello"}]	List of messages received from the LLM in a chat API request
+    prompt_template_template: str
+    | None = None,  # String	"Weather forecast for {city} on {date}"	Template used to generate prompts as Python f-strings
+    prompt_template_variables: dict[str, Any]
+    | None = None,  # JSON String	{ context: "<context from retrieval>", subject: "math" }	JSON of key value pairs applied to the prompt template
+    prompt_template_version: str
+    | None = None,  # String	"v1.0"	The version of the prompt template
+    token_count_completion: int
+    | None = None,  # Integer	15	The number of tokens in the completion
+    token_count_prompt: int | None = None,  # Integer	5	The number of tokens in the prompt
+    token_count_total: int
+    | None = None,  # Integer	20	Total number of tokens, including prompt and completion
+):
+    """Traces an LLM call using OpenInference semantic conventions."""
+    current_span = get_span()
+
+    if current_span is None:
+        return
+    if SpanAttributes is not None:
+        current_span.set_attribute(SpanAttributes.OPENINFERENCE_SPAN_KIND, "GUARDRAIL")
+    ser_function_call = serialize(function_call)
+    if ser_function_call:
+        current_span.set_attribute("llm.function_call", ser_function_call)
+
+    if input_messages and isinstance(input_messages, list):
+        for i, message in enumerate(input_messages):
+            msg_obj = to_dict(message)
+            for key, value in msg_obj.items():
+                if value is not None:
+                    standardized_key = f"message.{key}" if "message" not in key else key
+                    current_span.set_attribute(
+                        f"llm.input_messages.{i}.{standardized_key}",
+                        serialize(value),  # type: ignore
+                    )
+
+    ser_invocation_parameters = serialize(invocation_parameters)
+    redacted_ser_invocation_parameters = recursive_key_operation(ser_invocation_parameters, redact)
+    reser_invocation_parameters = (
+        json.dumps(redacted_ser_invocation_parameters)
+        if isinstance(redacted_ser_invocation_parameters, dict)
+        or isinstance(redacted_ser_invocation_parameters, list)
+        else redacted_ser_invocation_parameters
+    )
+    if reser_invocation_parameters:
+        current_span.set_attribute("llm.invocation_parameters", reser_invocation_parameters)
+
+    ser_model_name = serialize(model_name)
+    if ser_model_name:
+        current_span.set_attribute("llm.model_name", ser_model_name)
+
+    if output_messages and isinstance(output_messages, list):
+        for i, message in enumerate(output_messages):
+            # Most responses are either dictionaries or Pydantic models
+            msg_obj = to_dict(message)
+            for key, value in msg_obj.items():
+                if value is not None:
+                    standardized_key = f"message.{key}" if "message" not in key else key
+                    current_span.set_attribute(
+                        f"llm.output_messages.{i}.{standardized_key}",
+                        serialize(value),  # type: ignore
+                    )
+
+    ser_prompt_template_template = serialize(prompt_template_template)
+    if ser_prompt_template_template:
+        current_span.set_attribute("llm.prompt_template.template", ser_prompt_template_template)
+
+    ser_prompt_template_variables = serialize(prompt_template_variables)
+    if ser_prompt_template_variables:
+        current_span.set_attribute("llm.prompt_template.variables", ser_prompt_template_variables)
+
+    ser_prompt_template_version = serialize(prompt_template_version)
+    if ser_prompt_template_version:
+        current_span.set_attribute("llm.prompt_template.version", ser_prompt_template_version)
+
+    if token_count_completion:
+        current_span.set_attribute("llm.token_count.completion", token_count_completion)
+
+    if token_count_prompt:
+        current_span.set_attribute("llm.token_count.prompt", token_count_prompt)
+
+    if token_count_total:
+        current_span.set_attribute("llm.token_count.total", token_count_total)

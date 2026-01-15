@@ -1,5 +1,3 @@
-from typing import Dict, List
-
 from pydantic import BaseModel, Field
 
 from guardrails.validator_base import OnFailAction
@@ -19,10 +17,10 @@ class FeeDetailsFilter(BaseModel):
 
 
 class ContractDetailsFilter(BaseModel):
-    fees: List[FeeDetailsFilter] = Field(
+    fees: list[FeeDetailsFilter] = Field(
         description="What fees and charges are associated with my account?"
     )
-    interest_rates: Dict = Field(
+    interest_rates: dict = Field(
         description="What are the interest rates offered by the bank on savings "
         "and checking accounts, loans, and credit products?"
     )
@@ -41,10 +39,10 @@ class FeeDetailsFix(BaseModel):
 
 
 class ContractDetailsFix(BaseModel):
-    fees: List[FeeDetailsFix] = Field(
+    fees: list[FeeDetailsFix] = Field(
         description="What fees and charges are associated with my account?"
     )
-    interest_rates: Dict = Field(
+    interest_rates: dict = Field(
         description="What are the interest rates offered by the bank on savings "
         "and checking accounts, loans, and credit products?"
     )
@@ -63,10 +61,10 @@ class FeeDetailsNoop(BaseModel):
 
 
 class ContractDetailsNoop(BaseModel):
-    fees: List[FeeDetailsNoop] = Field(
+    fees: list[FeeDetailsNoop] = Field(
         description="What fees and charges are associated with my account?"
     )
-    interest_rates: Dict = Field(
+    interest_rates: dict = Field(
         description="What are the interest rates offered by the bank on savings "
         "and checking accounts, loans, and credit products?"
     )
@@ -85,10 +83,10 @@ class FeeDetailsReask(BaseModel):
 
 
 class ContractDetailsReask(BaseModel):
-    fees: List[FeeDetailsReask] = Field(
+    fees: list[FeeDetailsReask] = Field(
         description="What fees and charges are associated with my account?"
     )
-    interest_rates: Dict = Field(
+    interest_rates: dict = Field(
         description="What are the interest rates offered by the bank on savings "
         "and checking accounts, loans, and credit products?"
     )
@@ -107,10 +105,10 @@ class FeeDetailsRefrain(BaseModel):
 
 
 class ContractDetailsRefrain(BaseModel):
-    fees: List[FeeDetailsRefrain] = Field(
+    fees: list[FeeDetailsRefrain] = Field(
         description="What fees and charges are associated with my account?"
     )
-    interest_rates: Dict = Field(
+    interest_rates: dict = Field(
         description="What are the interest rates offered by the bank on savings "
         "and checking accounts, loans, and credit products?"
     )
@@ -125,14 +123,14 @@ ${gr.xml_prefix_prompt}
 
 ${xml_output_schema}
 
-${gr.xml_suffix_prompt_v2_wo_none}"""  # noqa: E501
+${gr.xml_suffix_prompt_v2_wo_none}"""
 
 
 INSTRUCTIONS_CHAT_MODEL = """
 You are a helpful assistant only capable of communicating with valid JSON, and no other text.
 
 ${gr.xml_suffix_prompt_examples}
-"""  # noqa: E501
+"""
 
 
 PROMPT_CHAT_MODEL = """
@@ -145,4 +143,4 @@ Extract information from this document and return a JSON that follows the correc
 ${gr.xml_prefix_prompt}
 
 ${xml_output_schema}
-"""  # noqa: E501
+"""

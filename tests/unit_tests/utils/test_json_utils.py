@@ -2,7 +2,6 @@ import pytest
 
 from guardrails.utils.parsing_utils import extract_json_from_ouput
 
-
 json_code_block = """
 ```json
 {
@@ -88,32 +87,32 @@ not_even_json = "This isn't even json..."
         (
             invalid_json_code_block__quotes,
             None,
-            "Expecting property name enclosed in double quotes: line 2 column 5 (char 6)",  # noqa
+            "Expecting property name enclosed in double quotes: line 2 column 5 (char 6)",
         ),
         (
             invalid_json_code_block__braces,
             None,
-            "Expecting ',' delimiter: line 1 column 62 (char 61)",  # noqa
+            "Expecting ',' delimiter: line 1 column 62 (char 61)",
         ),
         (
             invalid_json_no_block__quotes,
             None,
-            "Expecting property name enclosed in double quotes: line 2 column 5 (char 6)",  # noqa
+            "Expecting property name enclosed in double quotes: line 2 column 5 (char 6)",
         ),
         (
             invalid_json_no_block__braces,
             None,
-            "Expecting ',' delimiter: line 3 column 1 (char 63)",  # noqa
+            "Expecting ',' delimiter: line 3 column 1 (char 63)",
         ),
         (
             invalid_json_code_block__quotes,
             None,
-            "Expecting property name enclosed in double quotes: line 2 column 5 (char 6)",  # noqa
+            "Expecting property name enclosed in double quotes: line 2 column 5 (char 6)",
         ),
         (
             invalid_json_code_block__braces,
             None,
-            "Expecting ',' delimiter: line 1 column 62 (char 61)",  # noqa
+            "Expecting ',' delimiter: line 1 column 62 (char 61)",
         ),
         (not_even_json, None, "Expecting value: line 1 column 1 (char 0)"),
     ],

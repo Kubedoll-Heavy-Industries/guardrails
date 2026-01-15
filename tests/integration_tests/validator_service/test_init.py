@@ -1,11 +1,11 @@
+import os
 from asyncio import get_event_loop
 from asyncio.unix_events import _UnixSelectorEventLoop
-import os
+
 import pytest
 
-from guardrails.validator_service import should_run_sync, get_loop
 from guardrails.classes.history import Iteration
-
+from guardrails.validator_service import get_loop, should_run_sync
 
 try:
     import uvloop
@@ -186,7 +186,7 @@ class TestValidate:
         if os.environ.get("GUARDRAILS_PROCESS_COUNT"):
             del os.environ["GUARDRAILS_PROCESS_COUNT"]
 
-        from guardrails.validator_service import validate, SequentialValidatorService
+        from guardrails.validator_service import SequentialValidatorService, validate
 
         mocker.spy(SequentialValidatorService, "__init__")
         mocker.spy(SequentialValidatorService, "validate")
@@ -216,7 +216,7 @@ class TestValidate:
             del os.environ["GUARDRAILS_RUN_SYNC"]
 
     def test_async(self, mocker):
-        from guardrails.validator_service import validate, AsyncValidatorService
+        from guardrails.validator_service import AsyncValidatorService, validate
 
         mocker.spy(AsyncValidatorService, "__init__")
         mocker.spy(AsyncValidatorService, "validate")
@@ -239,7 +239,7 @@ class TestValidate:
         AsyncValidatorService.validate.assert_called_once()
 
     def test_sync_busy_loop(self, mocker):
-        from guardrails.validator_service import validate, SequentialValidatorService
+        from guardrails.validator_service import SequentialValidatorService, validate
 
         mocker.spy(SequentialValidatorService, "__init__")
         mocker.spy(SequentialValidatorService, "validate")
@@ -254,10 +254,7 @@ class TestValidate:
         async def callback():
             with pytest.warns(
                 Warning,
-                match=(
-                    "Could not obtain an event loop."
-                    " Falling back to synchronous validation."
-                ),
+                match=("Could not obtain an event loop. Falling back to synchronous validation."),
             ):
                 value, metadata = validate(
                     value="value",
@@ -276,7 +273,7 @@ class TestValidate:
 
 @pytest.mark.asyncio
 async def test_async_validate(mocker):
-    from guardrails.validator_service import async_validate, AsyncValidatorService
+    from guardrails.validator_service import AsyncValidatorService, async_validate
 
     mocker.spy(AsyncValidatorService, "__init__")
     mocker.spy(AsyncValidatorService, "async_validate")

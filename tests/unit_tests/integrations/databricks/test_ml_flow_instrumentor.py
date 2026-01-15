@@ -1,13 +1,14 @@
 from asyncio import Future
-import pytest
 from unittest.mock import MagicMock
 
-from guardrails.guard import Guard
+import pytest
+
 from guardrails.async_guard import AsyncGuard
 from guardrails.classes.history.call import Call
 from guardrails.classes.history.iteration import Iteration
 from guardrails.classes.llm.llm_response import LLMResponse
 from guardrails.classes.validation_outcome import ValidationOutcome
+from guardrails.guard import Guard
 from guardrails.run.async_runner import AsyncRunner
 from guardrails.run.async_stream_runner import AsyncStreamRunner
 from guardrails.run.runner import Runner
@@ -53,27 +54,19 @@ class TestMlFlowInstrumentor:
         m = MlFlowInstrumentor("mock experiment")
 
         # Prevent real methods from being wrapped and persistint into other tests
-        mocker.patch(
-            "guardrails.integrations.databricks.ml_flow_instrumentor.Guard._execute"
-        )
+        mocker.patch("guardrails.integrations.databricks.ml_flow_instrumentor.Guard._execute")
         guard_execute = Guard._execute
         mock_instrument_guard = mocker.patch.object(m, "_instrument_guard")
 
-        mocker.patch(
-            "guardrails.integrations.databricks.ml_flow_instrumentor.AsyncGuard._execute"
-        )
+        mocker.patch("guardrails.integrations.databricks.ml_flow_instrumentor.AsyncGuard._execute")
         async_guard_execute = AsyncGuard._execute
         mock_instrument_async_guard = mocker.patch.object(m, "_instrument_async_guard")
 
-        mocker.patch(
-            "guardrails.integrations.databricks.ml_flow_instrumentor.Runner.step"
-        )
+        mocker.patch("guardrails.integrations.databricks.ml_flow_instrumentor.Runner.step")
         runner_step = Runner.step
         mock_instrument_runner_step = mocker.patch.object(m, "_instrument_runner_step")
 
-        mocker.patch(
-            "guardrails.integrations.databricks.ml_flow_instrumentor.StreamRunner.step"
-        )
+        mocker.patch("guardrails.integrations.databricks.ml_flow_instrumentor.StreamRunner.step")
         stream_runner_step = StreamRunner.step
         mock_instrument_stream_runner_step = mocker.patch.object(
             m, "_instrument_stream_runner_step"
@@ -83,9 +76,7 @@ class TestMlFlowInstrumentor:
             "guardrails.integrations.databricks.ml_flow_instrumentor.AsyncRunner.async_step"
         )
         async_runner_step = AsyncRunner.async_step
-        mock_instrument_async_runner_step = mocker.patch.object(
-            m, "_instrument_async_runner_step"
-        )
+        mock_instrument_async_runner_step = mocker.patch.object(m, "_instrument_async_runner_step")
 
         mocker.patch(
             "guardrails.integrations.databricks.ml_flow_instrumentor.AsyncStreamRunner.async_step"
@@ -95,9 +86,7 @@ class TestMlFlowInstrumentor:
             m, "_instrument_async_stream_runner_step"
         )
 
-        mocker.patch(
-            "guardrails.integrations.databricks.ml_flow_instrumentor.Runner.call"
-        )
+        mocker.patch("guardrails.integrations.databricks.ml_flow_instrumentor.Runner.call")
         runner_call = Runner.call
         mock_instrument_runner_call = mocker.patch.object(m, "_instrument_runner_call")
 
@@ -105,9 +94,7 @@ class TestMlFlowInstrumentor:
             "guardrails.integrations.databricks.ml_flow_instrumentor.AsyncRunner.async_call"
         )
         async_runner_call = AsyncRunner.async_call
-        mock_instrument_async_runner_call = mocker.patch.object(
-            m, "_instrument_async_runner_call"
-        )
+        mock_instrument_async_runner_call = mocker.patch.object(m, "_instrument_async_runner_call")
 
         m.instrument()
 
@@ -119,9 +106,7 @@ class TestMlFlowInstrumentor:
         mock_instrument_runner_step.assert_called_once_with(runner_step)
         mock_instrument_stream_runner_step.assert_called_once_with(stream_runner_step)
         mock_instrument_async_runner_step.assert_called_once_with(async_runner_step)
-        mock_instrument_async_stream_runner_step.assert_called_once_with(
-            async_stream_runner_step
-        )
+        mock_instrument_async_stream_runner_step.assert_called_once_with(async_stream_runner_step)
         mock_instrument_runner_call.assert_called_once_with(runner_call)
         mock_instrument_async_runner_call.assert_called_once_with(async_runner_call)
 
@@ -189,9 +174,7 @@ class TestMlFlowInstrumentor:
 
         m = MlFlowInstrumentor("mock experiment")
 
-        mock_result = iter(
-            [ValidationOutcome(call_id="mock call id", validation_passed=True)]
-        )
+        mock_result = iter([ValidationOutcome(call_id="mock call id", validation_passed=True)])
         mock_execute = MagicMock()
         mock_execute.return_value = mock_result
         mock_guard = MagicMock(spec=Guard)
@@ -238,9 +221,7 @@ class TestMlFlowInstrumentor:
 
         m = MlFlowInstrumentor("mock experiment")
 
-        validation_outcome = ValidationOutcome(
-            call_id="mock call id", validation_passed=True
-        )
+        validation_outcome = ValidationOutcome(call_id="mock call id", validation_passed=True)
         mock_result = Future()
         mock_result.set_result(validation_outcome)
         mock_execute = MagicMock()
@@ -267,9 +248,7 @@ class TestMlFlowInstrumentor:
         # Internally called, not the wrapped call above
         mock_guard._execute.assert_called_once()
         mock_span.set_attribute.assert_called_once_with("guard.name", "mock guard")
-        mock_add_guard_attributes.assert_called_once_with(
-            mock_span, [], validation_outcome
-        )
+        mock_add_guard_attributes.assert_called_once_with(mock_span, [], validation_outcome)
 
         mock_trace_async_stream_guard.assert_not_called()
 
@@ -359,9 +338,7 @@ class TestMlFlowInstrumentor:
 
         # Internally called, not the wrapped call above
         mock_runner.step.assert_called_once()
-        mock_add_step_attributes.assert_called_once_with(
-            mock_span, iteration, mock_runner
-        )
+        mock_add_step_attributes.assert_called_once_with(mock_span, iteration, mock_runner)
 
     def test__instrument_stream_runner_step(self, mocker):
         mock_span = MockSpan()
@@ -450,9 +427,7 @@ class TestMlFlowInstrumentor:
 
         # Internally called, not the wrapped call above
         mock_runner.async_step.assert_called_once()
-        mock_add_step_attributes.assert_called_once_with(
-            mock_span, iteration, mock_runner
-        )
+        mock_add_step_attributes.assert_called_once_with(mock_span, iteration, mock_runner)
 
     @pytest.mark.asyncio
     async def test__instrument_async_stream_runner_step(self, mocker):
@@ -539,9 +514,7 @@ class TestMlFlowInstrumentor:
 
         # Internally called, not the wrapped call above
         mock_runner.call.assert_called_once()
-        mock_add_call_attributes.assert_called_once_with(
-            mock_span, llmResponse, mock_runner
-        )
+        mock_add_call_attributes.assert_called_once_with(mock_span, llmResponse, mock_runner)
 
     @pytest.mark.asyncio
     async def test__instrument_async_runner_call(self, mocker):
@@ -582,9 +555,7 @@ class TestMlFlowInstrumentor:
 
         # Internally called, not the wrapped call above
         mock_runner.async_call.assert_called_once()
-        mock_add_call_attributes.assert_called_once_with(
-            mock_span, llmResponse, mock_runner
-        )
+        mock_add_call_attributes.assert_called_once_with(mock_span, llmResponse, mock_runner)
 
     def test__instrument_validator_validate(self, mocker):
         mock_span = MockSpan()

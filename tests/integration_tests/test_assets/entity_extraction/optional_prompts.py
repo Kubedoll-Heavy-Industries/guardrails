@@ -1,5 +1,3 @@
-# ruff: noqa: E501
-
 OPTIONAL_PROMPT_COMPLETION_MODEL = """
 Given the following document, answer the following questions. If the answer doesn't exist in the document, enter 'None'.
 

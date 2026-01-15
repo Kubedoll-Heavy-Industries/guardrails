@@ -1,11 +1,9 @@
-from typing import List
-
 from pydantic import BaseModel
 
 LIST_PROMPT = """Create a list of items that may be found in a grocery store."""
 
 
-LIST_OUTPUT = """[{"name": "apple", "price": 1.0}, {"name": "banana", "price": 0.5}, {"name": "orange", "price": 1.5}]"""  # noqa: E501
+LIST_OUTPUT = """[{"name": "apple", "price": 1.0}, {"name": "banana", "price": 0.5}, {"name": "orange", "price": 1.5}]"""
 
 
 class Item(BaseModel):
@@ -13,13 +11,11 @@ class Item(BaseModel):
     price: float
 
 
-PYDANTIC_RAIL_WITH_LIST = List[Item]
+PYDANTIC_RAIL_WITH_LIST = list[Item]
 
 
 message = (
-    '<message role="user">'
-    "Create a list of items that may be found in a grocery store."
-    "</message>"
+    '<message role="user">Create a list of items that may be found in a grocery store.</message>'
 )
 RAIL_SPEC_WITH_LIST = f"""
 <rail version="0.1">

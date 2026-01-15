@@ -1,4 +1,5 @@
-from typing import Any, Callable, Dict, Union
+from collections.abc import Callable
+from typing import Any, Union
 
 from guardrails import Validator, register_validator
 from guardrails.classes.validation.validation_result import (
@@ -10,11 +11,11 @@ from guardrails.classes.validation.validation_result import (
 
 def create_mock_validator(
     name: str,
-    on_fail: Union[str, Callable] = None,
+    on_fail: Union[str, Callable] | None = None,
     should_pass: bool = True,
     return_value: Any = None,
 ):
-    def validate(self, value: Any, metadata: Dict[str, Any]) -> ValidationResult:
+    def validate(self, value: Any, metadata: dict[str, Any]) -> ValidationResult:
         if self.should_pass:
             return self.return_value if self.return_value is not None else PassResult()
         else:

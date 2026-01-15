@@ -1,3 +1,4 @@
+from tests.integration_tests.test_assets.validators.detect_pii import MockDetectPII
 from tests.integration_tests.test_assets.validators.ends_with import EndsWith
 from tests.integration_tests.test_assets.validators.lower_case import LowerCase
 from tests.integration_tests.test_assets.validators.one_line import OneLine
@@ -8,11 +9,11 @@ from tests.integration_tests.test_assets.validators.upper_case import UpperCase
 from tests.integration_tests.test_assets.validators.valid_choices import ValidChoices
 from tests.integration_tests.test_assets.validators.valid_length import ValidLength
 from tests.integration_tests.test_assets.validators.valid_url import ValidURL
-from tests.integration_tests.test_assets.validators.detect_pii import MockDetectPII
 
 __all__ = [
     "EndsWith",
     "LowerCase",
+    "MockDetectPII",
     "OneLine",
     "ReadingTime",
     "RegexMatch",
@@ -21,5 +22,4 @@ __all__ = [
     "ValidChoices",
     "ValidLength",
     "ValidURL",
-    "MockDetectPII",
 ]

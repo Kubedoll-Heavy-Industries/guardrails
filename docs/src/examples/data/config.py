@@ -8,24 +8,25 @@ and guards will be persisted into postgres. In that case,
 these guards will not be initialized.
 """
 
-from typing import Any, Callable, Dict, Optional, Union
+from typing import Any, Callable, Optional, Union
+
 from guardrails import Guard, OnFailAction
+from guardrails.hub import RegexMatch
 from guardrails.validators import (
-    Validator,
-    register_validator,
     FailResult,
     PassResult,
     ValidationResult,
+    Validator,
+    register_validator,
 )
-from guardrails.hub import RegexMatch
 
-name_case = Guard(
-    name="name-case", description="Checks that a string is in Name Case format."
-).use(RegexMatch(regex="^(?:[A-Z][^\s]*\s?)+$", on_fail=OnFailAction.NOOP))
+name_case = Guard(name="name-case", description="Checks that a string is in Name Case format.").use(
+    RegexMatch(regex=r"^(?:[A-Z][^\s]*\s?)+$", on_fail=OnFailAction.NOOP)
+)
 
-all_caps = Guard(
-    name="all-caps", description="Checks that a string is all capital."
-).use(RegexMatch(regex="^[A-Z\\s]*$", on_fail=OnFailAction.NOOP))
+all_caps = Guard(name="all-caps", description="Checks that a string is all capital.").use(
+    RegexMatch(regex="^[A-Z\\s]*$", on_fail=OnFailAction.NOOP)
+)
 
 
 @register_validator(name="custom/dynamic-enum", data_type="all")
@@ -38,7 +39,7 @@ class DynamicEnum(Validator):
         super().__init__(on_fail=on_fail, enum_fetcher=enum_fetcher)
         self.enum_fetcher = enum_fetcher
 
-    def validate(self, value: Any, metdata: Optional[Dict] = {}) -> ValidationResult:
+    def validate(self, value: Any, metdata: Optional[dict] = {}) -> ValidationResult:
         enum_fetcher_args = metdata.get("enum_fetcher_args", [])
         dynamic_enum = self.enum_fetcher(*enum_fetcher_args)
 

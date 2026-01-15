@@ -1,6 +1,8 @@
-import pytest
 from datetime import datetime
-from guardrails.utils.serialization_utils import serialize, deserialize
+
+import pytest
+
+from guardrails.utils.serialization_utils import deserialize, serialize
 
 
 class TestSerializeAndDeserialize:

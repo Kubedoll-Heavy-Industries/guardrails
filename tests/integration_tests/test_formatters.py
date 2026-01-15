@@ -1,15 +1,12 @@
 import importlib
-import pytest
-from typing import List
 
+import pytest
 from pydantic import BaseModel
 
 from guardrails import Guard
 
-
 if_transformers_installed = pytest.mark.skipif(
-    not importlib.util.find_spec("transformers")
-    or not importlib.util.find_spec("torch"),
+    not importlib.util.find_spec("transformers") or not importlib.util.find_spec("torch"),
     reason="Transformers / Torch not installed.",
 )
 
@@ -22,7 +19,7 @@ def test_hugging_face_model_callable():
 
     class Foo(BaseModel):
         bar: str
-        bez: List[str]
+        bez: list[str]
 
     g = Guard.for_pydantic(Foo, output_formatter="jsonformer")
     response = g(
@@ -46,7 +43,7 @@ def test_hugging_face_pipeline_callable():
 
     class Foo(BaseModel):
         bar: str
-        bez: List[str]
+        bez: list[str]
 
     g = Guard.for_pydantic(Foo, output_formatter="jsonformer")
     response = g(model, messages=[{"content": "Sample:", "role": "user"}])
@@ -78,7 +75,5 @@ def test_hugging_face_pipeline_complex_schema():
     assert isinstance(out, dict)
     assert "foo" in out
     assert isinstance(out["foo"], dict)
-    assert isinstance(out["foo"]["whole"], int) or isinstance(
-        out["foo"]["whole"], float
-    )
+    assert isinstance(out["foo"]["whole"], int) or isinstance(out["foo"]["whole"], float)
     assert isinstance(out["foo"]["frac"], float)

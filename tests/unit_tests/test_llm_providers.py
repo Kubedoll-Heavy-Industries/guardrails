@@ -1,7 +1,8 @@
 import importlib.util
 import os
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, List
+from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
@@ -118,7 +119,7 @@ def openai_mock():
     @dataclass
     class MockCompletion:
         id: str
-        choices: List[MockCompletionChoice]
+        choices: list[MockCompletionChoice]
         created: int
         model: str
         object: str
@@ -202,8 +203,7 @@ async def test_async_manifest_callable():
 
 
 @pytest.mark.skipif(
-    not importlib.util.find_spec("transformers")
-    and not importlib.util.find_spec("torch"),
+    not importlib.util.find_spec("transformers") and not importlib.util.find_spec("torch"),
     reason="transformers or torch is not installed",
 )
 @pytest.mark.parametrize(
@@ -211,7 +211,7 @@ async def test_async_manifest_callable():
 )
 def test_hugging_face_model_callable(mocker, model_inputs, tokenizer_call_count):
     class MockTokenizer:
-        def __call__(self, prompt: str, *args: Any, **kwds: Any) -> Dict[str, Any]:
+        def __call__(self, prompt: str, *args: Any, **kwds: Any) -> dict[str, Any]:
             self.prompt = prompt
             return self
 
@@ -247,8 +247,7 @@ def test_hugging_face_model_callable(mocker, model_inputs, tokenizer_call_count)
 
 
 @pytest.mark.skipif(
-    not importlib.util.find_spec("transformers")
-    and not importlib.util.find_spec("torch"),
+    not importlib.util.find_spec("transformers") and not importlib.util.find_spec("torch"),
     reason="transformers or torch is not installed",
 )
 def test_hugging_face_pipeline_callable():
@@ -258,9 +257,7 @@ def test_hugging_face_pipeline_callable():
     from guardrails.llm_providers import HuggingFacePipelineCallable
 
     hf_model_callable = HuggingFacePipelineCallable()
-    response = hf_model_callable(
-        pipeline=pipeline, messages=[{"role": "user", "content": "Hello"}]
-    )
+    response = hf_model_callable(pipeline=pipeline, messages=[{"role": "user", "content": "Hello"}])
 
     assert isinstance(response, LLMResponse) is True
     assert response.output == "Hello there!"
@@ -290,7 +287,7 @@ def test_litellm_callable(mocker):
 
     @dataclass
     class MockResponse:
-        choices: List[Choice]
+        choices: list[Choice]
         usage: Usage
 
     class MockCompletion:
@@ -360,7 +357,7 @@ def test_get_llm_ask_manifest(mocker):
     reason="transformers is not installed",
 )
 def test_get_llm_ask_hugging_face_model(mocker):
-    from transformers import PreTrainedModel, GenerationMixin
+    from transformers import GenerationMixin, PreTrainedModel
 
     from guardrails.llm_providers import HuggingFaceModelCallable
 
@@ -460,9 +457,7 @@ def test_get_llm_ask_custom_llm_must_accept_kwargs():
     def my_llm(messages: str) -> str:
         return f"Hello {messages}!"
 
-    with pytest.raises(
-        ValueError, match="Custom LLM callables must accept \\*\\*kwargs!"
-    ):
+    with pytest.raises(ValueError, match="Custom LLM callables must accept \\*\\*kwargs!"):
         get_llm_ask(my_llm)
 
 
@@ -501,9 +496,7 @@ def test_get_async_llm_ask_custom_llm_must_accept_kwargs():
     def my_llm(prompt: str) -> str:
         return f"Hello {prompt}!"
 
-    with pytest.raises(
-        ValueError, match="Custom LLM callables must accept \\*\\*kwargs!"
-    ):
+    with pytest.raises(ValueError, match="Custom LLM callables must accept \\*\\*kwargs!"):
         get_async_llm_ask(my_llm)
 
 

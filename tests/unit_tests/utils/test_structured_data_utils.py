@@ -1,12 +1,10 @@
 from pydantic import BaseModel, Field
-from typing import List
 
 from guardrails.schema.pydantic_schema import pydantic_model_to_schema
-
 from guardrails.utils.structured_data_utils import (
     json_function_calling_tool,
-    schema_to_tool,
     output_format_json_schema,
+    schema_to_tool,
 )
 
 
@@ -25,7 +23,7 @@ class Delivery(BaseModel):
 
 
 class Schedule(BaseModel):
-    deliveries: List[Delivery] = Field(description="deliveries for messenger")
+    deliveries: list[Delivery] = Field(description="deliveries for messenger")
 
 
 class Person(BaseModel):
@@ -73,8 +71,7 @@ def test_pydantic_model_to_schema():
                                 "type": "string",
                             },
                             "price": {
-                                "description": "price of delivery with"
-                                " currency symbol included",
+                                "description": "price of delivery with currency symbol included",
                                 "title": "Price",
                                 "type": "string",
                             },
@@ -185,8 +182,7 @@ def test_output_format_json_schema():
                                 "type": "string",
                             },
                             "price": {
-                                "description": "price of delivery with"
-                                " currency symbol included",
+                                "description": "price of delivery with currency symbol included",
                                 "title": "Price",
                                 "type": "string",
                             },

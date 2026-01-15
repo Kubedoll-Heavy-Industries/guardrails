@@ -8,9 +8,7 @@ from guardrails.applications.text2sql import Text2Sql
 CURRENT_DIR_PARENT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SCHEMA_PATH = os.path.join(CURRENT_DIR_PARENT, "test_assets/text2sql/schema.sql")
 EXAMPLES_PATH = os.path.join(CURRENT_DIR_PARENT, "test_assets/text2sql/examples.json")
-DB_PATH = os.path.join(
-    CURRENT_DIR_PARENT, "test_assets/text2sql/department_management.sqlite"
-)
+DB_PATH = os.path.join(CURRENT_DIR_PARENT, "test_assets/text2sql/department_management.sqlite")
 
 
 @pytest.mark.parametrize(
@@ -30,7 +28,7 @@ def test_text2sql_with_examples(conn_str: str, schema_path: str, examples: str, 
     )
 
     if examples is not None:
-        with open(examples, "r") as f:
+        with open(examples) as f:
             examples = json.load(f)
 
     # This should not raise an exception.

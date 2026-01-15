@@ -1,0 +1,90 @@
+name: Build Guardrails Server Image
+description: Build and optionally push the Guardrails server container image.
+
+inputs:
+  context:
+    description: Build context
+    required: false
+    default: .
+  dockerfile:
+    description: Path to Dockerfile
+    required: false
+    default: docker/Dockerfile
+
+  tags:
+    description: Newline-separated image tags
+    required: true
+  platforms:
+    description: Comma-separated platforms for buildx
+    required: true
+
+  push:
+    description: Whether to push images
+    required: false
+    default: "false"
+  load:
+    description: Whether to load image into local docker (single-platform only)
+    required: false
+    default: "false"
+
+  python_version:
+    description: Python version (e.g., 3.12)
+    required: true
+  variant:
+    description: Base image variant (e.g., slim)
+    required: true
+
+  guardrails_template:
+    description: Guard template JSON file to include in the image
+    required: false
+    default: "guard-template.json"
+
+  version:
+    description: Version label to bake into the image
+    required: true
+  commit:
+    description: Git commit SHA to bake into the image
+    required: true
+
+  oci_source:
+    description: OCI source label
+    required: true
+  oci_vendor:
+    description: OCI vendor label
+    required: true
+  oci_authors:
+    description: OCI authors label
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: guardrails-server
+        tags: ${{ inputs.tags }}
+
+    - name: Build image
+      uses: docker/build-push-action@v6
+      with:
+        context: ${{ inputs.context }}
+        file: ${{ inputs.dockerfile }}
+        platforms: ${{ inputs.platforms }}
+        push: ${{ inputs.push }}
+        load: ${{ inputs.load }}
+        tags: ${{ inputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        build-args: |
+          PYTHON_VERSION=${{ inputs.python_version }}
+          VARIANT=${{ inputs.variant }}
+          GUARDRAILS_TEMPLATE=${{ inputs.guardrails_template }}
+          VERSION=${{ inputs.version }}
+          COMMIT=${{ inputs.commit }}
+          BUILD_DATE=${{ steps.meta.outputs.created }}
+          OCI_SOURCE=${{ inputs.oci_source }}
+          OCI_VENDOR=${{ inputs.oci_vendor }}
+          OCI_AUTHORS=${{ inputs.oci_authors }}

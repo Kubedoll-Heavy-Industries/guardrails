@@ -7,16 +7,14 @@ import importlib
 import os
 
 import pytest
+from pydantic import BaseModel
 
 import guardrails as gd
-
-from typing import List
-from pydantic import BaseModel
 from guardrails.llm_providers import (
-    get_llm_ask,
+    AsyncLiteLLMCallable,
     LiteLLMCallable,
     get_async_llm_ask,
-    AsyncLiteLLMCallable,
+    get_llm_ask,
 )
 
 
@@ -35,7 +33,7 @@ def test_litellm_tools():
         description: str
 
     class Fruits(BaseModel):
-        list: List[Fruit]
+        list: list[Fruit]
 
     guard = gd.Guard.for_pydantic(Fruits)
     res = guard(
@@ -137,8 +135,7 @@ def test_litellm_openai_async_messages():
         messages=[
             {
                 "role": "user",
-                "content": "Name 10 unique fruits, "
-                "lowercase only, one per line, no numbers",
+                "content": "Name 10 unique fruits, lowercase only, one per line, no numbers",
             }
         ],
     )

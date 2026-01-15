@@ -1,4 +1,3 @@
-# ruff: noqa: E501
 VALIDATED_OUTPUT_NOOP = {
     "fees": [
         {

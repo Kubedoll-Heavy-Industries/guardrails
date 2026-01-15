@@ -1,42 +1,38 @@
 import pytest
+
 from guardrails import Guard
-from typing import List, Optional
 from tests.integration_tests.test_assets.validators import RegexMatch
 
 pytest.importorskip("llama_index")
 
 from llama_index.core.chat_engine.types import (  # noqa
-    BaseChatEngine,  # noqa
-    AgentChatResponse,  # noqa
-    StreamingAgentChatResponse,  # noqa
-)  # noqa
-from llama_index.core.base.llms.types import ChatMessage  # noqa
-from guardrails.integrations.llama_index import GuardrailsChatEngine  # noqa
+    BaseChatEngine,
+    AgentChatResponse,
+    StreamingAgentChatResponse,
+)
+from llama_index.core.base.llms.types import ChatMessage
+from guardrails.integrations.llama_index import GuardrailsChatEngine
 
 
 class MockChatEngine(BaseChatEngine):
     def chat(
-        self, message: str, chat_history: Optional[List[ChatMessage]] = None
+        self, message: str, chat_history: list[ChatMessage] | None = None
     ) -> AgentChatResponse:
         return AgentChatResponse(response="Mock response")
 
     async def achat(
-        self, message: str, chat_history: Optional[List[ChatMessage]] = None
+        self, message: str, chat_history: list[ChatMessage] | None = None
     ) -> AgentChatResponse:
         return AgentChatResponse(response="Mock async chat response")
 
-    def stream_chat(
-        self, message: str, chat_history: Optional[List[ChatMessage]] = None
-    ):
+    def stream_chat(self, message: str, chat_history: list[ChatMessage] | None = None):
         return StreamingAgentChatResponse(response="Mock stream chat response")
 
-    async def astream_chat(
-        self, message: str, chat_history: Optional[List[ChatMessage]] = None
-    ):
+    async def astream_chat(self, message: str, chat_history: list[ChatMessage] | None = None):
         return StreamingAgentChatResponse(response="Mock async stream chat response")
 
     @property
-    def chat_history(self) -> List[ChatMessage]:
+    def chat_history(self) -> list[ChatMessage]:
         return []
 
     def reset(self):

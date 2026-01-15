@@ -1,4 +1,3 @@
-# ruff: noqa: E501
 import os
 
 from .msg_validated_output_reask import MSG_VALIDATED_OUTPUT_REASK
@@ -18,9 +17,7 @@ from .validated_response_reask import prompt as VALIDATED_RESPONSE_REASK_PROMPT
 from .with_msg_history import Movie as WITH_MSG_HISTORY
 
 DATA_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)))
-reader = (
-    lambda filename: open(os.path.join(DATA_DIR, filename)).read().replace("\r", "")
-)
+reader = lambda filename: open(os.path.join(DATA_DIR, filename)).read().replace("\r", "")
 
 COMPILED_PROMPT = reader("compiled_prompt.txt")
 COMPILED_PROMPT_CHAT = reader("compiled_prompt_chat.txt")
@@ -56,25 +53,25 @@ __all__ = [
     "LLM_OUTPUT",
     "LLM_OUTPUT_REASK_1",
     "LLM_OUTPUT_REASK_2",
+    "MSG_COMPILED_INSTRUCTIONS_REASK",
+    "MSG_COMPILED_PROMPT_REASK",
+    "MSG_HISTORY_LLM_OUTPUT",
+    "MSG_HISTORY_LLM_OUTPUT_CORRECT",
+    "MSG_HISTORY_LLM_OUTPUT_INCORRECT",
+    "MSG_VALIDATED_OUTPUT_REASK",
+    "PARSING_COMPILED_PROMPT",
+    "PARSING_COMPILED_REASK",
+    "PARSING_DOCUMENT",
+    "PARSING_EXPECTED_LLM_OUTPUT",
+    "PARSING_EXPECTED_OUTPUT",
+    "PARSING_INITIAL_PROMPT",
+    "PARSING_UNPARSEABLE_LLM_OUTPUT",
     "RAIL_SPEC_WITH_REASK",
     "VALIDATED_OUTPUT_REASK_1",
     "VALIDATED_OUTPUT_REASK_2",
     "VALIDATED_OUTPUT_REASK_3",
-    "WITH_MSG_HISTORY",
-    "MSG_HISTORY_LLM_OUTPUT_INCORRECT",
-    "MSG_HISTORY_LLM_OUTPUT_CORRECT",
-    "MSG_COMPILED_PROMPT_REASK",
-    "MSG_COMPILED_INSTRUCTIONS_REASK",
-    "MSG_VALIDATED_OUTPUT_REASK",
-    "MSG_HISTORY_LLM_OUTPUT",
     "VALIDATED_RESPONSE_REASK_PROMPT",
+    "WITH_MSG_HISTORY",
     "ListOfPeople",
     "PersonalDetails",
-    "PARSING_INITIAL_PROMPT",
-    "PARSING_DOCUMENT",
-    "PARSING_EXPECTED_LLM_OUTPUT",
-    "PARSING_UNPARSEABLE_LLM_OUTPUT",
-    "PARSING_COMPILED_PROMPT",
-    "PARSING_COMPILED_REASK",
-    "PARSING_EXPECTED_OUTPUT",
 ]

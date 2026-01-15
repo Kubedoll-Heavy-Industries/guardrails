@@ -1,5 +1,4 @@
 from copy import deepcopy
-from typing import List
 
 import pydantic.version
 from pydantic import BaseModel, Field
@@ -65,6 +64,6 @@ class TestConvertPydanticModelToOpenaiFn:
         }
         # fmt: on
 
-        actual_fn_params = convert_pydantic_model_to_openai_fn(List[Foo])
+        actual_fn_params = convert_pydantic_model_to_openai_fn(list[Foo])
 
         assert actual_fn_params == expected_fn_params

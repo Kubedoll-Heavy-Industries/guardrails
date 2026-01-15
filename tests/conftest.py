@@ -1,7 +1,7 @@
 import os
-import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
+import pytest
 
 os.environ["OPENAI_API_KEY"] = "mocked"
 

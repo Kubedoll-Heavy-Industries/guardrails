@@ -1,13 +1,12 @@
 import re
 import sys
+
 import toml
 
 
-def add_package_name_prefix(
-    pyproject_path, pep_503_new_package_name, validator_folder_name
-):
+def add_package_name_prefix(pyproject_path, pep_503_new_package_name, validator_folder_name):
     # Read the existing pyproject.toml file
-    with open(pyproject_path, "r") as f:
+    with open(pyproject_path) as f:
         content = f.read()
         parsed_toml = toml.loads(content)
 
@@ -66,6 +65,4 @@ if __name__ == "__main__":
     pep_503_new_package_name = sys.argv[2]
     validator_folder_name = sys.argv[3]
 
-    add_package_name_prefix(
-        pyproject_path, pep_503_new_package_name, validator_folder_name
-    )
+    add_package_name_prefix(pyproject_path, pep_503_new_package_name, validator_folder_name)

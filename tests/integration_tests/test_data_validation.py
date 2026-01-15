@@ -1,12 +1,11 @@
-# ruff: noqa: E501
 from typing import Literal, Union
 
 import pytest
 from pydantic import BaseModel, Field
 
 from guardrails import Guard
-from guardrails.errors import ValidationError
 from guardrails.actions.reask import ReAsk
+from guardrails.errors import ValidationError
 from guardrails.validator_base import OnFailAction
 from tests.integration_tests.test_assets.validators import ValidChoices
 
@@ -109,9 +108,7 @@ def test_choice_validation_pydantic(llm_output, raises, has_error, fails):
             )
         )
         flight_speed: int = Field(
-            validators=ValidChoices(
-                choices=[1, 2, 3, 4], on_fail=OnFailAction.EXCEPTION
-            )
+            validators=ValidChoices(choices=[1, 2, 3, 4], on_fail=OnFailAction.EXCEPTION)
         )
 
     class Choice(BaseModel):

@@ -5,7 +5,6 @@ from typer.testing import CliRunner
 
 from guardrails.cli.hub.hub import hub_command
 
-
 runner = CliRunner()
 
 

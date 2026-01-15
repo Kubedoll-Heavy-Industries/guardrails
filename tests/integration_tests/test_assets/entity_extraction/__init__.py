@@ -1,4 +1,3 @@
-# ruff: noqa: E501
 import os
 
 from .optional_prompts import (
@@ -27,16 +26,12 @@ from .validated_output_skeleton_reask_1 import VALIDATED_OUTPUT_SKELETON_REASK_1
 from .validated_output_skeleton_reask_2 import VALIDATED_OUTPUT_SKELETON_REASK_2
 
 DATA_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)))
-reader = (
-    lambda filename: open(os.path.join(DATA_DIR, filename)).read().replace("\r", "")
-)
+reader = lambda filename: open(os.path.join(DATA_DIR, filename)).read().replace("\r", "")
 
 # Compiled prompts
 COMPILED_PROMPT = reader("compiled_prompt.txt")
 NON_OPENAI_COMPILED_PROMPT = reader("non_openai_compiled_prompt.txt")
-COMPILED_PROMPT_WITHOUT_INSTRUCTIONS = reader(
-    "compiled_prompt_without_instructions.txt"
-)
+COMPILED_PROMPT_WITHOUT_INSTRUCTIONS = reader("compiled_prompt_without_instructions.txt")
 COMPILED_PROMPT_REASK = reader("compiled_prompt_reask.txt")
 NON_OPENAI_COMPILED_PROMPT_REASK = reader("non_openai_compiled_prompt_reask.txt")
 COMPILED_PROMPT_REASK_WITHOUT_INSTRUCTIONS = reader(
@@ -83,18 +78,22 @@ PYDANTIC_INSTRUCTIONS_CHAT_MODEL = INSTRUCTIONS_CHAT_MODEL
 
 
 __all__ = [
-    "COMPILED_PROMPT",
-    "NON_OPENAI_COMPILED_PROMPT",
-    "COMPILED_PROMPT_WITHOUT_INSTRUCTIONS",
-    "COMPILED_PROMPT_REASK",
-    "NON_OPENAI_COMPILED_PROMPT_REASK",
-    "COMPILED_PROMPT_REASK_WITHOUT_INSTRUCTIONS",
     "COMPILED_INSTRUCTIONS",
     "COMPILED_INSTRUCTIONS_REASK",
     "COMPILED_MSG_HISTORY",
     "COMPILED_MSG_HISTORY_PROMPT",
+    "COMPILED_PROMPT",
+    "COMPILED_PROMPT_REASK",
+    "COMPILED_PROMPT_REASK_WITHOUT_INSTRUCTIONS",
+    "COMPILED_PROMPT_WITHOUT_INSTRUCTIONS",
     "LLM_OUTPUT",
     "LLM_OUTPUT_REASK",
+    "NON_OPENAI_COMPILED_PROMPT",
+    "NON_OPENAI_COMPILED_PROMPT_REASK",
+    "OPTIONAL_INSTRUCTIONS_CHAT_MODEL",
+    "OPTIONAL_MSG_HISTORY",
+    "OPTIONAL_PROMPT_CHAT_MODEL",
+    "OPTIONAL_PROMPT_COMPLETION_MODEL",
     "PYDANTIC_INSTRUCTIONS",
     "PYDANTIC_PROMPT",
     "RAIL_SPEC_WITH_FILTER",
@@ -111,8 +110,4 @@ __all__ = [
     "VALIDATED_OUTPUT_REFRAIN",
     "VALIDATED_OUTPUT_SKELETON_REASK_1",
     "VALIDATED_OUTPUT_SKELETON_REASK_2",
-    "OPTIONAL_PROMPT_COMPLETION_MODEL",
-    "OPTIONAL_PROMPT_CHAT_MODEL",
-    "OPTIONAL_INSTRUCTIONS_CHAT_MODEL",
-    "OPTIONAL_MSG_HISTORY",
 ]

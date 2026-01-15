@@ -1,16 +1,15 @@
 from datetime import datetime
 from unittest.mock import MagicMock, call
 
-from guardrails.actions.filter import Filter
-from guardrails.validator_service.validator_service_base import ValidatorRun
 import pytest
 
+from guardrails.actions.filter import Filter
 from guardrails.classes.history.iteration import Iteration
+from guardrails.classes.validation.validation_result import FailResult, PassResult
 from guardrails.classes.validation.validator_logs import ValidatorLogs
 from guardrails.validator_base import OnFailAction, Validator
 from guardrails.validator_service.async_validator_service import AsyncValidatorService
-from guardrails.classes.validation.validation_result import FailResult, PassResult
-
+from guardrails.validator_service.validator_service_base import ValidatorRun
 
 avs = AsyncValidatorService()
 
@@ -37,9 +36,7 @@ def test_validate(mocker):
     )
 
     assert mock_loop.run_until_complete.call_count == 1
-    async_validate_mock.assert_called_once_with(
-        True, {}, {}, iteration, "$", "$", stream=False
-    )
+    async_validate_mock.assert_called_once_with(True, {}, {}, iteration, "$", "$", stream=False)
 
 
 class TestAsyncValidate:
@@ -497,9 +494,7 @@ class TestRunValidator:
         )
 
         assert mock_before_run_validator.call_count == 1
-        mock_before_run_validator.assert_called_once_with(
-            iteration, validator, "value", "$"
-        )
+        mock_before_run_validator.assert_called_once_with(iteration, validator, "value", "$")
 
         assert mock_run_validator_async.call_count == 1
         mock_run_validator_async.assert_called_once_with(
@@ -561,9 +556,7 @@ class TestRunValidator:
         )
 
         assert mock_before_run_validator.call_count == 1
-        mock_before_run_validator.assert_called_once_with(
-            iteration, validator, "value", "$"
-        )
+        mock_before_run_validator.assert_called_once_with(iteration, validator, "value", "$")
 
         assert mock_run_validator_async.call_count == 1
         mock_run_validator_async.assert_called_once_with(
@@ -629,9 +622,7 @@ class TestRunValidator:
         )
 
         assert mock_before_run_validator.call_count == 1
-        mock_before_run_validator.assert_called_once_with(
-            iteration, validator, "value", "$"
-        )
+        mock_before_run_validator.assert_called_once_with(iteration, validator, "value", "$")
 
         assert mock_run_validator_async.call_count == 1
         mock_run_validator_async.assert_called_once_with(
@@ -673,9 +664,7 @@ class TestRunValidator:
             avs, "before_run_validator", return_value=validator_logs
         )
 
-        validation_result = FailResult(
-            error_message="mock-error", fix_value="fixed-value"
-        )
+        validation_result = FailResult(error_message="mock-error", fix_value="fixed-value")
         rechecked_result = PassResult()
         mock_run_validator_async = mocker.patch.object(
             avs,
@@ -707,9 +696,7 @@ class TestRunValidator:
         )
 
         assert mock_before_run_validator.call_count == 1
-        mock_before_run_validator.assert_called_once_with(
-            iteration, validator, "value", "$"
-        )
+        mock_before_run_validator.assert_called_once_with(iteration, validator, "value", "$")
 
         assert mock_run_validator_async.call_count == 2
         mock_run_validator_async.assert_has_calls(

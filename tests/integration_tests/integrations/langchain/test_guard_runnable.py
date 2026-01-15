@@ -1,15 +1,14 @@
-from typing import Any, Optional
 import io
 import sys
+from typing import Any
 
 import pytest
 from pydantic import PrivateAttr
 
+from guardrails.classes import ValidationOutcome
+from guardrails.errors import ValidationError
 from guardrails.guard import Guard
 from guardrails.integrations.langchain.guard_runnable import GuardRunnable
-from guardrails.errors import ValidationError
-from guardrails.classes import ValidationOutcome
-
 from tests.integration_tests.test_assets.validators import ReadingTime, RegexMatch
 
 
@@ -17,9 +16,7 @@ from tests.integration_tests.test_assets.validators import ReadingTime, RegexMat
 def guard_runnable():
     return GuardRunnable(
         Guard()
-        .use(
-            RegexMatch("Ice cream", match_type="search", on_fail="refrain"), on="output"
-        )
+        .use(RegexMatch("Ice cream", match_type="search", on_fail="refrain"), on="output")
         .use(ReadingTime(0.05, on_fail="noop"))
     )
 
@@ -43,7 +40,7 @@ def test_guard_as_runnable(guard_runnable: GuardRunnable, output: str, throws: b
         def invoke(
             self,
             input: LanguageModelInput,
-            config: Optional[RunnableConfig] = None,
+            config: RunnableConfig | None = None,
             **kwargs: Any,
         ) -> BaseMessage:
             return AIMessage(content=output)
@@ -60,8 +57,7 @@ def test_guard_as_runnable(guard_runnable: GuardRunnable, output: str, throws: b
             chain.invoke({"topic": topic})
 
         assert str(exc_info.value) == (
-            "The response from the LLM failed validation!"
-            "See `guard.history` for more details."
+            "The response from the LLM failed validation!See `guard.history` for more details."
         )
 
         assert guard_runnable.guard.history.last.status == "fail"
@@ -75,8 +71,8 @@ def test_guard_as_runnable(guard_runnable: GuardRunnable, output: str, throws: b
 
 def test_guard_runnable_with_callback_config(guard_runnable):
     from langchain_core.callbacks import CallbackManager
-    from langchain_core.tracers import ConsoleCallbackHandler
     from langchain_core.runnables import RunnableConfig
+    from langchain_core.tracers import ConsoleCallbackHandler
 
     console_handler = ConsoleCallbackHandler()
     callback_manager = CallbackManager([console_handler])
@@ -130,9 +126,7 @@ def test_guard_runnable_max_retries(
     guard = CountingGuard(succeed_on_attempt)
     runnable = GuardRunnable(guard)
 
-    config = (
-        RunnableConfig(max_retries=max_retries) if max_retries is not None else None
-    )
+    config = RunnableConfig(max_retries=max_retries) if max_retries is not None else None
 
     if "Failed" in expected_result:
         with pytest.raises(ValidationError) as exc_info:

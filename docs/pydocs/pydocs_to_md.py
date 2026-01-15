@@ -37,10 +37,7 @@ def module_to_string(
                 if not hasattr(obj, "__module__") or not obj.__module__:
                     continue
 
-                if (
-                    not obj.__module__.startswith(module.__name__)
-                    and obj.__module__ != "builtins"
-                ):
+                if not obj.__module__.startswith(module.__name__) and obj.__module__ != "builtins":
                     continue
                 unwrapped = module_to_string(
                     obj,
@@ -57,14 +54,11 @@ def module_to_string(
     except Exception as e:
         print(f"failed to get members of {module.__name__}")
         print(e)
-        pass
 
     return module_str
 
 
-def class_to_string(
-    cls, ignore_prefix_list=[], include_list=[], indents=1, display_string=None
-):
+def class_to_string(cls, ignore_prefix_list=[], include_list=[], indents=1, display_string=None):
     if display_string is None:
         display_string = cls.__name__
     return module_to_string(

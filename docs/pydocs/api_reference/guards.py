@@ -1,9 +1,9 @@
 from docspec_python import ParserOptions
-from docs.pydocs.pydocs_markdown_impl import render_loader
 from pydoc_markdown.contrib.loaders.python import PythonLoader
 from pydoc_markdown.contrib.processors.filter import FilterProcessor
-from docs.pydocs.helpers import write_to_file
 
+from docs.pydocs.helpers import write_to_file
+from docs.pydocs.pydocs_markdown_impl import render_loader
 
 export_map = {
     "guardrails/guard.py": [
@@ -58,9 +58,7 @@ export_map = {
 
 conditionals = []
 for k, v in export_map.items():
-    conditionals.append(
-        f"((name in {v}) if ('{k}' in obj.location.filename) else False)"
-    )
+    conditionals.append(f"((name in {v}) if ('{k}' in obj.location.filename) else False)")
 
 export_string = " or ".join(conditionals)
 

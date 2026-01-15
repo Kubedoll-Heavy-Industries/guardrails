@@ -1,12 +1,12 @@
+from guardrails.actions.reask import FieldReAsk
 from guardrails.classes.generic.stack import Stack
 from guardrails.classes.history.inputs import Inputs
 from guardrails.classes.history.iteration import Iteration
 from guardrails.classes.history.outputs import Outputs
-from guardrails.constants import error_status, not_run_status
-from guardrails.llm_providers import LiteLLMCallable
 from guardrails.classes.llm.llm_response import LLMResponse
 from guardrails.classes.validation.validator_logs import ValidatorLogs
-from guardrails.actions.reask import FieldReAsk
+from guardrails.constants import error_status, not_run_status
+from guardrails.llm_providers import LiteLLMCallable
 from guardrails.validator_base import FailResult
 
 
@@ -74,9 +74,7 @@ def test_non_empty_initialization():
     )
     parsed_output = "Hello there!"
     guarded_output = "Hello there"
-    reask = FieldReAsk(
-        incorrect_value="Hello there!", fail_results=[validation_result], path=[]
-    )
+    reask = FieldReAsk(incorrect_value="Hello there!", fail_results=[validation_result], path=[])
     reasks = [reask]
     validator_logs = [
         ValidatorLogs(

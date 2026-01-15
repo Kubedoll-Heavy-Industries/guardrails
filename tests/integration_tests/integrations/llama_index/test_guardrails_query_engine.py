@@ -1,20 +1,20 @@
 import pytest
+
 from guardrails import Guard
 from guardrails.errors import ValidationError
-from typing import Optional
 from tests.integration_tests.test_assets.validators import RegexMatch
 
 pytest.importorskip("llama_index")
 
 from llama_index.core.query_engine import BaseQueryEngine  # noqa
-from llama_index.core.schema import QueryBundle  # noqa
-from llama_index.core.base.response.schema import Response  # noqa
-from llama_index.core.prompts.mixin import PromptMixinType  # noqa
-from llama_index.core.callbacks import CallbackManager  # noqa
+from llama_index.core.schema import QueryBundle
+from llama_index.core.base.response.schema import Response
+from llama_index.core.prompts.mixin import PromptMixinType
+from llama_index.core.callbacks import CallbackManager
 
 
 class MockQueryEngine(BaseQueryEngine):
-    def __init__(self, callback_manager: Optional[CallbackManager] = None):
+    def __init__(self, callback_manager: CallbackManager | None = None):
         super().__init__(callback_manager)
 
     def _query(self, query_bundle: QueryBundle) -> Response:

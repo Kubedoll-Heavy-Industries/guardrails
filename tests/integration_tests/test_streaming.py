@@ -4,7 +4,8 @@
 # 3. Test string schema streaming
 # Using the LowerCase Validator, and a custom validator to show new streaming behavior
 import json
-from typing import Any, Callable, Dict, Iterable, List, Optional, Union
+from collections.abc import Callable, Iterable
+from typing import Any, Union
 
 import openai
 import pytest
@@ -33,9 +34,9 @@ expected_filter_refrain_output = {}
 class MinSentenceLengthValidator(Validator):
     def __init__(
         self,
-        min: Optional[int] = None,
-        max: Optional[int] = None,
-        on_fail: Optional[Callable] = None,
+        min: int | None = None,
+        max: int | None = None,
+        on_fail: Callable | None = None,
     ):
         super().__init__(
             on_fail=on_fail,
@@ -46,9 +47,9 @@ class MinSentenceLengthValidator(Validator):
         self._max = to_int(max)
 
     def sentence_split(self, value):
-        return list(map(lambda x: x + ".", value.split(".")[:-1]))
+        return [x + "." for x in value.split(".")[:-1]]
 
-    def validate(self, value: Union[str, List], metadata: Dict) -> ValidationResult:
+    def validate(self, value: Union[str, list], metadata: dict) -> ValidationResult:
         sentences = self.sentence_split(value)
         error_spans = []
         index = 0
@@ -84,7 +85,7 @@ class MinSentenceLengthValidator(Validator):
             )
         return PassResult(validated_chunk=value)
 
-    def validate_stream(self, chunk: Any, metadata: Dict, **kwargs) -> ValidationResult:
+    def validate_stream(self, chunk: Any, metadata: dict, **kwargs) -> ValidationResult:
         return super().validate_stream(chunk, metadata, **kwargs)
 
 
@@ -356,9 +357,7 @@ STR_LLM_CHUNKS = [
         (
             gd.Guard.for_string(
                 # only the middle sentence should pass
-                validators=[
-                    MinSentenceLengthValidator(26, 30, on_fail=OnFailAction.NOOP)
-                ],
+                validators=[MinSentenceLengthValidator(26, 30, on_fail=OnFailAction.NOOP)],
                 messages=STR_MESSAGES,
             ),
             # each value is a tuple
@@ -414,7 +413,7 @@ def test_string_schema_streaming_with_openai_chat(mocker, guard, expected_error_
     error_spans = guard.error_spans_in_output()
 
     assert len(error_spans) == len(expected_error_spans)
-    for error_span, expected in zip(error_spans, expected_error_spans):
+    for error_span, expected in zip(error_spans, expected_error_spans, strict=False):
         assert accumulated_output[error_span.start : error_span.end] == expected[0]
         assert error_span.reason == expected[1]
     # TODO assert something about these error spans
@@ -447,7 +446,7 @@ def test_noop_behavior_two_validators(mocker):
         ),
         LowerCase(on_fail=OnFailAction.NOOP),
     )
-    prompt = """Write me a 4 line poem about John in San Francisco. 
+    prompt = """Write me a 4 line poem about John in San Francisco.
     Make every third word all caps."""
     gen = guard(
         llm_api=openai.chat.completions.create,
@@ -490,7 +489,7 @@ def test_fix_behavior_one_validator(mocker):
     guard = gd.Guard().use_many(
         LowerCase(on_fail=OnFailAction.FIX),
     )
-    prompt = """Write me a 4 line poem about John in San Francisco. 
+    prompt = """Write me a 4 line poem about John in San Francisco.
     Make every third word all caps."""
     gen = guard(
         llm_api=openai.chat.completions.create,
@@ -537,7 +536,7 @@ def test_fix_behavior_two_validators(mocker):
         ),
         LowerCase(on_fail=OnFailAction.FIX),
     )
-    prompt = """Write me a 4 line poem about John in San Francisco. 
+    prompt = """Write me a 4 line poem about John in San Francisco.
     Make every third word all caps."""
     gen = guard(
         llm_api=openai.chat.completions.create,
@@ -594,7 +593,7 @@ def test_fix_behavior_three_validators(mocker):
             },
         ),
     )
-    prompt = """Write me a 4 line poem about John in San Francisco. 
+    prompt = """Write me a 4 line poem about John in San Francisco.
     Make every third word all caps."""
     gen = guard(
         llm_api=openai.chat.completions.create,
@@ -698,7 +697,7 @@ def test_refrain_behavior(mocker):
         LowerCase(on_fail=OnFailAction.FIX),
     )
 
-    prompt = """Write me a 4 line poem about John in San Francisco. 
+    prompt = """Write me a 4 line poem about John in San Francisco.
     Make every third word all caps."""
     gen = guard(
         llm_api=openai.chat.completions.create,
@@ -739,7 +738,7 @@ def test_filter_behavior(mocker):
         ),
         LowerCase(on_fail=OnFailAction.FILTER),
     )
-    prompt = """Write me a 4 line poem about John in San Francisco. 
+    prompt = """Write me a 4 line poem about John in San Francisco.
     Make every third word all caps."""
     gen = guard(
         llm_api=openai.chat.completions.create,
