@@ -58,54 +58,73 @@ select = [
     "S608",   # hardcoded-sql-expression: SQL injection risk
 ]
 ignore = [
-    # === Formatter Conflicts ===
-    "E501",   # line too long (handled by formatter)
-    # === Intentional Patterns ===
-    "E731",   # lambda assignment (common pattern)
-    "E741",   # ambiguous variable names (existing code)
-    "B006",   # mutable default argument (existing pattern)
-    "B008",   # function call in default argument (FastAPI Depends)
-    "B007",   # unused loop variable (prefix with _ if needed)
-    "B017",   # assert blind exception (existing tests)
-    "B026",   # star-arg unpacking after keyword (existing pattern)
-    "B027",   # empty abstract method (intentional for protocols)
-    "B028",   # no stacklevel in warnings (existing code)
-    "B904",   # raise from err (too noisy for existing codebase)
-    # === Comprehension Preferences ===
-    "C400",   # unnecessary generator (readability preference)
-    "C405",   # unnecessary list in set() (readability preference)
-    "C408",   # unnecessary dict() call (readability preference)
-    "C411",   # unnecessary list() call (readability preference)
-    "C416",   # unnecessary list comprehension (readability preference)
-    # === Pylint (Too Noisy) ===
-    "PLW0602", # global without assignment: sometimes intentional
-    "PLW0603", # global-statement: sometimes necessary for module state
-    "PLW1641", # object without __hash__: intentional for mutable classes
-    "PLW2901", # redefined-loop-name: often intentional in data processing
-    # === Performance (Style Preference) ===
-    "PERF102", # use dict.values(): sometimes keys are needed for debugging
-    "PERF203", # try-except in loop: required for iterator consumption
-    "PERF401", # use list comprehension: readability preference
-    "PERF402", # use list.copy: readability preference
-    "PERF403", # use dict comprehension: readability preference
-    # === Ruff-specific ===
-    "RUF005", # list concatenation vs unpacking (style preference)
-    "RUF009", # function call in dataclass defaults (Field is fine)
-    "RUF012", # mutable class attributes without ClassVar (existing pattern)
-    "RUF013", # implicit Optional (existing pattern)
-    "RUF059", # unpacked variable never used (prefix with _ if needed)
-    # === Simplify (Readability) ===
-    "SIM101", # merge isinstance calls (readability preference)
-    "SIM102", # nested if statements (readability preference)
-    "SIM108", # use ternary operator (readability preference)
-    "SIM115", # context manager for open (existing pattern)
-    "SIM118", # use key in dict (existing pattern)
-    # === Pyupgrade (Keep Compatibility) ===
-    "UP007",  # Use X | Y for Union (keep compatibility)
-    "UP008",  # super() call style (existing pattern)
-    "UP035",  # deprecated typing imports (keep compatibility)
-    "UP045",  # X | None vs Optional (keep compatibility)
-    "UP046",  # use PEP 695 type params (keep compatibility)
+    # =======================================================================
+    # Formatter handles these
+    # =======================================================================
+    "E501",   # line too long
+
+    # =======================================================================
+    # Intentional patterns (no action needed)
+    # =======================================================================
+    "E731",   # lambda assignment - valid Python pattern
+    "B008",   # function call in default argument - FastAPI Depends() pattern
+    "B027",   # empty abstract method - intentional for protocols/interfaces
+    "PLW0602", # global without assignment - intentional for module-level state
+    "PLW0603", # global-statement - intentional for module-level state
+    "PLW1641", # object without __hash__ - intentional for mutable dataclasses
+    "PERF203", # try-except in loop - required for iterator consumption patterns
+    "RUF009", # function call in dataclass defaults - pydantic Field() is fine
+
+    # =======================================================================
+    # Style preferences (subjective, keep current style)
+    # =======================================================================
+    "C400",   # unnecessary generator - readability preference
+    "C405",   # unnecessary list in set() - readability preference
+    "C408",   # unnecessary dict() call - readability preference
+    "C411",   # unnecessary list() call - readability preference
+    "C416",   # unnecessary list comprehension - readability preference
+    "PERF102", # use dict.values() - keys sometimes useful for debugging
+    "PERF401", # use list comprehension - readability preference
+    "PERF402", # use list.copy - readability preference
+    "PERF403", # use dict comprehension - readability preference
+    "RUF005", # list concatenation vs unpacking - style preference
+    "SIM101", # merge isinstance calls - can hurt readability
+    "SIM102", # nested if statements - can hurt readability
+    "SIM108", # use ternary operator - can hurt readability
+
+    # =======================================================================
+    # Python 3.10 compatibility (minimum supported version)
+    # =======================================================================
+    "UP007",  # Use X | Y for Union - requires 3.10+ in runtime contexts
+    "UP035",  # deprecated typing imports - need typing.Optional for 3.9 compat
+    "UP045",  # X | None vs Optional - requires 3.10+ in runtime contexts
+    "UP046",  # PEP 695 type params - requires 3.12+
+
+    # =======================================================================
+    # TODO(@cagyirey, 5): Real bugs - fix in fast follow
+    # =======================================================================
+    "B006",   # mutable default argument - 14 violations, causes shared state bugs
+    "RUF012", # mutable class attributes - 10 violations, causes shared state bugs
+
+    # =======================================================================
+    # TODO(@cagyirey, 4): Best practices - fix when touching affected code
+    # =======================================================================
+    "B904",   # raise from err - 47 violations, loses exception context
+    "B028",   # no stacklevel in warnings - 20 violations, warnings point to wrong line
+    "RUF013", # implicit Optional - 6 violations, type safety issue
+
+    # =======================================================================
+    # TODO(@cagyirey, 3): Minor improvements - fix opportunistically
+    # =======================================================================
+    "E741",   # ambiguous variable names (l, O, I) - few violations
+    "B007",   # unused loop variable - should prefix with _
+    "B017",   # assert blind exception - tests should be more specific
+    "B026",   # star-arg unpacking after keyword - review for correctness
+    "PLW2901", # redefined loop variable - 9 violations, review if intentional
+    "RUF059", # unpacked variable never used - should prefix with _
+    "SIM115", # context manager for open - review for resource leaks
+    "SIM118", # use `key in dict` instead of `key in dict.keys()`
+    "UP008",  # super() call style - modernize to super()
 ]
 
 [tool.ruff.lint.per-file-ignores]
