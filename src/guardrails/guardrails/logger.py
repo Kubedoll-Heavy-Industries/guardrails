@@ -99,7 +99,7 @@ def get_scope_handler() -> ScopeHandler:
             h for h in _logger.handlers if isinstance(h, ScopeHandler)
         )
         return scope_handler
-    except IndexError:
+    except StopIteration:
         hdlr = _setup_handler()
         _logger.addHandler(hdlr)
         return hdlr

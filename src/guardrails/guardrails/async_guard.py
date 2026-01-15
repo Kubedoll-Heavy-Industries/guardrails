@@ -18,12 +18,12 @@ from guardrails_api_client.models import (
 )
 from opentelemetry import context as otel_context
 
-from guardrails import Guard
 from guardrails.classes import OT, ValidationOutcome
 from guardrails.classes.history import Call
 from guardrails.classes.history.call_inputs import CallInputs
 from guardrails.classes.output_type import OutputTypes
 from guardrails.classes.schema.processed_schema import ProcessedSchema
+from guardrails.guard import Guard
 from guardrails.hub_telemetry.hub_tracing import async_trace
 from guardrails.llm_providers import get_async_llm_ask, model_is_supported_server_side
 from guardrails.logger import set_scope

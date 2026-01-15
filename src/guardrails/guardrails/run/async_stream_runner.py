@@ -19,8 +19,8 @@ from guardrails.llm_providers import (
     AsyncPromptCallableBase,
 )
 from guardrails.logger import set_scope
-from guardrails.run import StreamRunner
 from guardrails.run.async_runner import AsyncRunner
+from guardrails.run.stream_runner import StreamRunner
 from guardrails.telemetry import trace_async_stream_step
 from guardrails.types import OnFailAction
 from guardrails.validator_service import AsyncValidatorService

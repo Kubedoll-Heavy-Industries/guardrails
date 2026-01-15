@@ -5,7 +5,8 @@ from string import Template
 from typing import Union
 
 from guardrails.classes.templating.namespace_template import NamespaceTemplate
-from guardrails.prompt import Instructions, Prompt
+from guardrails.prompt.instructions import Instructions
+from guardrails.prompt.prompt import Prompt
 from guardrails.utils.constants import constants
 from guardrails.utils.templating_utils import get_template_variables
 
