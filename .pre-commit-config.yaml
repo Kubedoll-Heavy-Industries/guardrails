@@ -12,8 +12,9 @@ repos:
         description: "Run 'ruff format' for formatting"
 
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.5.11
+    rev: 0.6.1
     hooks:
       - id: uv-lock
         name: uv-lock
-        description: "Keep uv.lock in sync with pyproject.toml"
+        description: "Check uv.lock is in sync with pyproject.toml"
+        args: ["--check"]
