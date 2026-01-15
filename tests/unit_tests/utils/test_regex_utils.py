@@ -1,4 +1,4 @@
-from guardrails.utils.regex_utils import split_on, ESCAPED_OR_QUOTED
+from guardrails.utils.regex_utils import ESCAPED_OR_QUOTED, split_on
 
 
 class TestSplitOn:
@@ -9,7 +9,7 @@ class TestSplitOn:
         assert tokens == ["length: 0 1", 'ends-with: {"some text;"}']
 
     def ignore_test_quoted(self):
-        string = "length: 0 1; ends-with: {\"some text;\"}; other: 'don't escape; this';"  # noqa
+        string = "length: 0 1; ends-with: {\"some text;\"}; other: 'don't escape; this';"
         tokens = split_on(string, ";", exceptions=ESCAPED_OR_QUOTED)
         assert len(tokens) == 3
         assert tokens == [

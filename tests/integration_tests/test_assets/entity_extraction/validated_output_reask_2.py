@@ -1,4 +1,3 @@
-# ruff: noqa: E501
 VALIDATED_OUTPUT_REASK_2 = {
     "fees": [
         {

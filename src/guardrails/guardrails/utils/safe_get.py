@@ -1,9 +1,10 @@
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Union
+
 from guardrails.logger import logger
 
 
 def safe_get_with_brackets(
-    container: Union[str, List[Any], Any], key: Any, default: Optional[Any] = None
+    container: Union[str, list[Any], Any], key: Any, default: Any | None = None
 ) -> Any:
     try:
         value = container[key]
@@ -22,9 +23,9 @@ def safe_get_with_brackets(
 
 
 def safe_get(
-    container: Union[str, List[Any], Dict[Any, Any], Tuple],
+    container: Union[str, list[Any], dict[Any, Any], tuple],
     key: Any,
-    default: Optional[Any] = None,
+    default: Any | None = None,
 ) -> Any:
     if isinstance(container, dict):
         return container.get(key, default)

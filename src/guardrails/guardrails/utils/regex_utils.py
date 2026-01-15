@@ -1,7 +1,5 @@
 import re
 from string import Template
-from typing import List
-
 
 ESCAPED = "(?![^{}]*})"
 
@@ -11,13 +9,13 @@ ESCAPED_OR_QUOTED = "(?![^{}]*})|(?<!')${separator}(?=[^']*'$)"
 
 def split_on(
     value: str, separator: str, *, exceptions: str = ESCAPED, filter_nones: bool = True
-) -> List[str]:
+) -> list[str]:
     split_pattern = Template("${separator}${exceptions}").safe_substitute(
         separator=separator, exceptions=exceptions
     )
     pattern = re.compile(rf"{split_pattern}")
     tokens = re.split(pattern, value)
-    trimmed = list(map(lambda t: t.strip(), tokens))
+    trimmed = [t.strip() for t in tokens]
     if not filter_nones:
         return trimmed
     return list(filter(None, trimmed))

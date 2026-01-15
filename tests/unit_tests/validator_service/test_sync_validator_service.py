@@ -1,4 +1,5 @@
 from unittest.mock import MagicMock
+
 from guardrails.classes.history.iteration import Iteration
 from guardrails.classes.validation.validation_result import FailResult, PassResult
 from guardrails.classes.validation.validator_logs import ValidatorLogs
@@ -47,7 +48,7 @@ class TestRunValidators:
         iteration.id = "12345"
         mock_validator = MockValidator(on_fail=OnFailAction.FIX_REASK)
 
-        result, metadata = val_svc.run_validators(
+        result, _metadata = val_svc.run_validators(
             iteration=iteration,
             validator_map={"$": [mock_validator]},
             value="foo",

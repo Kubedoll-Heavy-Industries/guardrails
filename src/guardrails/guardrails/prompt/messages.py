@@ -2,10 +2,10 @@
 
 import re
 from string import Template
-from typing import Dict, List, Optional, Union
+from typing import Union
 
-from guardrails.prompt import Prompt, Instructions
 from guardrails.classes.templating.namespace_template import NamespaceTemplate
+from guardrails.prompt import Instructions, Prompt
 from guardrails.utils.constants import constants
 from guardrails.utils.templating_utils import get_template_variables
 
@@ -13,10 +13,10 @@ from guardrails.utils.templating_utils import get_template_variables
 class Messages:
     def __init__(
         self,
-        source: List[Dict[str, Union[str, Prompt, Instructions]]],
-        output_schema: Optional[str] = None,
+        source: list[dict[str, Union[str, Prompt, Instructions]]],
+        output_schema: str | None = None,
         *,
-        xml_output_schema: Optional[str] = None,
+        xml_output_schema: str | None = None,
     ):
         self._source = source
 

@@ -54,7 +54,6 @@ def module_to_string(
     except Exception as e:
         print(f"failed to get members of {module.__name__}")
         print(e)
-        pass
 
     return module_str
 

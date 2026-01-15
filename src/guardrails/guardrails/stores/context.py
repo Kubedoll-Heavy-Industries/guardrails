@@ -1,5 +1,5 @@
 from contextvars import ContextVar, copy_context
-from typing import Any, Dict, Literal, Optional, Union, cast
+from typing import Any, Literal, Union, cast
 
 from opentelemetry import context
 from opentelemetry.context import Context
@@ -20,7 +20,7 @@ def get_guard_name() -> str:
     return get_context_var(GUARD_NAME_KEY) or ""
 
 
-def set_tracer(tracer: Optional[Tracer] = None) -> None:
+def set_tracer(tracer: Tracer | None = None) -> None:
     set_context_var(TRACER_KEY, tracer)
 
 
@@ -31,7 +31,7 @@ def get_tracer() -> Union[Tracer, None]:
     return cast(Tracer, cvar)
 
 
-def set_tracer_context(tracer_context: Optional[Context] = None) -> None:
+def set_tracer_context(tracer_context: Context | None = None) -> None:
     tracer_context = (
         tracer_context
         if tracer_context
@@ -44,11 +44,11 @@ def get_tracer_context() -> Union[Context, None]:
     return get_context_var(TRACER_CONTEXT_KEY)
 
 
-def set_call_kwargs(kwargs: Dict[str, Any]) -> None:
+def set_call_kwargs(kwargs: dict[str, Any]) -> None:
     set_context_var(CALL_KWARGS_KEY, kwargs)
 
 
-def get_call_kwargs() -> Dict[str, Any]:
+def get_call_kwargs() -> dict[str, Any]:
     return get_context_var(CALL_KWARGS_KEY) or {}
 
 
@@ -60,7 +60,7 @@ def get_call_kwarg(kwarg_key: str) -> Union[Any, None]:
 def _get_contextvar(key):
     context = copy_context()
     context_var = None
-    for c_key in context.keys():
+    for c_key in context:
         if c_key.name == key:
             context_var = c_key
             break

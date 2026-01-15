@@ -1,12 +1,11 @@
 import os
 import random
-from typing import List
 
 from lxml.etree import Element as E
 from rich.pretty import pretty_repr
 
-from guardrails.classes.history.call import Call
 from guardrails.actions.reask import gather_reasks
+from guardrails.classes.history.call import Call
 from guardrails.types import RailTypes
 
 
@@ -41,10 +40,7 @@ def generate_test_artifacts(
         if i == 0:
             ext = ""
         elif i == 1:
-            if call_log.iterations.length == 2:
-                ext = "_reask"
-            else:
-                ext = "_reask_1"
+            ext = "_reask" if call_log.iterations.length == 2 else "_reask_1"
         else:
             ext = f"_reask_{i}"
 
@@ -74,7 +70,7 @@ def generate_test_artifacts(
             f.write(f"\nVALIDATED_OUTPUT = {validated_output_repr}")
 
 
-def generate_random_schemas(n: int, depth: int = 4, width: int = 10) -> List[str]:
+def generate_random_schemas(n: int, depth: int = 4, width: int = 10) -> list[str]:
     """Generate random schemas that represent a valid schema.
 
     Args:

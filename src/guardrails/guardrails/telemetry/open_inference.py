@@ -1,12 +1,12 @@
 import json
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from guardrails.telemetry.common import (
     get_span,
-    to_dict,
-    serialize,
     recursive_key_operation,
     redact,
+    serialize,
+    to_dict,
 )
 
 try:
@@ -17,10 +17,10 @@ except ImportError:
 
 def trace_operation(
     *,
-    input_mime_type: Optional[str] = None,
-    input_value: Optional[Any] = None,
-    output_mime_type: Optional[str] = None,
-    output_value: Optional[Any] = None,
+    input_mime_type: str | None = None,
+    input_value: Any | None = None,
+    output_mime_type: str | None = None,
+    output_value: Any | None = None,
 ):
     """Traces an operation (any function call) using OpenInference semantic
     conventions."""
@@ -48,39 +48,27 @@ def trace_operation(
 
 def trace_llm_call(
     *,
-    function_call: Optional[
-        Dict[str, Any]
-    ] = None,  # JSON String	"{function_name: 'add', args: [1, 2]}"	Object recording details of a function call in models or APIs  # noqa
-    input_messages: Optional[
-        List[Dict[str, Any]]
-    ] = None,  # List of objects†	[{"message.role": "user", "message.content": "hello"}]	List of messages sent to the LLM in a chat API request  # noqa
-    invocation_parameters: Optional[
-        Dict[str, Any]
-    ] = None,  # JSON string	"{model_name: 'gpt-3', temperature: 0.7}"	Parameters used during the invocation of an LLM or API  # noqa
-    model_name: Optional[
-        str
-    ] = None,  # String	"gpt-3.5-turbo"	The name of the language model being utilized  # noqa
-    output_messages: Optional[
-        List[Dict[str, Any]]
-    ] = None,  # List of objects	[{"message.role": "user", "message.content": "hello"}]	List of messages received from the LLM in a chat API request  # noqa
-    prompt_template_template: Optional[
-        str
-    ] = None,  # String	"Weather forecast for {city} on {date}"	Template used to generate prompts as Python f-strings  # noqa
-    prompt_template_variables: Optional[
-        Dict[str, Any]
-    ] = None,  # JSON String	{ context: "<context from retrieval>", subject: "math" }	JSON of key value pairs applied to the prompt template  # noqa
-    prompt_template_version: Optional[
-        str
-    ] = None,  # String	"v1.0"	The version of the prompt template  # noqa
-    token_count_completion: Optional[
-        int
-    ] = None,  # Integer	15	The number of tokens in the completion  # noqa
-    token_count_prompt: Optional[
-        int
-    ] = None,  # Integer	5	The number of tokens in the prompt  # noqa
-    token_count_total: Optional[
-        int
-    ] = None,  # Integer	20	Total number of tokens, including prompt and completion  # noqa
+    function_call: dict[str, Any]
+    | None = None,  # JSON String	"{function_name: 'add', args: [1, 2]}"	Object recording details of a function call in models or APIs
+    input_messages: list[dict[str, Any]]
+    | None = None,  # List of objects†	[{"message.role": "user", "message.content": "hello"}]	List of messages sent to the LLM in a chat API request
+    invocation_parameters: dict[str, Any]
+    | None = None,  # JSON string	"{model_name: 'gpt-3', temperature: 0.7}"	Parameters used during the invocation of an LLM or API
+    model_name: str
+    | None = None,  # String	"gpt-3.5-turbo"	The name of the language model being utilized
+    output_messages: list[dict[str, Any]]
+    | None = None,  # List of objects	[{"message.role": "user", "message.content": "hello"}]	List of messages received from the LLM in a chat API request
+    prompt_template_template: str
+    | None = None,  # String	"Weather forecast for {city} on {date}"	Template used to generate prompts as Python f-strings
+    prompt_template_variables: dict[str, Any]
+    | None = None,  # JSON String	{ context: "<context from retrieval>", subject: "math" }	JSON of key value pairs applied to the prompt template
+    prompt_template_version: str
+    | None = None,  # String	"v1.0"	The version of the prompt template
+    token_count_completion: int
+    | None = None,  # Integer	15	The number of tokens in the completion
+    token_count_prompt: int | None = None,  # Integer	5	The number of tokens in the prompt
+    token_count_total: int
+    | None = None,  # Integer	20	Total number of tokens, including prompt and completion
 ):
     """Traces an LLM call using OpenInference semantic conventions."""
     current_span = get_span()

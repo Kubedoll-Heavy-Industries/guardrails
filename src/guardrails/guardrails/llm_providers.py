@@ -1,44 +1,34 @@
 import asyncio
-
 import inspect
+import warnings
+from collections.abc import Awaitable, Callable, Iterator
 from typing import (
     Any,
-    Awaitable,
-    Callable,
-    Dict,
-    Iterator,
-    List,
-    Optional,
     Union,
     cast,
 )
 
-from guardrails.prompt import Prompt, Instructions
 from guardrails_api_client.models import LLMResource
 
-from guardrails.errors import UserFacingException
 from guardrails.classes.llm.llm_response import LLMResponse
 from guardrails.classes.llm.prompt_callable import (
     CALLABLE_FAILURE_SUFFIX,
     PromptCallableBase,
     PromptCallableException,
 )
-
-from guardrails.types.inputs import MessageHistory
-
-import warnings
-
-from guardrails.utils.safe_get import safe_get
+from guardrails.errors import UserFacingException
+from guardrails.prompt import Instructions, Prompt
 from guardrails.telemetry import trace_llm_call, trace_operation
-
+from guardrails.types.inputs import MessageHistory
 from guardrails.utils.prompt_utils import messages_to_prompt_string
+from guardrails.utils.safe_get import safe_get
 
 ###
 # Synchronous wrappers
 ###
 
 
-def nonchat_prompt(prompt: str, instructions: Optional[str] = None) -> str:
+def nonchat_prompt(prompt: str, instructions: str | None = None) -> str:
     """Prepare final prompt for nonchat engine."""
     if instructions:
         prompt = "\n\n".join([instructions, prompt])
@@ -46,10 +36,10 @@ def nonchat_prompt(prompt: str, instructions: Optional[str] = None) -> str:
 
 
 def chat_prompt(
-    prompt: Optional[str],
-    instructions: Optional[str] = None,
-    messages: Optional[List[Dict]] = None,
-) -> List[Dict[str, str]]:
+    prompt: str | None,
+    instructions: str | None = None,
+    messages: list[dict] | None = None,
+) -> list[dict[str, str]]:
     """Prepare final prompt for chat engine."""
     if messages:
         return messages
@@ -68,10 +58,10 @@ def chat_prompt(
 
 
 def litellm_messages(
-    prompt: Optional[str],
-    instructions: Optional[str] = None,
-    messages: Optional[List[Dict]] = None,
-) -> List[Dict[str, str]]:
+    prompt: str | None,
+    instructions: str | None = None,
+    messages: list[dict] | None = None,
+) -> list[dict[str, str]]:
     """Prepare messages for LiteLLM."""
     if messages:
         return messages
@@ -89,7 +79,7 @@ class ManifestCallable(PromptCallableBase):
         self,
         text: str,
         client: Any,
-        instructions: Optional[str] = None,
+        instructions: str | None = None,
         *args,
         **kwargs,
     ) -> LLMResponse:
@@ -105,7 +95,7 @@ class ManifestCallable(PromptCallableBase):
         ```
         """
         try:
-            import manifest  # noqa: F401 # type: ignore
+            import manifest  # type: ignore
         except ImportError:
             raise PromptCallableException(
                 "The `manifest` package is not installed. Install with `poetry add manifest-ml`"
@@ -139,9 +129,9 @@ class ManifestCallable(PromptCallableBase):
 class LiteLLMCallable(PromptCallableBase):
     def _invoke_llm(
         self,
-        text: Optional[str] = None,
+        text: str | None = None,
         model: str = "gpt-3.5-turbo",
-        messages: Optional[List[Dict]] = None,
+        messages: list[dict] | None = None,
         *args,
         **kwargs,
     ) -> LLMResponse:
@@ -182,7 +172,7 @@ class LiteLLMCallable(PromptCallableBase):
         function_calling_tools = [
             tool.get("function")
             for tool in kwargs.get("tools", [])
-            if isinstance(tool, Dict) and tool.get("type") == "function"
+            if isinstance(tool, dict) and tool.get("type") == "function"
         ]
         trace_llm_call(
             input_messages=kwargs.get("messages"),
@@ -410,7 +400,7 @@ class HuggingFacePipelineCallable(PromptCallableBase):
 
 
 class ArbitraryCallable(PromptCallableBase):
-    def __init__(self, llm_api: Optional[Callable] = None, *args, **kwargs):
+    def __init__(self, llm_api: Callable | None = None, *args, **kwargs):
         llm_api_args = inspect.getfullargspec(llm_api)
         if not llm_api_args.varkw:
             raise ValueError("Custom LLM callables must accept **kwargs!")
@@ -479,10 +469,10 @@ class ArbitraryCallable(PromptCallableBase):
 
 
 def get_llm_ask(
-    llm_api: Optional[Callable] = None,
+    llm_api: Callable | None = None,
     *args,
     **kwargs,
-) -> Optional[PromptCallableBase]:
+) -> PromptCallableBase | None:
     if "temperature" not in kwargs:
         kwargs.update({"temperature": 0})
 
@@ -505,7 +495,7 @@ def get_llm_ask(
             return ArbitraryCallable(*args, llm_api=llm_api, **kwargs)
 
     try:
-        import manifest  # noqa: F401 # type: ignore
+        import manifest  # type: ignore
 
         if isinstance(llm_api, manifest.Manifest):
             return ManifestCallable(*args, client=llm_api, **kwargs)
@@ -513,7 +503,7 @@ def get_llm_ask(
         pass
 
     try:
-        from transformers import (  # noqa: F401 # type: ignore
+        from transformers import (  # type: ignore
             FlaxPreTrainedModel,
             GenerationMixin,
             PreTrainedModel,
@@ -536,7 +526,7 @@ def get_llm_ask(
         pass
 
     try:
-        from transformers import Pipeline  # noqa: F401 # type: ignore
+        from transformers import Pipeline  # type: ignore
 
         if isinstance(llm_api, Pipeline):
             # Couldn't find a constant for this
@@ -583,9 +573,9 @@ class AsyncPromptCallableBase(PromptCallableBase):
 class AsyncLiteLLMCallable(AsyncPromptCallableBase):
     async def invoke_llm(
         self,
-        text: Optional[str] = None,
-        instructions: Optional[str] = None,
-        messages: Optional[List[Dict]] = None,
+        text: str | None = None,
+        instructions: str | None = None,
+        messages: list[dict] | None = None,
         *args,
         **kwargs,
     ):
@@ -630,7 +620,7 @@ class AsyncLiteLLMCallable(AsyncPromptCallableBase):
         function_calling_tools = [
             tool.get("function")
             for tool in kwargs.get("tools", [])
-            if isinstance(tool, Dict) and tool.get("type") == "function"
+            if isinstance(tool, dict) and tool.get("type") == "function"
         ]
         trace_llm_call(
             input_messages=kwargs.get("messages"),
@@ -652,7 +642,7 @@ class AsyncLiteLLMCallable(AsyncPromptCallableBase):
             # response = cast(AsyncIterator[str], response)
             return LLMResponse(
                 output="",
-                # FIXME: Why is this different from the synchronous streaming implementation?  ## noqa: E501
+                # FIXME: Why is this different from the synchronous streaming implementation?  #
                 # This shouldn't be necessary: https://docs.litellm.ai/docs/completion/stream#async-streaming
                 async_stream_output=response.completion_stream,  # pyright: ignore[reportGeneralTypeIssues]
             )
@@ -695,7 +685,7 @@ class AsyncManifestCallable(AsyncPromptCallableBase):
         self,
         text: str,
         client: Any,
-        instructions: Optional[str] = None,
+        instructions: str | None = None,
         *args,
         **kwargs,
     ):
@@ -711,7 +701,7 @@ class AsyncManifestCallable(AsyncPromptCallableBase):
         ```
         """
         try:
-            import manifest  # noqa: F401 # type: ignore
+            import manifest  # type: ignore
         except ImportError:
             raise PromptCallableException(
                 "The `manifest` package is not installed. Install with `poetry add manifest-ml`"
@@ -801,7 +791,7 @@ class AsyncArbitraryCallable(AsyncPromptCallableBase):
             # the callable returns a generator object
             return LLMResponse(
                 output="",
-                # FIXME: Why is this different from the synchronous streaming implementation?  ## noqa: E501
+                # FIXME: Why is this different from the synchronous streaming implementation?  #
                 # This shouldn't be necessary: https://docs.litellm.ai/docs/completion/stream#async-streaming
                 async_stream_output=output.completion_stream,
             )
@@ -826,7 +816,7 @@ def get_async_llm_ask(
         pass
 
     try:
-        import manifest  # noqa: F401 # type: ignore
+        import manifest  # type: ignore
 
         if isinstance(llm_api, manifest.Manifest):
             return AsyncManifestCallable(*args, client=llm_api, **kwargs)
@@ -838,7 +828,7 @@ def get_async_llm_ask(
 
 
 def model_is_supported_server_side(
-    llm_api: Optional[Union[Callable, Callable[..., Awaitable[Any]]]] = None,
+    llm_api: Union[Callable, Callable[..., Awaitable[Any]]] | None = None,
     *args,
     **kwargs,
 ) -> bool:
@@ -852,9 +842,7 @@ def model_is_supported_server_side(
 
 
 # CONTINUOUS FIXME: Update with newly supported LLMs
-def get_llm_api_enum(
-    llm_api: Callable[..., Awaitable[Any]], *args, **kwargs
-) -> Optional[LLMResource]:
+def get_llm_api_enum(llm_api: Callable[..., Awaitable[Any]], *args, **kwargs) -> LLMResource | None:
     # TODO: Distinguish between v1 and v2
     model = get_llm_ask(llm_api, *args, **kwargs)
     if isinstance(model, LiteLLMCallable):

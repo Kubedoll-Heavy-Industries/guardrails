@@ -1,5 +1,3 @@
-from typing import List, Optional
-
 from guardrails.embedding import EmbeddingBase
 from guardrails.vectordb.base import VectorDBBase
 
@@ -14,7 +12,7 @@ faiss_error = "`faiss` is required for using vectordb.faiss.Install it with `poe
 
 
 class Faiss(VectorDBBase):
-    def __init__(self, index: "Index", embedder: EmbeddingBase, path: Optional[str] = None) -> None:
+    def __init__(self, index: "Index", embedder: EmbeddingBase, path: str | None = None) -> None:
         try:
             import faiss  # noqa: F401
         except ImportError:
@@ -24,9 +22,7 @@ class Faiss(VectorDBBase):
         self._index = index
 
     @classmethod
-    def new_flat_l2_index(
-        cls, vector_dim: int, embedder: EmbeddingBase, path: Optional[str] = None
-    ):
+    def new_flat_l2_index(cls, vector_dim: int, embedder: EmbeddingBase, path: str | None = None):
         try:
             import faiss
         except ImportError:
@@ -34,9 +30,7 @@ class Faiss(VectorDBBase):
         return cls(faiss.IndexFlatL2(vector_dim), embedder, path)
 
     @classmethod
-    def new_flat_ip_index(
-        cls, vector_dim: int, embedder: EmbeddingBase, path: Optional[str] = None
-    ):
+    def new_flat_ip_index(cls, vector_dim: int, embedder: EmbeddingBase, path: str | None = None):
         if faiss is None:
             raise ImportError(faiss_error)
         return cls(faiss.IndexFlatIP(vector_dim), embedder, path)
@@ -44,9 +38,9 @@ class Faiss(VectorDBBase):
     @classmethod
     def new_flat_l2_index_from_embedding(
         cls,
-        embedding: List[List[float]],
+        embedding: list[list[float]],
         embedder: EmbeddingBase,
-        path: Optional[str] = None,
+        path: str | None = None,
     ):
         if faiss is None:
             raise ImportError(faiss_error)
@@ -62,11 +56,11 @@ class Faiss(VectorDBBase):
         index = faiss.read_index(path)
         return cls(index, embedder, path)
 
-    def save(self, path: Optional[str] = None):
+    def save(self, path: str | None = None):
         write_path = path if path else self._path
         faiss.write_index(self._index, write_path)
 
-    def similarity_search_vector(self, vector: List[float], k: int) -> List[int]:
+    def similarity_search_vector(self, vector: list[float], k: int) -> list[int]:
         import numpy as np
 
         # FIXME is this correct usage of `search`?
@@ -75,8 +69,8 @@ class Faiss(VectorDBBase):
         return scores[0].tolist()
 
     def similarity_search_vector_with_threshold(
-        self, vector: List[float], k: int, threshold: float
-    ) -> List[int]:
+        self, vector: list[float], k: int, threshold: float
+    ) -> list[int]:
         import numpy as np
 
         # Call faiss range search and get all the vectors with a score >= threshold
@@ -91,7 +85,7 @@ class Faiss(VectorDBBase):
         sorted_indexes = indexes[sorted_indices]
         return sorted_indexes.tolist()[:k]
 
-    def add_vectors(self, vectors: List[List[float]]) -> None:
+    def add_vectors(self, vectors: list[list[float]]) -> None:
         import numpy as np
 
         # FIXME is this correct usage of `add`?

@@ -1,5 +1,5 @@
 import json
-from typing import Dict, List, Union
+from typing import Union
 
 import typer
 
@@ -8,7 +8,7 @@ from guardrails.cli.guardrails import guardrails
 from guardrails.hub_telemetry.hub_tracing import trace
 
 
-def validate_llm_output(rail: str, llm_output: str) -> Union[str, Dict, List, None]:
+def validate_llm_output(rail: str, llm_output: str) -> Union[str, dict, list, None]:
     """Validate guardrails.yml file."""
     guard = Guard.for_rail(rail)
     result = guard.parse(llm_output)

@@ -1,8 +1,9 @@
-from datetime import datetime
 import json
-from typing import Any, Optional
 import warnings
 from dataclasses import asdict, is_dataclass
+from datetime import datetime
+from typing import Any
+
 from pydantic import BaseModel
 
 from guardrails.classes.generic.default_json_encoder import DefaultJSONEncoder
@@ -26,7 +27,7 @@ def to_dict(o):
 
 
 # TODO: What other common cases we should consider?
-def serialize(val: Any) -> Optional[str]:
+def serialize(val: Any) -> str | None:
     try:
         return json.dumps(val, cls=DefaultJSONEncoder)
     except Exception as e:
@@ -37,7 +38,7 @@ def serialize(val: Any) -> Optional[str]:
 # We want to do the oppisite of what we did in the DefaultJSONEncoder
 # TODO: What's a good way to expose a configurable API for this?
 #       Do we wrap JSONDecoder with an extra layer to supply the original object?
-def deserialize(original: Optional[Any], serialized: Optional[str]) -> Any:
+def deserialize(original: Any | None, serialized: str | None) -> Any:
     try:
         if original is None or serialized is None:
             return None

@@ -1,6 +1,7 @@
-import unittest
-from guardrails.telemetry.common import recursive_key_operation, redact
 import ast
+import unittest
+
+from guardrails.telemetry.common import recursive_key_operation, redact
 
 
 # Test suite for recursive_key_operation function

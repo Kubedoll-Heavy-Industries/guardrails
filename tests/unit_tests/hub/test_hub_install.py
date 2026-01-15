@@ -1,13 +1,13 @@
+from unittest.mock import ANY, MagicMock, call
+
 import pytest
-from unittest.mock import ANY, call, MagicMock
+from guardrails_hub_types import Manifest
 
 from guardrails.classes.rc import RC
-from guardrails_hub_types import Manifest
+from guardrails.hub.install import LocalModelFlagNotSet, install
 from guardrails.hub.validator_package_service import (
     InvalidHubInstallURL,
 )
-
-from guardrails.hub.install import LocalModelFlagNotSet, install
 
 
 @pytest.mark.parametrize(
@@ -85,8 +85,8 @@ class TestInstall:
             ),
             call(
                 level=5,
-                msg="✅Successfully installed hub://guardrails/id!\n\nImport validator:\nfrom guardrails.hub import TestValidator\n\nGet more info:\nhttps://hub.guardrailsai.com/validator/guardrails/id\n",  # noqa
-            ),  # noqa
+                msg="✅Successfully installed hub://guardrails/id!\n\nImport validator:\nfrom guardrails.hub import TestValidator\n\nGet more info:\nhttps://hub.guardrailsai.com/validator/guardrails/id\n",
+            ),
         ]
         assert mock_logger_log.call_count == 3
         mock_logger_log.assert_has_calls(log_calls)
@@ -145,8 +145,8 @@ class TestInstall:
             ),
             call(
                 level=5,
-                msg="✅Successfully installed hub://guardrails/id!\n\nImport validator:\nfrom guardrails.hub import TestValidator\n\nGet more info:\nhttps://hub.guardrailsai.com/validator/guardrails/id\n",  # noqa
-            ),  # noqa
+                msg="✅Successfully installed hub://guardrails/id!\n\nImport validator:\nfrom guardrails.hub import TestValidator\n\nGet more info:\nhttps://hub.guardrailsai.com/validator/guardrails/id\n",
+            ),
         ]
         assert mock_logger_log.call_count == 3
         mock_logger_log.assert_has_calls(log_calls)
@@ -202,8 +202,8 @@ class TestInstall:
             ),
             call(
                 level=5,
-                msg="✅Successfully installed hub://guardrails/id!\n\nImport validator:\nfrom guardrails.hub import TestValidator\n\nGet more info:\nhttps://hub.guardrailsai.com/validator/guardrails/id\n",  # noqa
-            ),  # noqa
+                msg="✅Successfully installed hub://guardrails/id!\n\nImport validator:\nfrom guardrails.hub import TestValidator\n\nGet more info:\nhttps://hub.guardrailsai.com/validator/guardrails/id\n",
+            ),
         ]
         assert mock_logger_log.call_count == 3
         mock_logger_log.assert_has_calls(log_calls)
@@ -254,8 +254,8 @@ class TestInstall:
             call(level=5, msg="Installing hub://guardrails/id..."),
             call(
                 level=5,
-                msg="Installing models locally!",  # noqa
-            ),  # noqa
+                msg="Installing models locally!",
+            ),
         ]
 
         assert mock_logger_log.call_count == 3
@@ -419,8 +419,8 @@ class TestInstall:
             call(level=5, msg="Installing hub://guardrails/test-validator..."),
             call(
                 level=5,
-                msg=msg,  # noqa
-            ),  # noqa
+                msg=msg,
+            ),
         ]
 
         assert mock_logger_log.call_count == 3

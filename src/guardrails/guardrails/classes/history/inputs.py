@@ -1,13 +1,13 @@
-from typing import Any, Dict, List, Optional, Union
-
-from pydantic import Field
+from typing import Any, Union
 
 from guardrails_api_client import Inputs as IInputs
+from pydantic import Field
+
 from guardrails.classes.generic.arbitrary_model import ArbitraryModel
 from guardrails.classes.llm.prompt_callable import PromptCallableBase
-from guardrails.prompt.prompt import Prompt
-from guardrails.prompt.messages import Messages
 from guardrails.prompt.instructions import Instructions
+from guardrails.prompt.messages import Messages
+from guardrails.prompt.prompt import Prompt
 
 
 class Inputs(IInputs, ArbitraryModel):
@@ -31,36 +31,36 @@ class Inputs(IInputs, ArbitraryModel):
         stream (Optional[bool]): Whether or not streaming was used.
     """
 
-    llm_api: Optional[PromptCallableBase] = Field(
+    llm_api: PromptCallableBase | None = Field(
         description="The constructed class for calling the LLM.", default=None
     )
-    llm_output: Optional[str] = Field(
+    llm_output: str | None = Field(
         description="The string output from an external LLM call"
         "provided by the user via Guard.parse.",
         default=None,
     )
-    messages: Optional[Union[List[Dict[str, Union[str, Prompt, Instructions]]], Messages]] = Field(
+    messages: Union[list[dict[str, Union[str, Prompt, Instructions]]], Messages] | None = Field(
         description="The message history provided by the user for chat model calls.",
         default=None,
     )
-    prompt_params: Optional[Dict] = Field(
+    prompt_params: dict | None = Field(
         description="The parameters provided by the user"
         "that will be formatted into the final LLM prompt.",
         default=None,
     )
-    num_reasks: Optional[int] = Field(
+    num_reasks: int | None = Field(
         description="The total number of reasks allowed; user provided or defaulted.",
         default=None,
     )
-    metadata: Optional[Dict[str, Any]] = Field(
+    metadata: dict[str, Any] | None = Field(
         description="The metadata provided by the user to be used during validation.",
         default=None,
     )
-    full_schema_reask: Optional[bool] = Field(
+    full_schema_reask: bool | None = Field(
         description="Whether to perform reasks across the entire schemaor at the field level.",
         default=None,
     )
-    stream: Optional[bool] = Field(
+    stream: bool | None = Field(
         description="Whether to use streaming.",
         default=False,
     )
@@ -87,7 +87,7 @@ class Inputs(IInputs, ArbitraryModel):
             stream=self.stream,
         )
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return self.to_interface().to_dict()
 
     @classmethod
@@ -115,6 +115,6 @@ class Inputs(IInputs, ArbitraryModel):
         )
 
     @classmethod
-    def from_dict(cls, obj: Dict[str, Any]) -> "Inputs":
+    def from_dict(cls, obj: dict[str, Any]) -> "Inputs":
         i_inputs = IInputs.from_dict(obj) or IInputs()
         return cls.from_interface(i_inputs)

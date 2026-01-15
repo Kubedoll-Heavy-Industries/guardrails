@@ -3,6 +3,7 @@ import re
 
 from guardrails.cli.hub.hub import hub_command
 from guardrails.hub_telemetry.hub_tracing import trace
+
 from .console import console
 
 
@@ -18,7 +19,7 @@ def list():
     installed_validators = []
 
     if os.path.isfile(hub_init_file):
-        with open(hub_init_file, "r") as file:
+        with open(hub_init_file) as file:
             content = file.read()
             matches = re.findall(r"from .* import (\w+)", content)
             installed_validators.extend(matches)

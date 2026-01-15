@@ -1,9 +1,8 @@
-from typing import Optional
 from guardrails.classes.rc import RC
 
 
 # TODO: Consolidate with telemetry switches
-def get_use_remote_inference(rc: RC) -> Optional[bool]:
+def get_use_remote_inference(rc: RC) -> bool | None:
     """Load the use_remote_inferencing setting from the rc file.
 
     Args:

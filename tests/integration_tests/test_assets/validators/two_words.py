@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 from pydash.strings import words as _words
 
@@ -36,7 +36,7 @@ class TwoWords(Validator):
 
         return " ".join(words[:2])
 
-    def validate(self, value: Any, metadata: Dict) -> ValidationResult:
+    def validate(self, value: Any, metadata: dict) -> ValidationResult:
         logger.debug(f"Validating {value} is two words...")
 
         if len(value.split()) != 2:

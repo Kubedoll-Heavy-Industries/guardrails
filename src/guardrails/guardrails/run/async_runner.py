@@ -1,47 +1,45 @@
 import copy
 from functools import partial
-from typing import Any, Dict, List, Optional, cast
-
+from typing import Any, cast
 
 from guardrails import validator_service
+from guardrails.actions.reask import NonParseableReAsk, ReAsk
 from guardrails.classes.execution.guard_execution_options import GuardExecutionOptions
 from guardrails.classes.history import Call, Inputs, Iteration, Outputs
+from guardrails.classes.llm.llm_response import LLMResponse
 from guardrails.classes.output_type import OutputTypes
+from guardrails.constants import fail_status
 from guardrails.errors import ValidationError
+from guardrails.hub_telemetry.hub_tracing import async_trace
 from guardrails.llm_providers import AsyncPromptCallableBase
 from guardrails.logger import set_scope
+from guardrails.prompt import Prompt
 from guardrails.run.runner import Runner
 from guardrails.run.utils import messages_source
 from guardrails.schema.validator import schema_validation
-from guardrails.hub_telemetry.hub_tracing import async_trace
+from guardrails.telemetry import trace_async_call, trace_async_step
 from guardrails.types.inputs import MessageHistory
 from guardrails.types.pydantic import ModelOrListOfModels
 from guardrails.types.validator import ValidatorMap
 from guardrails.utils.exception_utils import UserFacingException
-from guardrails.classes.llm.llm_response import LLMResponse
-from guardrails.actions.reask import NonParseableReAsk, ReAsk
-from guardrails.telemetry import trace_async_call, trace_async_step
-
-from guardrails.constants import fail_status
-from guardrails.prompt import Prompt
 
 
 class AsyncRunner(Runner):
     def __init__(
         self,
         output_type: OutputTypes,
-        output_schema: Dict[str, Any],
+        output_schema: dict[str, Any],
         num_reasks: int,
         validation_map: ValidatorMap,
         *,
-        messages: Optional[List[Dict]] = None,
-        api: Optional[AsyncPromptCallableBase] = None,
-        metadata: Optional[Dict[str, Any]] = None,
-        output: Optional[str] = None,
-        base_model: Optional[ModelOrListOfModels] = None,
+        messages: list[dict] | None = None,
+        api: AsyncPromptCallableBase | None = None,
+        metadata: dict[str, Any] | None = None,
+        output: str | None = None,
+        base_model: ModelOrListOfModels | None = None,
         full_schema_reask: bool = False,
-        disable_tracer: Optional[bool] = True,
-        exec_options: Optional[GuardExecutionOptions] = None,
+        disable_tracer: bool | None = True,
+        exec_options: GuardExecutionOptions | None = None,
     ):
         super().__init__(
             output_type=output_type,
@@ -62,7 +60,7 @@ class AsyncRunner(Runner):
     # TODO: Refactor this to use inheritance and overrides
     # Why are we using a different method here instead of just overriding?
     @async_trace(name="/reasks", origin="AsyncRunner.async_run")
-    async def async_run(self, call_log: Call, prompt_params: Optional[Dict] = None) -> Call:
+    async def async_run(self, call_log: Call, prompt_params: dict | None = None) -> Call:
         """Execute the runner by repeatedly calling step until the reask budget
         is exhausted.
 
@@ -128,13 +126,13 @@ class AsyncRunner(Runner):
     async def async_step(
         self,
         index: int,
-        output_schema: Dict[str, Any],
+        output_schema: dict[str, Any],
         call_log: Call,
         *,
-        api: Optional[AsyncPromptCallableBase],
-        messages: Optional[List[Dict]] = None,
-        prompt_params: Optional[Dict] = None,
-        output: Optional[str] = None,
+        api: AsyncPromptCallableBase | None,
+        messages: list[dict] | None = None,
+        prompt_params: dict | None = None,
+        output: str | None = None,
     ) -> Iteration:
         """Run a full step."""
         prompt_params = prompt_params or {}
@@ -211,9 +209,9 @@ class AsyncRunner(Runner):
     @trace_async_call
     async def async_call(
         self,
-        messages: Optional[List[Dict]],
-        api: Optional[AsyncPromptCallableBase],
-        output: Optional[str] = None,
+        messages: list[dict] | None,
+        api: AsyncPromptCallableBase | None,
+        output: str | None = None,
     ) -> LLMResponse:
         """Run a step.
 
@@ -246,8 +244,8 @@ class AsyncRunner(Runner):
         iteration: Iteration,
         attempt_number: int,
         parsed_output: Any,
-        output_schema: Dict[str, Any],
-        stream: Optional[bool] = False,
+        output_schema: dict[str, Any],
+        stream: bool | None = False,
         **kwargs,
     ):
         """Validate the output."""
@@ -285,10 +283,10 @@ class AsyncRunner(Runner):
         call_log: Call,
         attempt_number: int,
         *,
-        messages: Optional[List[Dict]],
-        prompt_params: Optional[Dict] = None,
-        api: Optional[AsyncPromptCallableBase],
-    ) -> Optional[List[Dict]]:
+        messages: list[dict] | None,
+        prompt_params: dict | None = None,
+        api: AsyncPromptCallableBase | None,
+    ) -> list[dict] | None:
         """Prepare by running pre-processing and input validation.
 
         Returns:
@@ -316,7 +314,7 @@ class AsyncRunner(Runner):
         self,
         call_log: Call,
         messages: MessageHistory,
-        prompt_params: Dict,
+        prompt_params: dict,
         attempt_number: int,
     ) -> MessageHistory:
         formatted_messages = []

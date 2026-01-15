@@ -1,7 +1,7 @@
 import os
+
 import jwt
-from jwt import ExpiredSignatureError, DecodeError
-from typing import Optional
+from jwt import DecodeError, ExpiredSignatureError
 
 from guardrails.classes.rc import RC
 
@@ -35,7 +35,7 @@ class HttpError(Exception):
 VALIDATOR_HUB_SERVICE = os.getenv("GR_VALIDATOR_HUB_SERVICE", "https://hub.api.guardrailsai.com")
 
 
-def get_jwt_token(rc: RC) -> Optional[str]:
+def get_jwt_token(rc: RC) -> str | None:
     token = rc.token
 
     # check for jwt expiration

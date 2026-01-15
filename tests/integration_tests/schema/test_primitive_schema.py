@@ -1,9 +1,9 @@
 import json
 
-from guardrails.classes.validation.validator_reference import ValidatorReference
-from guardrails.classes.schema.processed_schema import ProcessedSchema
-from guardrails.schema.primitive_schema import primitive_to_schema
 from guardrails.classes.output_type import OutputTypes
+from guardrails.classes.schema.processed_schema import ProcessedSchema
+from guardrails.classes.validation.validator_reference import ValidatorReference
+from guardrails.schema.primitive_schema import primitive_to_schema
 from guardrails.validator_base import OnFailAction
 from tests.integration_tests.test_assets.validators import ValidChoices, ValidLength
 
@@ -12,7 +12,7 @@ class TestPrimitiveSchema:
     # Did this one first because it's what I was most concerned about
     def test_choice_case_happy_path(self):
         with open(
-            "tests/integration_tests/test_assets/json_schemas/string.json", "r"
+            "tests/integration_tests/test_assets/json_schemas/string.json"
         ) as choice_case_json_file:
             expected_schema = json.loads(choice_case_json_file.read())
 

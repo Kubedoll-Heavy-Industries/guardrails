@@ -1,14 +1,15 @@
-from typing import Any, Callable, Dict, List, Union
 import difflib
+from collections.abc import Callable
+from typing import Any, Union
 
 from guardrails.validator_base import (
+    ErrorSpan,
     FailResult,
     PassResult,
     ValidationResult,
     Validator,
     register_validator,
 )
-from guardrails.validator_base import ErrorSpan
 
 
 @register_validator(name="guardrails/detect_pii", data_type="string")
@@ -92,16 +93,16 @@ class MockDetectPII(Validator):
 
     def __init__(
         self,
-        pii_entities: Union[str, List[str], None] = None,
+        pii_entities: Union[str, list[str], None] = None,
         on_fail: Union[Callable[..., Any], None] = None,
-        replace_map: Dict[str, str] = {},
+        replace_map: dict[str, str] = {},
         **kwargs,
     ):
         super().__init__(on_fail, pii_entities=pii_entities, **kwargs)
         self.pii_entities = pii_entities
         self.replace_map = replace_map
 
-    def get_anonymized_text(self, text: str, entities: List[str]) -> str:
+    def get_anonymized_text(self, text: str, entities: list[str]) -> str:
         """Analyze and anonymize the text for PII.
 
         Args:
@@ -117,7 +118,7 @@ class MockDetectPII(Validator):
             anonymized_text = anonymized_text.replace(key, self.replace_map[key])
         return anonymized_text
 
-    def validate(self, value: Any, metadata: Dict[str, Any]) -> ValidationResult:
+    def validate(self, value: Any, metadata: dict[str, Any]) -> ValidationResult:
         # Entities to filter passed through metadata take precedence
         pii_entities = metadata.get("pii_entities", self.pii_entities)
         if pii_entities is None:

@@ -1,8 +1,8 @@
-from unittest.mock import mock_open, call
+from unittest.mock import call, mock_open
 
 import pytest
-
 from guardrails_hub_types import Manifest
+
 from guardrails.cli.hub.uninstall import remove_from_hub_inits
 
 manifest_mock = Manifest.from_dict(

@@ -1,13 +1,14 @@
-from guardrails_api_client.models.simple_types import SimpleTypes
+from typing import Any, Union, cast
+
 import jsonref
-from typing import Any, Dict, List, Optional, Set, Union, cast
+from guardrails_api_client.models.simple_types import SimpleTypes
 
 from guardrails.utils.safe_get import safe_get
 
 
 ### Reading and Writing Payloads by JSON Path ###
 def get_value_from_path(
-    object: Optional[Union[str, List[Any], Dict[Any, Any]]], property_path: str
+    object: Union[str, list[Any], dict[Any, Any]] | None, property_path: str
 ) -> Any:
     if object is None:
         return None
@@ -40,7 +41,7 @@ def fill_list(desired_length: int, array: list):
 
 # FIXME: Better Typing
 def write_value_to_path(
-    write_object: Union[str, List[Any], Dict[Any, Any]],
+    write_object: Union[str, list[Any], dict[Any, Any]],
     property_path: str,
     value: Any,
 ) -> Any:
@@ -71,24 +72,24 @@ def write_value_to_path(
 
 ### Reading and Manipulating JSON Schemas ###
 def _get_all_paths(
-    json_schema: Dict[str, Any],
+    json_schema: dict[str, Any],
     *,
-    paths: Optional[Set[str]] = None,
+    paths: set[str] | None = None,
     json_path: str = "$",
-) -> Set[str]:
+) -> set[str]:
     if not paths:
         paths = set()
     # Append the parent path for this iteration
     paths.add(json_path)
 
     # Object Schema
-    schema_properties: Dict[str, Any] = json_schema.get("properties", {})
+    schema_properties: dict[str, Any] = json_schema.get("properties", {})
     for k, v in schema_properties.items():
         child_path = f"{json_path}.{k}"
         _get_all_paths(v, paths=paths, json_path=child_path)
 
     ## Object Schema allows anonymous properties
-    additional_properties: Dict[str, Any] = json_schema.get("additionalProperties", False)
+    additional_properties: dict[str, Any] = json_schema.get("additionalProperties", False)
     schema_type = json_schema.get("type")
     # NOTE: Technically we should check for schema compositions
     #   that would yield an object as well,
@@ -105,28 +106,28 @@ def _get_all_paths(
         _get_all_paths(schema_items, paths=paths, json_path=json_path)
 
     # Conditional SubSchema
-    if_block: Dict[str, Any] = json_schema.get("if", {})
+    if_block: dict[str, Any] = json_schema.get("if", {})
     if if_block:
         _get_all_paths(if_block, paths=paths, json_path=json_path)
 
-    then_block: Dict[str, Any] = json_schema.get("then", {})
+    then_block: dict[str, Any] = json_schema.get("then", {})
     if then_block:
         _get_all_paths(then_block, paths=paths, json_path=json_path)
 
-    else_block: Dict[str, Any] = json_schema.get("else", {})
+    else_block: dict[str, Any] = json_schema.get("else", {})
     if else_block:
         _get_all_paths(else_block, paths=paths, json_path=json_path)
 
     # Schema Composition
-    oneOf: List[Dict[str, Any]] = json_schema.get("oneOf", [])
+    oneOf: list[dict[str, Any]] = json_schema.get("oneOf", [])
     for sub_schema in oneOf:
         _get_all_paths(sub_schema, paths=paths, json_path=json_path)
 
-    anyOf: List[Dict[str, Any]] = json_schema.get("anyOf", [])
+    anyOf: list[dict[str, Any]] = json_schema.get("anyOf", [])
     for sub_schema in anyOf:
         _get_all_paths(sub_schema, paths=paths, json_path=json_path)
 
-    allOf: List[Dict[str, Any]] = json_schema.get("allOf", [])
+    allOf: list[dict[str, Any]] = json_schema.get("allOf", [])
     for sub_schema in allOf:
         _get_all_paths(sub_schema, paths=paths, json_path=json_path)
 
@@ -134,12 +135,12 @@ def _get_all_paths(
 
 
 def get_all_paths(
-    json_schema: Dict[str, Any],
+    json_schema: dict[str, Any],
     *,
-    paths: Optional[Set[str]] = None,
+    paths: set[str] | None = None,
     json_path: str = "$",
-) -> Set[str]:
+) -> set[str]:
     """Takes a JSON Schema and returns all possible JSONPaths within that
     schema."""
-    dereferenced_schema = cast(Dict[str, Any], jsonref.replace_refs(json_schema))
+    dereferenced_schema = cast(dict[str, Any], jsonref.replace_refs(json_schema))
     return _get_all_paths(dereferenced_schema, paths=paths, json_path=json_path)

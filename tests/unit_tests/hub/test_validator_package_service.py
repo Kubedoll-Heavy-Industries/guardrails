@@ -1,15 +1,16 @@
+import sys
 from pathlib import Path
 from typing import cast
-import pytest
-import sys
-from unittest.mock import call, patch, MagicMock
+from unittest.mock import MagicMock, call, patch
 
+import pytest
 from guardrails_hub_types import Manifest
+
 from guardrails.cli.hub.utils import PipProcessError
 from guardrails.hub.validator_package_service import (
     FailedToLocateModule,
-    ValidatorPackageService,
     InvalidHubInstallURL,
+    ValidatorPackageService,
 )
 from tests.unit_tests.mocks.mock_file import MockFile
 
@@ -69,7 +70,7 @@ class TestAddToHubInits:
         mock_open.side_effect = [hub_init_file]
 
         mock_hub_read = mocker.patch.object(hub_init_file, "read")
-        mock_hub_read.return_value = "from guardrails_ai_grhub_id import helper, TestValidator"  # noqa
+        mock_hub_read.return_value = "from guardrails_ai_grhub_id import helper, TestValidator"
 
         hub_seek_spy = mocker.spy(hub_init_file, "seek")
         hub_write_spy = mocker.spy(hub_init_file, "write")
@@ -115,7 +116,7 @@ class TestAddToHubInits:
 
         mock_hub_read = mocker.patch.object(hub_init_file, "read")
         mock_hub_read.return_value = (
-            "from guardrails.hub.other_org.other_validator.validator import OtherValidator"  # noqa
+            "from guardrails.hub.other_org.other_validator.validator import OtherValidator"
         )
 
         hub_seek_spy = mocker.spy(hub_init_file, "seek")
@@ -142,9 +143,7 @@ class TestAddToHubInits:
         assert hub_write_spy.call_count == 2
         hub_write_calls = [
             call("\n"),
-            call(
-                "from guardrails_ai_grhub_id import TestValidator"  # noqa
-            ),
+            call("from guardrails_ai_grhub_id import TestValidator"),
         ]
         hub_write_spy.assert_has_calls(hub_write_calls)
 
@@ -173,7 +172,7 @@ class TestAddToHubInits:
         mock_open.side_effect = [hub_init_file]
 
         mock_hub_read = mocker.patch.object(hub_init_file, "read")
-        mock_hub_read.return_value = "from guardrails_ai_grhub_id import TestValidator"  # noqa
+        mock_hub_read.return_value = "from guardrails_ai_grhub_id import TestValidator"
 
         mock_is_file = mocker.patch("guardrails.hub.validator_package_service.os.path.isfile")
         mock_is_file.return_value = False
@@ -336,7 +335,7 @@ class TestRunPostInstall:
         mock_subprocess_check_output.assert_called_once_with(
             [
                 mock_sys_executable,
-                "./site_packages/guardrails_ai_grhub_id/post_install.py",  # noqa
+                "./site_packages/guardrails_ai_grhub_id/post_install.py",
             ]
         )
 

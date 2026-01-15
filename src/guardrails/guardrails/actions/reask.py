@@ -1,14 +1,16 @@
-from copy import deepcopy
 import json
-from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
+from collections.abc import Sequence
+from copy import deepcopy
+from typing import Any, Optional, Union
 
 from guardrails_api_client import Reask as IReask
+
 from guardrails.classes.execution.guard_execution_options import GuardExecutionOptions
 from guardrails.classes.output_type import OutputTypes
 from guardrails.classes.validation.validation_result import FailResult
 from guardrails.prompt.instructions import Instructions
-from guardrails.prompt.prompt import Prompt
 from guardrails.prompt.messages import Messages
+from guardrails.prompt.prompt import Prompt
 from guardrails.schema.generator import generate_example
 from guardrails.schema.rail_schema import json_schema_to_rail_output
 from guardrails.types.validator import ValidatorMap
@@ -26,13 +28,13 @@ class ReAsk(IReask):
     """
 
     incorrect_value: Any
-    fail_results: List[FailResult]
+    fail_results: list[FailResult]
 
     @classmethod
     def from_interface(cls, reask: IReask) -> "ReAsk":
         fail_results = []
         if reask.fail_results:
-            fail_results: List[FailResult] = [
+            fail_results: list[FailResult] = [
                 FailResult.from_interface(fail_result) for fail_result in reask.fail_results
             ]
 
@@ -59,7 +61,7 @@ class ReAsk(IReask):
         return cls(incorrect_value=reask.incorrect_value, fail_results=fail_results)
 
     @classmethod
-    def from_dict(cls, obj: Dict[str, Any]) -> Optional["ReAsk"]:
+    def from_dict(cls, obj: dict[str, Any]) -> Optional["ReAsk"]:
         i_reask = super().from_dict(obj)
         if not i_reask:
             return None
@@ -77,7 +79,7 @@ class FieldReAsk(ReAsk):
 
     # FIXME: This shouldn't be optional
     # We should be able to assign it on init now
-    path: Optional[List[Any]] = None
+    path: list[Any] | None = None
 
 
 class SkeletonReAsk(ReAsk):
@@ -87,8 +89,6 @@ class SkeletonReAsk(ReAsk):
     Inherits from ReAsk.
     """
 
-    pass
-
 
 class NonParseableReAsk(ReAsk):
     """An implementation of ReAsk that is used to reask for structured data
@@ -97,14 +97,12 @@ class NonParseableReAsk(ReAsk):
     Inherits from ReAsk.
     """
 
-    pass
-
 
 ### Internal Helper Methods ###
 def get_reask_subschema(
-    json_schema: Dict[str, Any],
-    reasks: Optional[List[FieldReAsk]] = None,
-) -> Dict[str, Any]:
+    json_schema: dict[str, Any],
+    reasks: list[FieldReAsk] | None = None,
+) -> dict[str, Any]:
     """Prune schema of any subschemas that are not in `reasks`.
 
     Return the schema with only the subschemas that are being `reask`ed for and
@@ -162,7 +160,7 @@ def get_reask_subschema(
     return root
 
 
-def prune_obj_for_reasking(obj: Any) -> Union[None, Dict, List, ReAsk]:
+def prune_obj_for_reasking(obj: Any) -> Union[None, dict, list, ReAsk]:
     """After validation, we get a nested dictionary where some keys may be
     ReAsk objects.
 
@@ -211,7 +209,7 @@ def prune_obj_for_reasking(obj: Any) -> Union[None, Dict, List, ReAsk]:
         return None
 
 
-def update_response_by_path(output: dict, path: List[Any], value: Any) -> None:
+def update_response_by_path(output: dict, path: list[Any], value: Any) -> None:
     """Update the output by path.
 
     Args:
@@ -226,27 +224,27 @@ def update_response_by_path(output: dict, path: List[Any], value: Any) -> None:
 
 ### Guard Execution Methods ###
 def introspect(
-    data: Optional[Union[ReAsk, str, Dict, List]],
-) -> Tuple[Sequence[ReAsk], Optional[Union[str, Dict, List]]]:
-    if isinstance(data, FieldReAsk):
-        return [data], None
-    elif isinstance(data, SkeletonReAsk):
-        return [data], None
-    elif isinstance(data, NonParseableReAsk):
+    data: Union[ReAsk, str, dict, list] | None,
+) -> tuple[Sequence[ReAsk], Union[str, dict, list] | None]:
+    if (
+        isinstance(data, FieldReAsk)
+        or isinstance(data, SkeletonReAsk)
+        or isinstance(data, NonParseableReAsk)
+    ):
         return [data], None
     return gather_reasks(data)
 
 
 def get_reask_setup_for_string(
     output_type: OutputTypes,
-    output_schema: Dict[str, Any],
+    output_schema: dict[str, Any],
     validation_map: ValidatorMap,
     reasks: Sequence[ReAsk],
     *,
-    validation_response: Optional[Union[str, List, Dict, ReAsk]] = None,
-    prompt_params: Optional[Dict[str, Any]] = None,
-    exec_options: Optional[GuardExecutionOptions] = None,
-) -> Tuple[Dict[str, Any], Messages]:
+    validation_response: Union[str, list, dict, ReAsk] | None = None,
+    prompt_params: dict[str, Any] | None = None,
+    exec_options: GuardExecutionOptions | None = None,
+) -> tuple[dict[str, Any], Messages]:
     prompt_params = prompt_params or {}
     exec_options = exec_options or GuardExecutionOptions()
 
@@ -303,7 +301,7 @@ def get_reask_setup_for_string(
     return output_schema, messages
 
 
-def get_original_prompt(exec_options: Optional[GuardExecutionOptions] = None) -> str:
+def get_original_prompt(exec_options: GuardExecutionOptions | None = None) -> str:
     exec_options = exec_options or GuardExecutionOptions()
     original_messages = exec_options.messages or []
     messages_prompt = next(
@@ -320,16 +318,16 @@ def get_original_prompt(exec_options: Optional[GuardExecutionOptions] = None) ->
 
 def get_reask_setup_for_json(
     output_type: OutputTypes,
-    output_schema: Dict[str, Any],
+    output_schema: dict[str, Any],
     validation_map: ValidatorMap,
     reasks: Sequence[ReAsk],
     *,
-    parsing_response: Optional[Union[str, List, Dict, ReAsk]] = None,
-    validation_response: Optional[Union[str, List, Dict, ReAsk]] = None,
-    use_full_schema: Optional[bool] = False,
-    prompt_params: Optional[Dict[str, Any]] = None,
-    exec_options: Optional[GuardExecutionOptions] = None,
-) -> Tuple[Dict[str, Any], Messages]:
+    parsing_response: Union[str, list, dict, ReAsk] | None = None,
+    validation_response: Union[str, list, dict, ReAsk] | None = None,
+    use_full_schema: bool | None = False,
+    prompt_params: dict[str, Any] | None = None,
+    exec_options: GuardExecutionOptions | None = None,
+) -> tuple[dict[str, Any], Messages]:
     reask_schema = output_schema
     is_skeleton_reask = not any(isinstance(reask, FieldReAsk) for reask in reasks)
     is_nonparseable_reask = any(isinstance(reask, NonParseableReAsk) for reask in reasks)
@@ -463,16 +461,16 @@ def get_reask_setup_for_json(
 
 def get_reask_setup(
     output_type: OutputTypes,
-    output_schema: Dict[str, Any],
+    output_schema: dict[str, Any],
     validation_map: ValidatorMap,
     reasks: Sequence[ReAsk],
     *,
-    parsing_response: Optional[Union[str, List, Dict, ReAsk]] = None,
-    validation_response: Optional[Union[str, List, Dict, ReAsk]] = None,
-    use_full_schema: Optional[bool] = False,
-    prompt_params: Optional[Dict[str, Any]] = None,
-    exec_options: Optional[GuardExecutionOptions] = None,
-) -> Tuple[Dict[str, Any], Messages]:
+    parsing_response: Union[str, list, dict, ReAsk] | None = None,
+    validation_response: Union[str, list, dict, ReAsk] | None = None,
+    use_full_schema: bool | None = False,
+    prompt_params: dict[str, Any] | None = None,
+    exec_options: GuardExecutionOptions | None = None,
+) -> tuple[dict[str, Any], Messages]:
     prompt_params = prompt_params or {}
     exec_options = exec_options or GuardExecutionOptions()
 
@@ -501,8 +499,8 @@ def get_reask_setup(
 
 ### Post-Processing Methods ###
 def gather_reasks(
-    validated_output: Optional[Union[ReAsk, str, Dict, List]],
-) -> Tuple[List[ReAsk], Optional[Union[str, Dict, List]]]:
+    validated_output: Union[ReAsk, str, dict, list] | None,
+) -> tuple[list[ReAsk], Union[str, dict, list] | None]:
     """Traverse output and gather all ReAsk objects.
 
     Args:
@@ -522,7 +520,7 @@ def gather_reasks(
     reasks = []
 
     def _gather_reasks_in_dict(
-        original: Dict, valid_output: Dict, path: Optional[List[Union[str, int]]] = None
+        original: dict, valid_output: dict, path: list[Union[str, int]] | None = None
     ) -> None:
         if path is None:
             path = []
@@ -540,7 +538,7 @@ def gather_reasks(
         return
 
     def _gather_reasks_in_list(
-        original: List, valid_output: List, path: Optional[List[Union[str, int]]] = None
+        original: list, valid_output: list, path: list[Union[str, int]] | None = None
     ) -> None:
         if path is None:
             path = []
@@ -555,11 +553,11 @@ def gather_reasks(
                 _gather_reasks_in_list(item, valid_output[idx], path + [idx])
         return
 
-    if isinstance(validated_output, Dict):
+    if isinstance(validated_output, dict):
         valid_output = deepcopy(validated_output)
         _gather_reasks_in_dict(validated_output, valid_output)
         return reasks, valid_output
-    elif isinstance(validated_output, List):
+    elif isinstance(validated_output, list):
         valid_output = deepcopy(validated_output)
         _gather_reasks_in_list(validated_output, valid_output)
         return reasks, valid_output
@@ -592,7 +590,7 @@ def sub_reasks_with_fixed_values(value: Any) -> Any:
     return copy
 
 
-def merge_reask_output(previous_response, reask_response) -> Dict:
+def merge_reask_output(previous_response, reask_response) -> dict:
     """Merge the reask output into the original output.
 
     Args:

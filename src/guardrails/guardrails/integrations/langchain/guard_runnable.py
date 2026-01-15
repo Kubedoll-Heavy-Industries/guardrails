@@ -1,8 +1,8 @@
-from guardrails.integrations.langchain.base_runnable import BaseRunnable
-from guardrails.guard import Guard
-from guardrails.errors import ValidationError
 from guardrails.classes.output_type import OT
 from guardrails.classes.validation_outcome import ValidationOutcome
+from guardrails.errors import ValidationError
+from guardrails.guard import Guard
+from guardrails.integrations.langchain.base_runnable import BaseRunnable
 
 
 class GuardRunnable(BaseRunnable):
@@ -17,9 +17,6 @@ class GuardRunnable(BaseRunnable):
         validated_output = response.validated_output
         if validated_output is None or response.validation_passed is False:
             raise ValidationError(
-                (
-                    "The response from the LLM failed validation!"
-                    "See `guard.history` for more details."
-                )
+                "The response from the LLM failed validation!See `guard.history` for more details."
             )
         return validated_output

@@ -1,15 +1,11 @@
 import json
+import logging
 import os
 import re
 import subprocess
 import sys
-
-from typing import Literal
-import logging
-
 from email.parser import BytesHeaderParser
-from typing import List, Union
-
+from typing import Literal, Union
 
 json_format: Literal["json"] = "json"
 string_format: Literal["string"] = "string"
@@ -52,7 +48,7 @@ class PipProcessError(Exception):
 def pip_process_with_custom_exception(
     action: str,
     package: str = "",
-    flags: List[str] = [],
+    flags: list[str] = [],
     format: Union[Literal["string"], Literal["json"]] = string_format,
     quiet: bool = False,
     no_color: bool = False,
@@ -104,7 +100,7 @@ def pip_process_with_custom_exception(
 def pip_process(
     action: str,
     package: str = "",
-    flags: List[str] = [],
+    flags: list[str] = [],
     format: Union[Literal["string"], Literal["json"]] = string_format,
     quiet: bool = False,
     no_color: bool = False,
@@ -149,12 +145,10 @@ def pip_process(
 
     except subprocess.CalledProcessError as exc:
         logger.error(
-            (
-                f"Failed to {action} {package}\n"
-                f"Exit code: {exc.returncode}\n"
-                f"stderr: {(exc.stderr or '').strip()}\n"
-                f"stdout: {(exc.stdout or '').strip()}"
-            )
+            f"Failed to {action} {package}\n"
+            f"Exit code: {exc.returncode}\n"
+            f"stderr: {(exc.stderr or '').strip()}\n"
+            f"stdout: {(exc.stdout or '').strip()}"
         )
         sys.exit(1)
     except Exception as e:

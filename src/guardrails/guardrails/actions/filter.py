@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any
 
 
 class Filter:
@@ -9,7 +9,7 @@ def apply_filters(value: Any) -> Any:
     """Recursively filter out any values that are instances of Filter."""
     if isinstance(value, Filter):
         pass
-    elif isinstance(value, List):
+    elif isinstance(value, list):
         # Cleaner syntax but requires two iterations
         # filtered_list = list(filter(None, map(apply_filters, value)))
         filtered_list = []
@@ -19,7 +19,7 @@ def apply_filters(value: Any) -> Any:
                 filtered_list.append(filtered_item)
 
         return filtered_list
-    elif isinstance(value, Dict):
+    elif isinstance(value, dict):
         # Cleaner syntax but requires two iterations
         # filtered_dict = {
         #     k: apply_filters(v)

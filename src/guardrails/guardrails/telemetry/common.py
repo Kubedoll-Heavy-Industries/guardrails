@@ -1,18 +1,22 @@
 import json
-from typing import Any, Callable, Dict, Optional, Union, List
-from opentelemetry.baggage import get_baggage
+from collections.abc import Callable
+from typing import Any, Union
+
 from opentelemetry import context
+from opentelemetry.baggage import get_baggage
 from opentelemetry.context import Context
-from opentelemetry.trace import Tracer, Span
+from opentelemetry.trace import Span, Tracer
 
 from guardrails.logger import logger
 from guardrails.stores.context import (
     get_tracer as get_context_tracer,
+)
+from guardrails.stores.context import (
     get_tracer_context,
 )
 
 
-def get_tracer(tracer: Optional[Tracer] = None) -> Optional[Tracer]:
+def get_tracer(tracer: Tracer | None = None) -> Tracer | None:
     # TODO: Do we ever need to consider supporting non-otel tracers?
     _tracer = tracer if tracer is not None else get_context_tracer()
     return _tracer
@@ -26,7 +30,7 @@ def get_current_context() -> Union[Context, None]:
     return otel_current_context or tracer_context
 
 
-def get_span(span: Optional[Span] = None) -> Optional[Span]:
+def get_span(span: Span | None = None) -> Span | None:
     if span is not None and hasattr(span, "add_event"):
         return span
     try:
@@ -40,7 +44,7 @@ def get_span(span: Optional[Span] = None) -> Optional[Span]:
         return None
 
 
-def serialize(val: Any) -> Optional[str]:
+def serialize(val: Any) -> str | None:
     try:
         if val is None:
             return None
@@ -55,7 +59,7 @@ def serialize(val: Any) -> Optional[str]:
         return None
 
 
-def to_dict(val: Any) -> Dict:
+def to_dict(val: Any) -> dict:
     try:
         if val is None:
             return {}
@@ -121,7 +125,6 @@ def add_user_attributes(span: Span):
         span.set_attribute("app", str(app))
     except Exception as e:
         logger.warning("Error loading baggage user information", e)
-        pass
 
 
 def redact(value: str) -> str:
@@ -154,10 +157,7 @@ def ismatchingkey(
         bool: True if any of the keys to match are found in the target key,
               False otherwise.
     """
-    for k in keys_to_match:
-        if k in target_key:
-            return True
-    return False
+    return any(k in target_key for k in keys_to_match)
 
 
 def can_convert_to_dict(s: str) -> bool:
@@ -181,10 +181,10 @@ def can_convert_to_dict(s: str) -> bool:
 
 
 def recursive_key_operation(
-    data: Optional[Union[Dict[str, Any], List[Any], str]],
+    data: Union[dict[str, Any], list[Any], str] | None,
     operation: Callable[[str], str],
-    keys_to_match: List[str] = ["key", "token", "password"],
-) -> Optional[Union[Dict[str, Any], List[Any], str]]:
+    keys_to_match: list[str] = ["key", "token", "password"],
+) -> Union[dict[str, Any], list[Any], str] | None:
     """Recursively traverses a dictionary, list, or JSON string and applies a
     specified operation to the values of keys that match any in the
     `keys_to_match` list. This function is useful for masking sensitive data

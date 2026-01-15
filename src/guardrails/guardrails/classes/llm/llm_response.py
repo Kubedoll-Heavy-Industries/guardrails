@@ -1,6 +1,7 @@
 import asyncio
+from collections.abc import AsyncIterator, Iterator
 from itertools import tee
-from typing import Any, Dict, Iterator, Optional, AsyncIterator
+from typing import Any
 
 from guardrails_api_client import LLMResponse as ILLMResponse
 from pydantic.config import ConfigDict
@@ -32,11 +33,11 @@ class LLMResponse(ILLMResponse):
     # Pydantic Config
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    prompt_token_count: Optional[int] = None
-    response_token_count: Optional[int] = None
+    prompt_token_count: int | None = None
+    response_token_count: int | None = None
     output: str
-    stream_output: Optional[Iterator] = None
-    async_stream_output: Optional[AsyncIterator] = None
+    stream_output: Iterator | None = None
+    async_stream_output: AsyncIterator | None = None
 
     def to_interface(self) -> ILLMResponse:
         stream_output = None
@@ -59,7 +60,7 @@ class LLMResponse(ILLMResponse):
                 async_stream_output.append(so)
                 awaited_stream_output.append(str(async_to_sync(so)))
 
-            self.async_stream_output = aiter(async_stream_output)  # type: ignore  # noqa: F821
+            self.async_stream_output = aiter(async_stream_output)  # type: ignore
 
         return ILLMResponse(
             prompt_token_count=self.prompt_token_count,  # type: ignore - pyright doesn't understand aliases
@@ -69,14 +70,14 @@ class LLMResponse(ILLMResponse):
             async_stream_output=async_stream_output,  # type: ignore - pyright doesn't understand aliases
         )
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return self.to_interface().to_dict()
 
     @classmethod
     def from_interface(cls, i_llm_response: ILLMResponse) -> "LLMResponse":
         stream_output = None
         if i_llm_response.stream_output:
-            stream_output = iter([so for so in i_llm_response.stream_output])
+            stream_output = iter(list(i_llm_response.stream_output))
 
         async_stream_output = None
         if i_llm_response.async_stream_output:
@@ -96,7 +97,7 @@ class LLMResponse(ILLMResponse):
         )
 
     @classmethod
-    def from_dict(cls, obj: Dict[str, Any]) -> "LLMResponse":
+    def from_dict(cls, obj: dict[str, Any]) -> "LLMResponse":
         i_llm_response = super().from_dict(obj) or ILLMResponse(output="")
 
         return cls.from_interface(i_llm_response)

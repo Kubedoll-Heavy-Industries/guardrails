@@ -1,5 +1,5 @@
 import json
-from typing import Dict, List
+
 import pytest
 from pydantic import BaseModel
 
@@ -169,17 +169,17 @@ def test_pydantic_with_full_schema_reask(mocker):
 
 
 class ContainerModel(BaseModel):
-    annotated_dict: Dict[str, str] = {}
-    annotated_dict_in_list: List[Dict[str, str]] = []
-    annotated_list: List[str] = []
-    annotated_list_in_dict: Dict[str, List[str]] = {}
+    annotated_dict: dict[str, str] = {}
+    annotated_dict_in_list: list[dict[str, str]] = []
+    annotated_list: list[str] = []
+    annotated_list_in_dict: dict[str, list[str]] = {}
 
 
 class ContainerModel2(BaseModel):
-    dict_: Dict = {}
-    dict_in_list: List[Dict] = []
-    list_: List = []
-    list_in_dict: Dict[str, List] = {}
+    dict_: dict = {}
+    dict_in_list: list[dict] = []
+    list_: list = []
+    list_in_dict: dict[str, list] = {}
 
 
 @pytest.mark.parametrize(

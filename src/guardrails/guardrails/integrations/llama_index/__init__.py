@@ -1,8 +1,8 @@
-from guardrails.integrations.llama_index.guardrails_query_engine import (
-    GuardrailsQueryEngine,
-)
 from guardrails.integrations.llama_index.guardrails_chat_engine import (
     GuardrailsChatEngine,
 )
+from guardrails.integrations.llama_index.guardrails_query_engine import (
+    GuardrailsQueryEngine,
+)
 
-__all__ = ["GuardrailsQueryEngine", "GuardrailsChatEngine"]
+__all__ = ["GuardrailsChatEngine", "GuardrailsQueryEngine"]

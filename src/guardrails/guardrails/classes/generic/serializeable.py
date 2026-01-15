@@ -3,7 +3,7 @@ import json
 import sys
 from dataclasses import InitVar, asdict, dataclass, field, is_dataclass
 from json import JSONEncoder
-from typing import Any, Dict
+from typing import Any
 
 from pydash.strings import snake_case
 
@@ -33,7 +33,7 @@ class Serializeable:
     encoder: InitVar[JSONEncoder] = field(**encoder_kwargs)
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]):
+    def from_dict(cls, data: dict[str, Any]):
         annotations = get_annotations(cls)
         attributes = dict.keys(annotations)
         snake_case_kwargs = {
@@ -43,7 +43,7 @@ class Serializeable:
         return cls(**snake_case_kwargs)  # type: ignore
 
     @property
-    def __dict__(self) -> Dict[str, Any]:
+    def __dict__(self) -> dict[str, Any]:
         return asdict(self)
 
     def to_json(self):

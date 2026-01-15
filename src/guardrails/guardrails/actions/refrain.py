@@ -1,4 +1,5 @@
-from typing import Any, Dict, List, Union
+from typing import Any, Union
+
 from guardrails.classes.output_type import OutputTypes
 from guardrails.logger import logger
 
@@ -7,7 +8,7 @@ class Refrain:
     pass
 
 
-def check_for_refrain(value: Union[List, Dict]) -> bool:
+def check_for_refrain(value: Union[list, dict]) -> bool:
     if isinstance(value, Refrain):
         return True
     elif isinstance(value, list):

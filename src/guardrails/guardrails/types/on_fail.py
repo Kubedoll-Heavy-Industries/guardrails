@@ -1,5 +1,6 @@
 from enum import Enum
-from typing import Optional, Union
+from typing import Union
+
 from guardrails.logger import logger
 
 
@@ -31,7 +32,7 @@ class OnFailAction(str, Enum):
     CUSTOM = "custom"
 
     @staticmethod
-    def get(key: Optional[Union[str, "OnFailAction"]], default=None):
+    def get(key: Union[str, "OnFailAction"] | None, default=None):
         try:
             if not key:
                 return default

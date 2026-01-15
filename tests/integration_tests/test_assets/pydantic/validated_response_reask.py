@@ -1,16 +1,15 @@
-# ruff: noqa: E501
-from typing import Any, Dict, List
+from typing import Any
 
 from pydantic import BaseModel, Field
 
 from guardrails import Validator, register_validator
 from guardrails.actions.reask import FieldReAsk
-from guardrails.types import OnFailAction
 from guardrails.classes.validation.validation_result import (
     FailResult,
     PassResult,
     ValidationResult,
 )
+from guardrails.types import OnFailAction
 
 prompt = """Generate data for possible users in accordance with the specification below.
 
@@ -23,7 +22,7 @@ ${gr.complete_xml_suffix_v2}"""
 
 @register_validator(name="zip_code_must_be_numeric", data_type="string")
 class ZipCodeMustBeNumeric(Validator):
-    def validate(self, value: Any, metadata: Dict[str, Any]) -> ValidationResult:
+    def validate(self, value: Any, metadata: dict[str, Any]) -> ValidationResult:
         if not value.isnumeric():
             return FailResult(error_message="Zip code must be numeric.")
         return PassResult()
@@ -31,7 +30,7 @@ class ZipCodeMustBeNumeric(Validator):
 
 @register_validator(name="age_must_be_between_0_and_150", data_type="integer")
 class AgeMustBeBetween0And150(Validator):
-    def validate(self, value: Any, metadata: Dict[str, Any]) -> ValidationResult:
+    def validate(self, value: Any, metadata: dict[str, Any]) -> ValidationResult:
         if not 0 <= value <= 150:
             return FailResult(error_message="Age must be between 0 and 150.")
         return PassResult()
@@ -39,7 +38,7 @@ class AgeMustBeBetween0And150(Validator):
 
 @register_validator(name="zip_code_in_california", data_type="string")
 class ZipCodeInCalifornia(Validator):
-    def validate(self, value: Any, metadata: Dict[str, Any]) -> ValidationResult:
+    def validate(self, value: Any, metadata: dict[str, Any]) -> ValidationResult:
         if not value.startswith("9"):
             return FailResult(error_message="Zip code must be in California, and start with 9.")
         if value == "90210":
@@ -80,7 +79,7 @@ class ListOfPeople(BaseModel):
         people (List[Person]): A list of people.
     """
 
-    people: List[Person]
+    people: list[Person]
 
 
 VALIDATED_OUTPUT_1 = {

@@ -1,13 +1,20 @@
-from typing import Any, Dict, List, Literal, Optional, Union
-from pydantic import Field
+from typing import Any, Literal, Union
+
 from guardrails_api_client import (
-    ValidationResult as IValidationResult,  # noqa
-    PassResult as IPassResult,
-    FailResult as IFailResult,
     ErrorSpan as IErrorSpan,
 )
+from guardrails_api_client import (
+    FailResult as IFailResult,
+)
+from guardrails_api_client import (
+    PassResult as IPassResult,
+)
+from guardrails_api_client import (
+    ValidationResult as IValidationResult,
+)
+from pydantic import BaseModel, Field
+
 from guardrails.classes.generic.arbitrary_model import ArbitraryModel
-from pydantic import BaseModel
 
 
 class ValidationResult(IValidationResult, ArbitraryModel):
@@ -23,8 +30,8 @@ class ValidationResult(IValidationResult, ArbitraryModel):
     """
 
     outcome: str
-    metadata: Optional[Dict[str, Any]] = None
-    validated_chunk: Optional[Any] = None
+    metadata: dict[str, Any] | None = None
+    validated_chunk: Any | None = None
 
     @classmethod
     def from_interface(
@@ -46,7 +53,7 @@ class ValidationResult(IValidationResult, ArbitraryModel):
         )
 
     @classmethod
-    def from_dict(cls, obj: Dict[str, Any]) -> "ValidationResult":
+    def from_dict(cls, obj: dict[str, Any]) -> "ValidationResult":
         i_validation_result = IValidationResult.from_dict(obj) or IValidationResult(outcome="fail")
         return cls.from_interface(i_validation_result)
 
@@ -67,7 +74,7 @@ class PassResult(ValidationResult, IPassResult):
         pass
 
     # should only be used if Validator.override_value_on_pass is True
-    value_override: Optional[Any] = Field(default=ValueOverrideSentinel)
+    value_override: Any | None = Field(default=ValueOverrideSentinel)
 
     def to_interface(self) -> IPassResult:
         i_pass_result = IPassResult(outcome=self.outcome, metadata=self.metadata)
@@ -77,7 +84,7 @@ class PassResult(ValidationResult, IPassResult):
 
         return i_pass_result
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         # Pydantic's model_dump method isn't working properly
         _dict = {
             "outcome": self.outcome,
@@ -108,12 +115,12 @@ class FailResult(ValidationResult, IFailResult):
     outcome: Literal["fail"] = "fail"
 
     error_message: str
-    fix_value: Optional[Any] = None
+    fix_value: Any | None = None
     """Segments that caused validation to fail.
 
     May not exist for non-streamed output.
     """
-    error_spans: Optional[List["ErrorSpan"]] = None
+    error_spans: list["ErrorSpan"] | None = None
 
     def __init__(self, error_message: str, **kwargs) -> None:
         # This is a silly thing to force a friendly error message and to give type hints
@@ -144,14 +151,14 @@ class FailResult(ValidationResult, IFailResult):
         )
 
     @classmethod
-    def from_dict(cls, obj: Dict[str, Any]) -> "FailResult":
+    def from_dict(cls, obj: dict[str, Any]) -> "FailResult":
         i_fail_result = IFailResult.from_dict(obj) or IFailResult(
             outcome="Fail",
             error_message="",  # type: ignore - pyright doesn't understand aliases
         )
         return cls.from_interface(i_fail_result)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         # Pydantic's model_dump method isn't working properly
         _dict = {
             "outcome": self.outcome,
@@ -189,4 +196,4 @@ class ErrorSpan(IErrorSpan, ArbitraryModel):
 class StreamValidationResult(BaseModel):
     chunk: Any
     original_text: str
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]

@@ -2,7 +2,6 @@
 
 import re
 from string import Template
-from typing import List, Optional
 
 import regex
 
@@ -17,9 +16,9 @@ class BasePrompt:
     def __init__(
         self,
         source: str,
-        output_schema: Optional[str] = None,
+        output_schema: str | None = None,
         *,
-        xml_output_schema: Optional[str] = None,
+        xml_output_schema: str | None = None,
     ):
         """Initialize and substitute constants in the prompt."""
         self._source = source
@@ -71,7 +70,7 @@ class BasePrompt:
 
         return text
 
-    def get_prompt_variables(self) -> List[str]:
+    def get_prompt_variables(self) -> list[str]:
         return self.variable_names
 
     def format(self, **kwargs) -> "BasePrompt":
@@ -82,7 +81,7 @@ class BasePrompt:
         for var in self.variable_names:
             self.source = self.source.replace(f"{{{var}}}", f"{{{var}:}}")
 
-    def get_format_instructions_idx(self, text: str) -> Optional[int]:
+    def get_format_instructions_idx(self, text: str) -> int | None:
         """Get the index of the first format instruction in the prompt.
 
         It checks to see where the first instance of any constant is in the text.

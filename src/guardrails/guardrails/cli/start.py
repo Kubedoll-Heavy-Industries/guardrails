@@ -1,12 +1,11 @@
-from typing import Optional
 import typer
 
 from guardrails.cli.guardrails import guardrails
+from guardrails.cli.hub.console import console
 from guardrails.cli.hub.utils import pip_process
 from guardrails.cli.logger import logger
 from guardrails.cli.telemetry import trace_if_enabled
 from guardrails.cli.version import version_warnings_if_applicable
-from guardrails.cli.hub.console import console
 from guardrails.settings import settings
 
 
@@ -21,15 +20,15 @@ def api_is_installed() -> bool:
 
 @guardrails.command()
 def start(
-    env: Optional[str] = typer.Option(
+    env: str | None = typer.Option(
         default="",
         help="An env file to load environment variables from.",
     ),
-    config: Optional[str] = typer.Option(
+    config: str | None = typer.Option(
         default="",
         help="A config file to load Guards from.",
     ),
-    port: Optional[int] = typer.Option(
+    port: int | None = typer.Option(
         default=8000,
         help="The port to run the server on.",
     ),

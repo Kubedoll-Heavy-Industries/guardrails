@@ -1,5 +1,4 @@
 import threading
-from typing import Optional
 
 from guardrails.classes.rc import RC
 
@@ -10,13 +9,13 @@ class Settings:
     _rc: RC
     _watch_mode_enabled: bool
     """Whether to use a local server for running Guardrails."""
-    use_server: Optional[bool]
+    use_server: bool | None
     """Whether to disable tracing.
 
     Traces are only ever sent to a telemetry sink you specify via
     environment variables or by instantiating a TracerProvider.
     """
-    disable_tracing: Optional[bool]
+    disable_tracing: bool | None
 
     def __new__(cls) -> "Settings":
         if cls._instance is None:

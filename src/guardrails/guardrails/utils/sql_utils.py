@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import List, Optional
 
 try:
     import sqlalchemy
@@ -18,7 +17,7 @@ class SQLDriver(ABC):
     """
 
     @abstractmethod
-    def validate_sql(self, query: str) -> List[str]: ...
+    def validate_sql(self, query: str) -> list[str]: ...
 
     @abstractmethod
     def get_schema(self) -> str: ...
@@ -30,7 +29,7 @@ class SimpleSqlDriver(SQLDriver):
     Does not understands dialects and is not connected to a database.
     """
 
-    def validate_sql(self, query: str) -> List[str]:
+    def validate_sql(self, query: str) -> list[str]:
         import sqlvalidator
 
         sql_query = sqlvalidator.parse(query)
@@ -49,7 +48,7 @@ class SqlAlchemyDriver(SQLDriver):
     by connecting to the database.
     """
 
-    def __init__(self, schema_file: Optional[str], conn: Optional[str]) -> None:
+    def __init__(self, schema_file: str | None, conn: str | None) -> None:
         if not _HAS_SQLALCHEMY:
             raise ImportError(
                 """The functionality requires sqlalchemy to be installed.
@@ -79,8 +78,8 @@ class SqlAlchemyDriver(SQLDriver):
 
                 self._conn.execute(text(schema))
 
-    def validate_sql(self, query: str) -> List[str]:
-        exceptions: List[str] = []
+    def validate_sql(self, query: str) -> list[str]:
+        exceptions: list[str] = []
         try:
             self._conn.execute(text(query))
         except Exception as ex:
@@ -116,7 +115,7 @@ class SqlAlchemyDriver(SQLDriver):
         return "\n".join(formatted_schema)
 
 
-def create_sql_driver(schema_file: Optional[str] = None, conn: Optional[str] = None) -> SQLDriver:
+def create_sql_driver(schema_file: str | None = None, conn: str | None = None) -> SQLDriver:
     if schema_file is None and conn is None:
         return SimpleSqlDriver()
     return SqlAlchemyDriver(schema_file=schema_file, conn=conn)

@@ -1,22 +1,22 @@
-from typing import Any, Optional, Dict, List, cast
-from guardrails import Guard
-from guardrails.errors import ValidationError
-from guardrails.classes.validation_outcome import ValidationOutcome
+from typing import Any, Optional, cast
 
+from guardrails import Guard
+from guardrails.classes.validation_outcome import ValidationOutcome
+from guardrails.errors import ValidationError
 
 try:
     import llama_index  # noqa: F401
-    from llama_index.core.query_engine import BaseQueryEngine
-    from llama_index.core.schema import QueryBundle
-    from llama_index.core.callbacks import CallbackManager
     from llama_index.core.base.response.schema import (
         RESPONSE_TYPE,
-        Response,
-        StreamingResponse,
         AsyncStreamingResponse,
         PydanticResponse,
+        Response,
+        StreamingResponse,
     )
+    from llama_index.core.callbacks import CallbackManager
     from llama_index.core.prompts.mixin import PromptMixinType
+    from llama_index.core.query_engine import BaseQueryEngine
+    from llama_index.core.schema import QueryBundle
 except ImportError:
     raise ImportError(
         "llama_index is not installed. Please install it with "
@@ -31,7 +31,7 @@ class GuardrailsQueryEngine(BaseQueryEngine):
         self,
         engine: BaseQueryEngine,
         guard: Guard,
-        guard_kwargs: Optional[Dict[str, Any]] = None,
+        guard_kwargs: dict[str, Any] | None = None,
         callback_manager: Optional["CallbackManager"] = None,
     ):
         self._engine = engine
@@ -43,7 +43,7 @@ class GuardrailsQueryEngine(BaseQueryEngine):
     def guard(self) -> Guard:
         return self._guard
 
-    def engine_api(self, *, messages: List[Dict[str, str]], **kwargs) -> str:
+    def engine_api(self, *, messages: list[dict[str, str]], **kwargs) -> str:
         query = messages[0]["content"]
         response = self._engine.query(query)
         self._engine_response = response
@@ -87,16 +87,14 @@ class GuardrailsQueryEngine(BaseQueryEngine):
                             else json.dumps(validated_output.validated_output)
                         )
                         self._engine_response.response = (
-                            self._engine_response.response.__class__.model_validate_json(  # noqa: E501
-                                json_str
-                            )
+                            self._engine_response.response.__class__.model_validate_json(json_str)
                         )
                 else:
                     raise ValueError("Unsupported response type")
         except ValidationError as e:
-            raise ValidationError(f"Validation failed: {str(e)}")
+            raise ValidationError(f"Validation failed: {e!s}")
         except Exception as e:
-            raise RuntimeError(f"An error occurred during query processing: {str(e)}")
+            raise RuntimeError(f"An error occurred during query processing: {e!s}")
         return self._engine_response
 
     def _update_response_metadata(self, validated_output):

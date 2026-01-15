@@ -1,22 +1,24 @@
 import json
 import os
 import sys
-from typing import Any, Iterator, Optional
+from collections.abc import Iterator
+from typing import Any
 
 import requests
-from guardrails_api_client.configuration import Configuration
-from guardrails_api_client.api_client import ApiClient
 from guardrails_api_client.api.guard_api import GuardApi
 from guardrails_api_client.api.validate_api import ValidateApi
+from guardrails_api_client.api_client import ApiClient
+from guardrails_api_client.configuration import Configuration
+from guardrails_api_client.exceptions import BadRequestException
 from guardrails_api_client.models import (
     Guard,
     ValidatePayload,
+)
+from guardrails_api_client.models import (
     ValidationOutcome as IValidationOutcome,
 )
 
-from guardrails_api_client.exceptions import BadRequestException
 from guardrails.errors import ValidationError
-
 from guardrails.logger import logger
 
 
@@ -28,7 +30,7 @@ class GuardrailsApiClient:
     base_url: str
     api_key: str
 
-    def __init__(self, base_url: Optional[str] = None, api_key: Optional[str] = None):
+    def __init__(self, base_url: str | None = None, api_key: str | None = None):
         self.base_url = (
             base_url
             if base_url is not None
@@ -50,7 +52,7 @@ class GuardrailsApiClient:
             guard_name=guard.name, body=guard, _request_timeout=self.timeout
         )
 
-    def fetch_guard(self, guard_name: str) -> Optional[Guard]:
+    def fetch_guard(self, guard_name: str) -> Guard | None:
         try:
             return self._guard_api.get_guard(guard_name=guard_name)
         except Exception as e:
@@ -61,7 +63,7 @@ class GuardrailsApiClient:
         self,
         guard: Guard,
         payload: ValidatePayload,
-        openai_api_key: Optional[str] = None,
+        openai_api_key: str | None = None,
     ):
         try:
             _openai_api_key = (
@@ -79,7 +81,7 @@ class GuardrailsApiClient:
         self,
         guard: Guard,
         payload: ValidatePayload,
-        openai_api_key: Optional[str] = None,
+        openai_api_key: str | None = None,
     ) -> Iterator[Any]:
         _openai_api_key = (
             openai_api_key if openai_api_key is not None else os.environ.get("OPENAI_API_KEY")

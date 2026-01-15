@@ -1,7 +1,6 @@
 import guardrails as gd
-from guardrails.classes.llm.llm_response import LLMResponse
-
 import tests.integration_tests.test_assets.validators  # noqa
+from guardrails.classes.llm.llm_response import LLMResponse
 
 from .test_assets import python_rail
 

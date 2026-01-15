@@ -1,9 +1,11 @@
 import asyncio
 import json
 import os
-import openai
+from collections.abc import Callable
 from string import Template
-from typing import Callable, Dict, Optional, Type, cast
+from typing import cast
+
+import openai
 
 from guardrails.classes import ValidationOutcome
 from guardrails.document_store import DocumentStoreBase, EphemeralDocumentStore
@@ -43,7 +45,7 @@ I will give you a list of examples. Write a SQL query similar to the examples be
 """
 
 
-def example_formatter(input: str, output: str, output_schema: Optional[Callable] = None) -> str:
+def example_formatter(input: str, output: str, output_schema: Callable | None = None) -> str:
     if output_schema is not None:
         output = output_schema(output)
 
@@ -60,22 +62,22 @@ class Text2Sql:
     def __init__(
         self,
         conn_str: str,
-        schema_file: Optional[str] = None,
-        examples: Optional[Dict] = None,
-        embedding: Type[EmbeddingBase] = OpenAIEmbedding,
-        vector_db: Type[VectorDBBase] = Faiss,
-        document_store: Type[DocumentStoreBase] = EphemeralDocumentStore,
-        rail_spec: Optional[str] = None,
-        rail_params: Optional[Dict] = None,
+        schema_file: str | None = None,
+        examples: dict | None = None,
+        embedding: type[EmbeddingBase] = OpenAIEmbedding,
+        vector_db: type[VectorDBBase] = Faiss,
+        document_store: type[DocumentStoreBase] = EphemeralDocumentStore,
+        rail_spec: str | None = None,
+        rail_params: dict | None = None,
         example_formatter: Callable = example_formatter,
-        reask_messages: list[Dict[str, str]] = [
+        reask_messages: list[dict[str, str]] = [
             {
                 "role": "user",
                 "content": REASK_PROMPT,
             }
         ],
-        llm_api: Optional[Callable] = None,
-        llm_api_kwargs: Optional[Dict] = None,
+        llm_api: Callable | None = None,
+        llm_api_kwargs: dict | None = None,
         num_relevant_examples: int = 2,
     ):
         """Initialize the text2sql application.
@@ -122,10 +124,10 @@ class Text2Sql:
     def _init_guard(
         self,
         conn_str: str,
-        schema_file: Optional[str] = None,
-        rail_spec: Optional[str] = None,
-        rail_params: Optional[Dict] = None,
-        reask_messages: list[Dict[str, str]] = [
+        schema_file: str | None = None,
+        rail_spec: str | None = None,
+        rail_params: dict | None = None,
+        reask_messages: list[dict[str, str]] = [
             {
                 "role": "user",
                 "content": REASK_PROMPT,
@@ -140,7 +142,7 @@ class Text2Sql:
                 rail_params["schema_file"] = ""
 
         # Load the rail specification.
-        with open(rail_spec, "r") as f:
+        with open(rail_spec) as f:
             rail_spec_str = f.read()
 
         # Substitute the parameters in the rail specification.
@@ -154,11 +156,11 @@ class Text2Sql:
 
     def _create_docstore_with_examples(
         self,
-        examples: Optional[Dict],
-        embedding: Type[EmbeddingBase],
-        vector_db: Type[VectorDBBase],
-        document_store: Type[DocumentStoreBase],
-    ) -> Optional[DocumentStoreBase]:
+        examples: dict | None,
+        embedding: type[EmbeddingBase],
+        vector_db: type[VectorDBBase],
+        document_store: type[DocumentStoreBase],
+    ) -> DocumentStoreBase | None:
         if examples is None:
             return None
 
@@ -176,7 +178,7 @@ class Text2Sql:
     def output_schema_formatter(output) -> str:
         return json.dumps({"generated_sql": output}, indent=4)
 
-    def __call__(self, text: str) -> Optional[str]:
+    def __call__(self, text: str) -> str | None:
         """Run text2sql on a text query and return the SQL query."""
 
         if self.store is not None:
@@ -206,7 +208,7 @@ class Text2Sql:
                     **self.llm_api_kwargs,
                 )
                 response = cast(ValidationOutcome, response)
-                validated_output: Dict = cast(Dict, response.validated_output)
+                validated_output: dict = cast(dict, response.validated_output)
                 output = validated_output["generated_sql"]
             except TypeError:
                 output = None

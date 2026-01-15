@@ -1,11 +1,11 @@
 import json
-from typing import Dict, List, Optional, Union
+from typing import Union
 
 from guardrails.formatters.base_formatter import BaseFormatter
 from guardrails.llm_providers import (
     ArbitraryCallable,
-    HuggingFacePipelineCallable,
     HuggingFaceModelCallable,
+    HuggingFacePipelineCallable,
 )
 
 
@@ -26,7 +26,7 @@ def _deref_schema_path(schema: dict, path: Union[list, str]):
 
 
 def _jsonschema_to_jsonformer(
-    schema: dict, path: Optional[list] = None, objdefs: Optional[dict] = None
+    schema: dict, path: list | None = None, objdefs: dict | None = None
 ) -> dict:
     """Converts the large-ish JSONSchema standard into the JSONFormer schema
     format.
@@ -98,7 +98,7 @@ class JsonFormatter(BaseFormatter):
 
             def fn(
                 *args,
-                messages: Optional[List[Dict[str, str]]] = None,
+                messages: list[dict[str, str]] | None = None,
                 **kwargs,
             ) -> str:
                 prompt = ""
@@ -124,7 +124,7 @@ class JsonFormatter(BaseFormatter):
 
             def fn(
                 *args,
-                messages: Optional[List[Dict[str, str]]] = None,
+                messages: list[dict[str, str]] | None = None,
                 **kwargs,
             ) -> str:
                 prompt = ""

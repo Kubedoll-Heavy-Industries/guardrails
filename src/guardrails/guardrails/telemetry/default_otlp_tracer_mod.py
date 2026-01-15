@@ -1,8 +1,8 @@
 import os
 import sys
+import threading
 
 from opentelemetry import trace
-from opentelemetry.trace import Tracer
 
 # TODO: Make the option between GRPC and HTTP configurable
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
@@ -13,8 +13,7 @@ from opentelemetry.sdk.trace.export import (
     ConsoleSpanExporter,
     SimpleSpanProcessor,
 )
-
-import threading
+from opentelemetry.trace import Tracer
 
 from guardrails.version import GUARDRAILS_VERSION
 

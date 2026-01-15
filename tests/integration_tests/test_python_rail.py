@@ -1,6 +1,6 @@
 import json
 from datetime import date, time
-from typing import List, Literal, Union
+from typing import Literal, Union
 
 import pytest
 from pydantic import BaseModel, Field, field_validator, model_validator
@@ -8,13 +8,13 @@ from pydantic import BaseModel, Field, field_validator, model_validator
 import guardrails as gd
 from guardrails import Validator, register_validator
 from guardrails.classes.llm.llm_response import LLMResponse
-from guardrails.types import OnFailAction
 from guardrails.classes.validation.validation_result import (
     FailResult,
     PassResult,
     ValidationResult,
 )
-from tests.integration_tests.test_assets.validators import ValidLength, TwoWords
+from guardrails.types import OnFailAction
+from tests.integration_tests.test_assets.validators import TwoWords, ValidLength
 
 from .test_assets import python_rail, string
 
@@ -88,7 +88,7 @@ class Movie(BaseModel):
 
 class Director(BaseModel):
     name: str = Field(validators=[IsValidDirector()])
-    movies: List[Movie]
+    movies: list[Movie]
 
 
 def test_python_rail(mocker):

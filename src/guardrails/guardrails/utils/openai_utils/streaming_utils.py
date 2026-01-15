@@ -1,7 +1,6 @@
-from typing import Dict, List
-from guardrails.logger import logger
-
 import tiktoken
+
+from guardrails.logger import logger
 
 
 def num_tokens_from_string(text: str, model_name: str) -> int:
@@ -25,7 +24,7 @@ def num_tokens_from_string(text: str, model_name: str) -> int:
 
 
 def num_tokens_from_messages(
-    messages: List[Dict[str, str]], model: str = "gpt-3.5-turbo-0613"
+    messages: list[dict[str, str]], model: str = "gpt-3.5-turbo-0613"
 ) -> int:
     """Return the number of tokens used by a list of messages."""
     try:

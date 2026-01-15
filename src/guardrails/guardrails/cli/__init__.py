@@ -1,5 +1,5 @@
 import guardrails.cli.configure  # noqa
-import guardrails.cli.start  # noqa
+import guardrails.cli.start
 import guardrails.cli.validate  # noqa
 from guardrails.cli.create import create_command  # noqa: F401
 from guardrails.cli.guardrails import guardrails as cli

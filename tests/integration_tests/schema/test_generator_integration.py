@@ -3,22 +3,21 @@ import re
 
 import pytest
 
-from guardrails.schema.generator import generate_example, gen_string
-from guardrails.schema.validator import validate_payload, SchemaValidationError
-
+from guardrails.schema.generator import gen_string, generate_example
+from guardrails.schema.validator import SchemaValidationError, validate_payload
 
 with open(
-    "tests/integration_tests/test_assets/json_schemas/choice_case.json", "r"
+    "tests/integration_tests/test_assets/json_schemas/choice_case.json"
 ) as choice_case_json_file:
     choice_case_json_schema = json.loads(choice_case_json_file.read())
 
 with open(
-    "tests/integration_tests/test_assets/json_schemas/choice_case_openapi.json", "r"
+    "tests/integration_tests/test_assets/json_schemas/choice_case_openapi.json"
 ) as choice_case_openapi_file:
     choice_case_openapi_schema = json.loads(choice_case_openapi_file.read())
 
 with open(
-    "tests/integration_tests/test_assets/json_schemas/credit_card_agreement.json", "r"
+    "tests/integration_tests/test_assets/json_schemas/credit_card_agreement.json"
 ) as credit_card_agreement_file:
     credit_card_agreement_schema = json.loads(credit_card_agreement_file.read())
 

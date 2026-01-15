@@ -1,8 +1,9 @@
 from unittest.mock import ANY, MagicMock, call
-from typer.testing import CliRunner
-from guardrails.cli.hub.install import hub_command
 
 import pytest
+from typer.testing import CliRunner
+
+from guardrails.cli.hub.install import hub_command
 
 
 class TestInstall:
@@ -193,7 +194,7 @@ class TestPipProcess:
         debug_calls = [
             call("running pip show  pip"),
             call(
-                "JSON parse exception in decoding output from pip show pip. Falling back to accumulating the byte stream"  # noqa
+                "JSON parse exception in decoding output from pip show pip. Falling back to accumulating the byte stream"
             ),
         ]
         mock_logger_debug.assert_has_calls(debug_calls)

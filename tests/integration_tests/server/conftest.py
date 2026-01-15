@@ -19,7 +19,6 @@ from testcontainers.core.container import DockerContainer
 from testcontainers.core.network import Network
 from testcontainers.core.waiting_utils import wait_for_logs
 
-
 # Configuration via environment variables
 GUARDRAILS_IMAGE = os.getenv("GUARDRAILS_TEST_IMAGE", "guardrails-server:ci")
 OLLAMA_HOST = os.getenv("OLLAMA_HOST")  # Use host Ollama if set

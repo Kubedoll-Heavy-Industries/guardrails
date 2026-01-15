@@ -1,8 +1,10 @@
 import json
-from guardrails_api_client import SimpleTypes
+from collections.abc import Callable
+from typing import Any, Union, cast
+
 import jsonref
 import regex
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union, cast
+from guardrails_api_client import SimpleTypes
 
 from guardrails.actions.reask import NonParseableReAsk
 from guardrails.classes.output_type import OutputTypes
@@ -12,9 +14,7 @@ from guardrails.utils.safe_get import safe_get
 
 
 ### String to Dictionary Parsing ###
-def has_code_block(
-    string_value: str, code_type: str = ""
-) -> Tuple[bool, Optional[int], Optional[int]]:
+def has_code_block(string_value: str, code_type: str = "") -> tuple[bool, int | None, int | None]:
     """Checks if a string contains a code block denoted by leading and trailing
     tripple ticks (```) with an optional code type for the opening tag.
 
@@ -26,7 +26,7 @@ def has_code_block(
         bool: Whether or not the string contains the specified type of code block.
         int: The starting index of the code block.
         int: The ending index of the code block.
-    """  # noqa
+    """
     block_border = "```"
     block_start_border = f"{block_border}{code_type}"
 
@@ -43,7 +43,7 @@ def has_code_block(
     return (False, None, None)
 
 
-def get_code_block(string_value: str, start: int, end: int, code_type: Optional[str] = "") -> str:
+def get_code_block(string_value: str, start: int, end: int, code_type: str | None = "") -> str:
     """Takes a string, start and end indexes, and an optional code type to
     extract a code block from a string.
 
@@ -55,7 +55,7 @@ def get_code_block(string_value: str, start: int, end: int, code_type: Optional[
 
     Returns:
         str: The contents of the code block.
-    """  # noqa
+    """
     trimmed_input = string_value
 
     block_border = "```"
@@ -72,7 +72,7 @@ def get_code_block(string_value: str, start: int, end: int, code_type: Optional[
 
 def extract_json_from_ouput(
     output: str,
-) -> Tuple[Optional[Union[Dict, List]], Optional[Exception]]:
+) -> tuple[Union[dict, list] | None, Exception | None]:
     # Find and extract json from code blocks
     extracted_code_block = output
     has_json_block, json_start, json_end = has_code_block(output, "json")
@@ -125,7 +125,7 @@ def is_valid_fragment(fragment: str, verified: set) -> bool:
         return False
 
 
-def parse_fragment(fragment: str) -> Tuple[Union[str, List, Dict], Optional[str]]:
+def parse_fragment(fragment: str) -> tuple[Union[str, list, dict], str | None]:
     """Parse the fragment into a dict."""
 
     # Complete the JSON fragment to handle missing brackets
@@ -152,7 +152,7 @@ def parse_fragment(fragment: str) -> Tuple[Union[str, List, Dict], Optional[str]
 
     # Parse the fragment
     try:
-        parsed_fragment: Union[Dict, List] = json.loads(fragment)
+        parsed_fragment: Union[dict, list] = json.loads(fragment)
         return parsed_fragment, None
     except ValueError as e:
         return fragment, str(e)
@@ -161,9 +161,9 @@ def parse_fragment(fragment: str) -> Tuple[Union[str, List, Dict], Optional[str]
 ### LLM Output Parsing ###
 def parse_json_llm_output(
     output: str, **kwargs
-) -> Tuple[
-    Union[str, List, Dict, NonParseableReAsk, None],
-    Union[Optional[Exception], str, bool, None],
+) -> tuple[
+    Union[str, list, dict, NonParseableReAsk, None],
+    Union[Exception | None, str, bool, None],
 ]:
     if kwargs.get("stream", False):
         # Do expected behavior for StreamRunner
@@ -196,7 +196,7 @@ def parse_json_llm_output(
     return parsed_output, None
 
 
-def parse_string_llm_output(output: str) -> Tuple[str, Optional[Exception]]:
+def parse_string_llm_output(output: str) -> tuple[str, Exception | None]:
     # Return a ValueError if the output is empty, else None
     error = ValueError("Empty response received.") if not output else None
     return output, error
@@ -209,18 +209,18 @@ def parse_llm_output(output: str, output_type: OutputTypes, **kwargs):
 
 
 def prune_extra_keys(
-    payload: Union[str, List[Any], Dict[str, Any]],
-    schema: Dict[str, Any],
+    payload: Union[str, list[Any], dict[str, Any]],
+    schema: dict[str, Any],
     *,
     json_path: str = "$",
-    all_json_paths: Optional[Set[str]] = None,
-) -> Union[str, List[Any], Dict[str, Any]]:
+    all_json_paths: set[str] | None = None,
+) -> Union[str, list[Any], dict[str, Any]]:
     if all_json_paths is None or not len(all_json_paths):
         all_json_paths = get_all_paths(schema)
 
     if isinstance(payload, dict):
         # Do full lookbehind
-        wildcards: List[str] = [path.split(".*")[0] for path in all_json_paths if ".*" in path]
+        wildcards: list[str] = [path.split(".*")[0] for path in all_json_paths if ".*" in path]
         ancestor_is_wildcard = any(w in json_path for w in wildcards)
         actual_keys = list(payload.keys())
         for key in actual_keys:
@@ -262,7 +262,7 @@ def try_json_parse(value: str) -> Any:
 
 
 def coerce_to_type(
-    payload: Union[str, List[Any], Dict[str, Any], Any], schema_type: SimpleTypes
+    payload: Union[str, list[Any], dict[str, Any], Any], schema_type: SimpleTypes
 ) -> Any:
     if schema_type == SimpleTypes.ARRAY:
         if isinstance(payload, str):
@@ -298,8 +298,8 @@ def coerce_to_type(
 
 
 def coerce_property(
-    payload: Union[str, List[Any], Dict[str, Any], Any], schema: Dict[str, Any]
-) -> Union[str, List[Any], Dict[str, Any]]:
+    payload: Union[str, list[Any], dict[str, Any], Any], schema: dict[str, Any]
+) -> Union[str, list[Any], dict[str, Any]]:
     schema_type = schema.get("type")
     if schema_type:
         payload = coerce_to_type(payload, schema_type)
@@ -319,7 +319,7 @@ def coerce_property(
             possible_values.append(coerce_property(payload, sub_schema))
             payload = safe_get(list(filter(None, possible_values)), 0, payload)
 
-    all_of: List[Dict[str, Any]] = schema.get("allOf", [])
+    all_of: list[dict[str, Any]] = schema.get("allOf", [])
     if all_of:
         if_blocks = [sub for sub in all_of if sub.get("if")]
         if if_blocks:
@@ -340,7 +340,7 @@ def coerce_property(
             payload = coerce_property(payload, factored_schema)
 
     ### Object Schema ###
-    properties: Dict[str, Any] = schema.get("properties", {})
+    properties: dict[str, Any] = schema.get("properties", {})
     if properties and isinstance(payload, dict):
         for k, v in properties.items():
             payload_value = payload.get(k)
@@ -348,27 +348,27 @@ def coerce_property(
                 payload[k] = coerce_property(payload_value, v)
 
     ### Object Additional Properties ###
-    additional_properties_schema: Dict[str, Any] = schema.get("additionalProperties", {})
+    additional_properties_schema: dict[str, Any] = schema.get("additionalProperties", {})
     if isinstance(additional_properties_schema, bool):
         additional_properties_schema = {}
     if additional_properties_schema and isinstance(payload, dict):
         declared_properties = properties.keys()
-        additional_properties = [key for key in payload.keys() if key not in declared_properties]
+        additional_properties = [key for key in payload if key not in declared_properties]
         for prop in additional_properties:
             payload_value = payload.get(prop)
             if payload_value:
                 payload[prop] = coerce_property(payload_value, additional_properties_schema)
 
     ### Conditional SubSchema ###
-    if_block: Dict[str, Any] = schema.get("if", {})
+    if_block: dict[str, Any] = schema.get("if", {})
     if if_block and isinstance(payload, dict):
-        if_properties: Dict[str, Any] = if_block.get("properties", {})
+        if_properties: dict[str, Any] = if_block.get("properties", {})
 
-        then_block: Dict[str, Any] = schema.get("then", {})
-        then_properties: Dict[str, Any] = then_block.get("properties", {})
+        then_block: dict[str, Any] = schema.get("then", {})
+        then_properties: dict[str, Any] = then_block.get("properties", {})
 
-        else_block: Dict[str, Any] = schema.get("else", {})
-        else_properties: Dict[str, Any] = else_block.get("properties", {})
+        else_block: dict[str, Any] = schema.get("else", {})
+        else_properties: dict[str, Any] = else_block.get("properties", {})
 
         conditional_schema = else_properties
 
@@ -388,7 +388,7 @@ def coerce_property(
         payload = coerce_property(payload, factored_schema)
 
     ### Array Schema ###
-    item_schema: Dict[str, Any] = schema.get("items", {})
+    item_schema: dict[str, Any] = schema.get("items", {})
     if isinstance(payload, list) and item_schema:
         coerced_items = []
         for item in payload:
@@ -399,7 +399,7 @@ def coerce_property(
 
 
 def coerce_types(
-    payload: Union[str, List[Any], Dict[str, Any], Any], schema: Dict[str, Any]
-) -> Union[str, List[Any], Dict[str, Any]]:
-    dereferenced_schema = cast(Dict[str, Any], jsonref.replace_refs(schema))  # for pyright
+    payload: Union[str, list[Any], dict[str, Any], Any], schema: dict[str, Any]
+) -> Union[str, list[Any], dict[str, Any]]:
+    dereferenced_schema = cast(dict[str, Any], jsonref.replace_refs(schema))  # for pyright
     return coerce_property(payload, dereferenced_schema)

@@ -1,14 +1,11 @@
+from collections.abc import Awaitable, Callable
 from functools import wraps
 from typing import (
     Any,
-    Awaitable,
-    Callable,
-    Dict,
-    Optional,
 )
 
 from opentelemetry import context, trace
-from opentelemetry.trace import StatusCode, Tracer, Span
+from opentelemetry.trace import Span, StatusCode, Tracer
 
 try:
     from openinference.semconv.trace import SpanAttributes  # type: ignore
@@ -16,9 +13,9 @@ except ImportError:
     SpanAttributes = None
 
 
-from guardrails.settings import settings
 from guardrails.classes.validation.validation_result import ValidationResult
-from guardrails.telemetry.common import get_tracer, add_user_attributes, serialize
+from guardrails.settings import settings
+from guardrails.telemetry.common import add_user_attributes, get_tracer, serialize
 from guardrails.telemetry.open_inference import trace_operation
 from guardrails.utils.casting_utils import to_string
 from guardrails.utils.safe_get import safe_get
@@ -30,9 +27,9 @@ def add_validator_attributes(
     validator_span: Span,
     validator_name: str,
     obj_id: int,
-    on_fail_descriptor: Optional[str] = None,
-    result: Optional[ValidationResult] = None,
-    init_kwargs: Dict[str, Any] = {},
+    on_fail_descriptor: str | None = None,
+    result: ValidationResult | None = None,
+    init_kwargs: dict[str, Any] = {},
     validation_session_id: str,
     **kwargs,
 ):
@@ -85,13 +82,13 @@ def add_validator_attributes(
 def trace_validator(
     validator_name: str,
     obj_id: int,
-    on_fail_descriptor: Optional[str] = None,
-    tracer: Optional[Tracer] = None,
+    on_fail_descriptor: str | None = None,
+    tracer: Tracer | None = None,
     *,
     validation_session_id: str,
     **init_kwargs,
 ):
-    def trace_validator_decorator(fn: Callable[..., Optional[ValidationResult]]):
+    def trace_validator_decorator(fn: Callable[..., ValidationResult | None]):
         @wraps(fn)
         def trace_validator_wrapper(*args, **kwargs):
             if not settings.disable_tracing:
@@ -150,14 +147,14 @@ def trace_validator(
 def trace_async_validator(
     validator_name: str,
     obj_id: int,
-    on_fail_descriptor: Optional[str] = None,
-    tracer: Optional[Tracer] = None,
+    on_fail_descriptor: str | None = None,
+    tracer: Tracer | None = None,
     *,
     validation_session_id: str,
     **init_kwargs,
 ):
     def trace_validator_decorator(
-        fn: Callable[..., Awaitable[Optional[ValidationResult]]],
+        fn: Callable[..., Awaitable[ValidationResult | None]],
     ):
         @wraps(fn)
         async def trace_validator_wrapper(*args, **kwargs):

@@ -1,19 +1,20 @@
-from contextvars import ContextVar, copy_context
 import sys
+from collections.abc import AsyncIterator
+from contextvars import ContextVar, copy_context
 from typing import (
     Any,
-    AsyncIterator,
-    Dict,
-    List,
-    Optional,
     cast,
 )
 
-from guardrails.validator_service import AsyncValidatorService
 from guardrails.actions.reask import SkeletonReAsk
 from guardrails.classes import ValidationOutcome
 from guardrails.classes.history import Call, Inputs, Iteration, Outputs
 from guardrails.classes.output_type import OutputTypes
+from guardrails.classes.validation.validation_result import (
+    FailResult,
+    PassResult,
+)
+from guardrails.hub_telemetry.hub_tracing import async_trace_stream
 from guardrails.llm_providers import (
     AsyncPromptCallableBase,
 )
@@ -21,13 +22,8 @@ from guardrails.logger import set_scope
 from guardrails.run import StreamRunner
 from guardrails.run.async_runner import AsyncRunner
 from guardrails.telemetry import trace_async_stream_step
-from guardrails.hub_telemetry.hub_tracing import async_trace_stream
 from guardrails.types import OnFailAction
-from guardrails.classes.validation.validation_result import (
-    PassResult,
-    FailResult,
-)
-
+from guardrails.validator_service import AsyncValidatorService
 
 if sys.version_info.minor < 10:
     from guardrails.utils.polyfills import anext
@@ -36,7 +32,7 @@ if sys.version_info.minor < 10:
 class AsyncStreamRunner(AsyncRunner, StreamRunner):
     # @async_trace_stream(name="/reasks", origin="AsyncStreamRunner.async_run")
     async def async_run(
-        self, call_log: Call, prompt_params: Optional[Dict] = None
+        self, call_log: Call, prompt_params: dict | None = None
     ) -> AsyncIterator[ValidationOutcome]:
         prompt_params = prompt_params or {}
 
@@ -67,13 +63,13 @@ class AsyncStreamRunner(AsyncRunner, StreamRunner):
     async def async_step(
         self,
         index: int,
-        output_schema: Dict[str, Any],
+        output_schema: dict[str, Any],
         call_log: Call,
         *,
-        api: Optional[AsyncPromptCallableBase],
-        messages: Optional[List[Dict]] = None,
-        prompt_params: Optional[Dict] = None,
-        output: Optional[str] = None,
+        api: AsyncPromptCallableBase | None,
+        messages: list[dict] | None = None,
+        prompt_params: dict | None = None,
+        output: str | None = None,
     ) -> AsyncIterator[ValidationOutcome]:
         prompt_params = prompt_params or {}
         inputs = Inputs(
@@ -121,16 +117,16 @@ class AsyncStreamRunner(AsyncRunner, StreamRunner):
         validation_passed = True
 
         context = copy_context()
-        stream_context_vars: ContextVar[Dict[str, ContextVar[List[str]]]] = ContextVar(
+        stream_context_vars: ContextVar[dict[str, ContextVar[list[str]]]] = ContextVar(
             "stream_context"
         )
-        context_vars: Dict[str, ContextVar[List[str]]] = {}
+        context_vars: dict[str, ContextVar[list[str]]] = {}
         for k, v in self.validation_map.items():
             if isinstance(v, list):
                 for validator in v:
                     property_validation_chunks = ContextVar(f"{k}_{validator.rail_alias}_chunks")
                     context.run(property_validation_chunks.set, [])
-                    context_vars[f"{k}_{validator.rail_alias}"] = property_validation_chunks  # noqa: E501
+                    context_vars[f"{k}_{validator.rail_alias}"] = property_validation_chunks
         context.run(stream_context_vars.set, context_vars)
 
         if self.output_type == OutputTypes.STRING:

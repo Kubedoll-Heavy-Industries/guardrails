@@ -1,6 +1,5 @@
-from typing import List, Optional
-from guardrails.logger import logger
 from guardrails.classes.schema.processed_schema import ProcessedSchema
+from guardrails.logger import logger
 from guardrails.types.pydantic import ModelOrListOfModels
 
 
@@ -51,8 +50,8 @@ def set_additional_properties_false_iteratively(schema):
 
 def json_function_calling_tool(
     schema: ProcessedSchema,
-    tools: Optional[List] = None,
-) -> List:
+    tools: list | None = None,
+) -> list:
     tools = tools or []
     tools.append(schema_to_tool(schema))  # type: ignore
     return tools

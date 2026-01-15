@@ -1,5 +1,5 @@
 import json
-from typing import Any, Dict
+from typing import Any
 
 
 def try_to_json(value: Any):
@@ -12,5 +12,5 @@ def try_to_json(value: Any):
         return False
 
 
-def extract_serializeable_metadata(metadata: Dict[str, Any]) -> Dict[str, Any]:
+def extract_serializeable_metadata(metadata: dict[str, Any]) -> dict[str, Any]:
     return {k: metadata[k] for k in metadata if try_to_json(metadata[k])}

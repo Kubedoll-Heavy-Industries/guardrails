@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 SECRETS_CODE_SNIPPET = """
 import os
@@ -31,7 +31,7 @@ for country in countries:
 """
 
 
-def mock_get_unique_secrets(self, value: str) -> Tuple[Dict[str, Any], List[str]]:
+def mock_get_unique_secrets(self, value: str) -> tuple[dict[str, Any], list[str]]:
     lines = value.split("\n")[:-1]
     lines = [line + "\n" for line in lines]
     if value == SECRETS_CODE_SNIPPET:

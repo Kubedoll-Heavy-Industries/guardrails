@@ -1,11 +1,6 @@
+from collections.abc import Callable
 from typing import (
     Any,
-    Callable,
-    Dict,
-    List,
-    Optional,
-    Tuple,
-    Type,
     Union,
     get_args,
     get_origin,
@@ -13,6 +8,7 @@ from typing import (
 
 from pydantic import AliasChoices, AliasGenerator, AliasPath, BaseModel
 from pydantic.fields import FieldInfo
+
 from guardrails.classes.output_type import OutputTypes
 from guardrails.classes.schema.processed_schema import ProcessedSchema
 from guardrails.classes.validation.validator_reference import ValidatorReference
@@ -27,7 +23,7 @@ from guardrails.utils.validator_utils import safe_get_validator
 from guardrails.validator_base import Validator
 
 
-def _resolve_alias(alias: Union[str, AliasPath, AliasChoices]) -> List[str]:
+def _resolve_alias(alias: Union[str, AliasPath, AliasChoices]) -> list[str]:
     aliases = []
     if isinstance(alias, str):
         aliases.append(alias)
@@ -41,8 +37,8 @@ def _resolve_alias(alias: Union[str, AliasPath, AliasChoices]) -> List[str]:
 
 
 def _collect_aliases(
-    field: Union[FieldInfo, AliasGenerator], field_name: str, model: Type[BaseModel]
-) -> List[str]:
+    field: Union[FieldInfo, AliasGenerator], field_name: str, model: type[BaseModel]
+) -> list[str]:
     aliases = []
 
     if field.alias:
@@ -83,7 +79,7 @@ def is_base_model_type(any_type: Any) -> bool:
 
 def get_base_model(
     pydantic_class: ModelOrListOrDict,
-) -> Tuple[ModelOrModelUnion, Any, Optional[Any]]:
+) -> tuple[ModelOrModelUnion, Any, Any | None]:
     schema_model = pydantic_class
     type_origin = get_origin(pydantic_class)
     key_type_origin = None
@@ -120,7 +116,7 @@ def get_base_model(
 
 def try_get_base_model(
     pydantic_class: ModelOrListOrDict,
-) -> Tuple[Optional[Type[BaseModel]], Optional[Any], Optional[Any]]:
+) -> tuple[type[BaseModel] | None, Any | None, Any | None]:
     try:
         model, type_origin, key_type_origin = get_base_model(pydantic_class)
         return (model, type_origin, key_type_origin)
@@ -131,11 +127,11 @@ def try_get_base_model(
 
 
 def extract_union_member(
-    member: Type,
+    member: type,
     processed_schema: ProcessedSchema,
     json_path: str,
-    aliases: List[str],
-) -> Type:
+    aliases: list[str],
+) -> type:
     aliases = aliases or []
     field_model, field_type_origin, key_type_origin = try_get_base_model(member)
     if not field_model:
@@ -157,18 +153,18 @@ def extract_union_member(
             aliases=aliases,
         )
         if field_type_origin is list:
-            return List[extracted_field_model]
+            return list[extracted_field_model]
         elif field_type_origin is dict:
-            return Dict[key_type_origin, extracted_field_model]  # type: ignore
+            return dict[key_type_origin, extracted_field_model]  # type: ignore
         return extracted_field_model
 
 
 def extract_validators(
-    model: Type[BaseModel],
+    model: type[BaseModel],
     processed_schema: ProcessedSchema,
     json_path: str,
-    aliases: Optional[List[str]] = None,
-) -> Type[BaseModel]:
+    aliases: list[str] | None = None,
+) -> type[BaseModel]:
     aliases = aliases or []
     for field_name in model.model_fields:
         alias_paths = []
@@ -192,7 +188,7 @@ def extract_validators(
             if not isinstance(validators, list) and not isinstance(validators, Validator):
                 logger.warning(f"Invalid value assigned to {field_name}.validators! {validators}")
                 continue
-            validator_instances: List[Validator] = []
+            validator_instances: list[Validator] = []
 
             # Only for backwards compatibility
             if isinstance(validators, Validator):
@@ -246,19 +242,19 @@ def extract_validators(
                         aliases=alias_paths,
                     )
                     if field_type_origin is list:
-                        model.model_fields[field_name].annotation = List[extracted_field_model]
+                        model.model_fields[field_name].annotation = list[extracted_field_model]
                     elif field_type_origin is dict:
-                        model.model_fields[field_name].annotation = Dict[
+                        model.model_fields[field_name].annotation = dict[
                             key_type_origin, extracted_field_model  # type: ignore
                         ]
                     else:
-                        model.model_fields[field_name].annotation = extracted_field_model  # noqa
+                        model.model_fields[field_name].annotation = extracted_field_model
     return model
 
 
 def pydantic_to_json_schema(
-    pydantic_class: Type[BaseModel], type_origin: Optional[Any] = None
-) -> Dict[str, Any]:
+    pydantic_class: type[BaseModel], type_origin: Any | None = None
+) -> dict[str, Any]:
     # Convert Pydantic model to JSON schema
     json_schema = pydantic_class.model_json_schema()
     json_schema["title"] = pydantic_class.__name__

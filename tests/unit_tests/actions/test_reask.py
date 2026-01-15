@@ -2,7 +2,6 @@ import json
 
 import pytest
 
-from guardrails.classes.execution.guard_execution_options import GuardExecutionOptions
 from guardrails.actions.reask import (
     FieldReAsk,
     gather_reasks,
@@ -10,6 +9,7 @@ from guardrails.actions.reask import (
     prune_obj_for_reasking,
     sub_reasks_with_fixed_values,
 )
+from guardrails.classes.execution.guard_execution_options import GuardExecutionOptions
 from guardrails.classes.output_type import OutputTypes
 from guardrails.classes.validation.validation_result import FailResult
 from guardrails.schema.rail_schema import rail_string_to_schema
@@ -360,7 +360,7 @@ def test_prune_json_for_reasking(input_dict, expected_dict):
 
 
 @pytest.mark.parametrize(
-    "example_rail, expected_rail, reasks, original_response, validation_response, json_example, expected_reask_json",  # noqa
+    "example_rail, expected_rail, reasks, original_response, validation_response, json_example, expected_reask_json",
     [
         (
             # Example RAIL
@@ -517,7 +517,7 @@ Help me correct the incorrect values based on the given error messages.
 Given below is XML that describes the information to extract from this document and the tags to extract it into.
 %s
 ONLY return a valid JSON object (no other text is necessary), where the key of the field in JSON is the `name` attribute of the corresponding XML, and the value is of the type specified by the corresponding XML's tag. The JSON MUST conform to the XML format, including any types and format requests e.g. requests for lists, objects and specific types. Be correct and concise. If you are unsure anywhere, enter `null`.
-"""  # noqa: E501
+"""
     expected_instructions = """
 You are a helpful assistant only capable of communicating with valid JSON, and no other text.
 
@@ -527,7 +527,7 @@ Here are examples of simple (XML, JSON) pairs that show the expected behavior:
 - `<string name='foo' format='two-words lower-case' />` => `{'foo': 'example one'}`
 - `<list name='bar'><string format='upper-case' /></list>` => `{"bar": ['STRING ONE', 'STRING TWO', etc.]}`
 - `<object name='baz'><string name="foo" format="capitalize two-words" /><integer name="index" format="1-indexed" /></object>` => `{'baz': {'foo': 'Some String', 'index': 1}}`
-"""  # noqa: E501
+"""
 
     mocker.patch("guardrails.actions.reask.generate_example", return_value=json_example)
 
@@ -592,7 +592,7 @@ Here are examples of simple (XML, JSON) pairs that show the expected behavior:
 #             [
 #                 FieldReAsk(
 #                     incorrect_value="",
-#                     fail_results=[FailResult(error_message="child should not be None")],  # noqa
+#                     fail_results=[FailResult(error_message="child should not be None")],
 #                     path=["dummy", 0],
 #                 )
 #             ],

@@ -1,16 +1,19 @@
-from typing import Generic, Iterator, List, Optional, Tuple, Union, cast
-
-from pydantic import Field
-from rich.pretty import pretty_repr
+from collections.abc import Iterator
+from typing import Generic, Union, cast
 
 from guardrails_api_client import (
     ValidationOutcome as IValidationOutcome,
+)
+from guardrails_api_client import (
     ValidationOutcomeValidatedOutput,
 )
+from pydantic import Field
+from rich.pretty import pretty_repr
+
 from guardrails.actions.reask import ReAsk
+from guardrails.classes.generic.arbitrary_model import ArbitraryModel
 from guardrails.classes.history import Call, Iteration
 from guardrails.classes.output_type import OT
-from guardrails.classes.generic.arbitrary_model import ArbitraryModel
 from guardrails.classes.validation.validation_summary import ValidationSummary
 from guardrails.constants import pass_status
 from guardrails.utils.safe_get import safe_get
@@ -32,17 +35,17 @@ class ValidationOutcome(IValidationOutcome, ArbitraryModel, Generic[OT]):
         error: If the validation failed, this field will contain the error message
     """
 
-    validation_summaries: Optional[List["ValidationSummary"]] = Field(
+    validation_summaries: list["ValidationSummary"] | None = Field(
         description="The summaries of the validation results.", default=[]
     )
     """The summaries of the validation results."""
 
-    raw_llm_output: Optional[str] = Field(
+    raw_llm_output: str | None = Field(
         description="The raw, unchanged output from the LLM call.", default=None
     )
     """The raw, unchanged output from the LLM call."""
 
-    validated_output: Optional[OT] = Field(
+    validated_output: OT | None = Field(
         description="The validated, and potentially fixed,"
         " output from the LLM call after passing through validation.",
         default=None,
@@ -50,7 +53,7 @@ class ValidationOutcome(IValidationOutcome, ArbitraryModel, Generic[OT]):
     """The validated, and potentially fixed, output from the LLM call after
     passing through validation."""
 
-    reask: Optional[ReAsk] = Field(
+    reask: ReAsk | None = Field(
         description="If validation continuously fails and all allocated"
         " reasks are used, this field will contain the final reask that"
         " would have been sent to the LLM if additional reasks were available.",
@@ -70,7 +73,7 @@ class ValidationOutcome(IValidationOutcome, ArbitraryModel, Generic[OT]):
     If this is False, the validated_output may be invalid.
     """
 
-    error: Optional[str] = Field(default=None)
+    error: str | None = Field(default=None)
     """If the validation failed, this field will contain the error message."""
 
     @classmethod
@@ -96,9 +99,9 @@ class ValidationOutcome(IValidationOutcome, ArbitraryModel, Generic[OT]):
 
     def __iter__(
         self,
-    ) -> Iterator[Union[Optional[str], Optional[OT], Optional[ReAsk], bool, Optional[str]]]:
+    ) -> Iterator[Union[str | None, OT | None, ReAsk | None, bool, str | None]]:
         """Iterate over the ValidationOutcome's fields."""
-        as_tuple: Tuple[Optional[str], Optional[OT], Optional[ReAsk], bool, Optional[str]] = (
+        as_tuple: tuple[str | None, OT | None, ReAsk | None, bool, str | None] = (
             self.raw_llm_output,
             self.validated_output,
             self.reask,

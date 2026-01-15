@@ -1,9 +1,9 @@
 from docspec_python import ParserOptions
-from docs.pydocs.pydocs_markdown_impl import render_loader
 from pydoc_markdown.contrib.loaders.python import PythonLoader
 from pydoc_markdown.contrib.processors.filter import FilterProcessor
-from docs.pydocs.helpers import write_to_file
 
+from docs.pydocs.helpers import write_to_file
+from docs.pydocs.pydocs_markdown_impl import render_loader
 
 # exports = [
 #     "docs.pydocs.api_reference.validator",

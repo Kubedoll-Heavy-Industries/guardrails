@@ -1,28 +1,29 @@
-from typing import Any, Dict, List, Optional, Union
 from builtins import id as object_id
+from typing import Any, Union
+
+from guardrails_api_client import Call as ICall
 from pydantic import Field
 from rich.panel import Panel
 from rich.pretty import pretty_repr
 from rich.tree import Tree
 
-from guardrails_api_client import Call as ICall
 from guardrails.actions.filter import Filter
-from guardrails.actions.refrain import Refrain
-from guardrails.actions.reask import merge_reask_output
-from guardrails.classes.generic.stack import Stack
-from guardrails.classes.history.call_inputs import CallInputs
-from guardrails.classes.history.iteration import Iteration
-from guardrails.classes.generic.arbitrary_model import ArbitraryModel
-from guardrails.classes.validation.validation_result import ValidationResult
-from guardrails.constants import error_status, fail_status, not_run_status, pass_status
-from guardrails.prompt.messages import Messages
-from guardrails.prompt import Prompt, Instructions
-from guardrails.classes.validation.validator_logs import ValidatorLogs
 from guardrails.actions.reask import (
     ReAsk,
     gather_reasks,
+    merge_reask_output,
     sub_reasks_with_fixed_values,
 )
+from guardrails.actions.refrain import Refrain
+from guardrails.classes.generic.arbitrary_model import ArbitraryModel
+from guardrails.classes.generic.stack import Stack
+from guardrails.classes.history.call_inputs import CallInputs
+from guardrails.classes.history.iteration import Iteration
+from guardrails.classes.validation.validation_result import ValidationResult
+from guardrails.classes.validation.validator_logs import ValidatorLogs
+from guardrails.constants import error_status, fail_status, not_run_status, pass_status
+from guardrails.prompt import Instructions, Prompt
+from guardrails.prompt.messages import Messages
 from guardrails.schema.parser import get_value_from_path
 
 
@@ -49,7 +50,7 @@ class Call(ICall, ArbitraryModel):
     inputs: CallInputs = Field(
         description="The inputs as passed in to Guard.__call__ or Guard.parse"
     )
-    exception: Optional[Exception] = Field(
+    exception: Exception | None = Field(
         description="The exception that interrupted the run.",
         default=None,
     )
@@ -58,9 +59,9 @@ class Call(ICall, ArbitraryModel):
     # Without this, Pydantic casts iterations to a list
     def __init__(
         self,
-        iterations: Optional[Stack[Iteration]] = None,
-        inputs: Optional[CallInputs] = None,
-        exception: Optional[Exception] = None,
+        iterations: Stack[Iteration] | None = None,
+        inputs: CallInputs | None = None,
+        exception: Exception | None = None,
     ):
         call_id = str(object_id(self))
         iterations = iterations or Stack()
@@ -71,19 +72,19 @@ class Call(ICall, ArbitraryModel):
         self.exception = exception
 
     @property
-    def prompt_params(self) -> Optional[Dict]:
+    def prompt_params(self) -> dict | None:
         """The prompt parameters as provided by the user when initializing or
         calling the Guard."""
         return self.inputs.prompt_params
 
     @property
-    def messages(self) -> Optional[Union[Messages, list[dict[str, str]]]]:
+    def messages(self) -> Union[Messages, list[dict[str, str]]] | None:
         """The messages as provided by the user when initializing or calling
         the Guard."""
         return self.inputs.messages
 
     @property
-    def compiled_messages(self) -> Optional[list[dict[str, str]]]:
+    def compiled_messages(self) -> list[dict[str, str]] | None:
         """The initial compiled messages that were passed to the LLM on the
         first call."""
         if self.iterations.empty():
@@ -151,7 +152,7 @@ class Call(ICall, ArbitraryModel):
         return Stack(*all_logs)
 
     @property
-    def tokens_consumed(self) -> Optional[int]:
+    def tokens_consumed(self) -> int | None:
         """Returns the total number of tokens consumed during all iterations
         with this call."""
         iteration_tokens = [
@@ -162,7 +163,7 @@ class Call(ICall, ArbitraryModel):
         return None
 
     @property
-    def prompt_tokens_consumed(self) -> Optional[int]:
+    def prompt_tokens_consumed(self) -> int | None:
         """Returns the total number of prompt tokens consumed during all
         iterations with this call."""
         iteration_tokens = [
@@ -175,7 +176,7 @@ class Call(ICall, ArbitraryModel):
         return None
 
     @property
-    def completion_tokens_consumed(self) -> Optional[int]:
+    def completion_tokens_consumed(self) -> int | None:
         """Returns the total number of completion tokens consumed during all
         iterations with this call."""
         iteration_tokens = [
@@ -200,13 +201,13 @@ class Call(ICall, ArbitraryModel):
         )
 
     @property
-    def parsed_outputs(self) -> Stack[Union[str, List, Dict]]:
+    def parsed_outputs(self) -> Stack[Union[str, list, dict]]:
         """The outputs from the LLM after undergoing parsing but before
         validation."""
         return Stack(*[i.outputs.parsed_output for i in self.iterations])
 
     @property
-    def validation_response(self) -> Optional[Union[str, List, Dict, ReAsk]]:
+    def validation_response(self) -> Union[str, list, dict, ReAsk] | None:
         """The aggregated responses from the validation process across all
         iterations within the current call.
 
@@ -249,7 +250,7 @@ class Call(ICall, ArbitraryModel):
         return merged_validation_responses
 
     @property
-    def fixed_output(self) -> Optional[Union[str, List, Dict]]:
+    def fixed_output(self) -> Union[str, list, dict] | None:
         """The cumulative output from the validation process across all current
         iterations with any automatic fixes applied.
 
@@ -258,7 +259,7 @@ class Call(ICall, ArbitraryModel):
         return sub_reasks_with_fixed_values(self.validation_response)
 
     @property
-    def guarded_output(self) -> Optional[Union[str, List, Dict]]:
+    def guarded_output(self) -> Union[str, list, dict] | None:
         """The complete validated output after all stages of validation are
         completed.
 
@@ -273,7 +274,7 @@ class Call(ICall, ArbitraryModel):
         if self.status == pass_status:
             return self.fixed_output
         last_iteration = self.iterations.last
-        if not self.status == pass_status and last_iteration and last_iteration.failed_validations:
+        if self.status != pass_status and last_iteration and last_iteration.failed_validations:
             # check that all failed validations are noop or none
             all_noop = True
             for failed_validation in last_iteration.failed_validations:
@@ -307,7 +308,7 @@ class Call(ICall, ArbitraryModel):
         return all_validator_logs
 
     @property
-    def error(self) -> Optional[str]:
+    def error(self) -> str | None:
         """The error message from any exception that raised and interrupted the
         run."""
         if self.exception:
@@ -401,7 +402,7 @@ class Call(ICall, ArbitraryModel):
             exception=self.error,
         )
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return self.to_interface().to_dict()
 
     @classmethod
@@ -415,7 +416,7 @@ class Call(ICall, ArbitraryModel):
 
     # TODO: Necessary to GET /guards/{guard_name}/history/{call_id}
     @classmethod
-    def from_dict(cls, obj: Dict[str, Any]) -> "Call":
+    def from_dict(cls, obj: dict[str, Any]) -> "Call":
         i_call = ICall.from_dict(obj)
 
         if i_call:

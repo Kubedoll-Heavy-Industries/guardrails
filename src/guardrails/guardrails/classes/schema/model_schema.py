@@ -1,15 +1,17 @@
-from typing import Any, Dict, Optional
-from guardrails_api_client import ModelSchema as IModelSchema, ValidationType
+from typing import Any
+
+from guardrails_api_client import ModelSchema as IModelSchema
+from guardrails_api_client import ValidationType
 
 
 # Because pydantic insists on including None values in the serialized dictionary
 class ModelSchema(IModelSchema):
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         super_dict = super().to_dict()
         return {k: v for k, v in super_dict.items() if v is not None}
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> "ModelSchema":
+    def from_dict(cls, obj: dict[str, Any] | None) -> "ModelSchema":
         if not obj:
             obj = {"type": "string"}
 

@@ -1,13 +1,12 @@
 import json
 import re
-from typing import Any, Dict, Union
+from typing import Any, Union
 
 from guardrails.classes.output_type import OutputTypes
-
-from guardrails.types.validator import ValidatorMap
-from guardrails.prompt.prompt import Prompt
 from guardrails.prompt.instructions import Instructions
+from guardrails.prompt.prompt import Prompt
 from guardrails.types.inputs import MessageHistory
+from guardrails.types.validator import ValidatorMap
 
 
 def prompt_uses_xml(prompt: str) -> bool:
@@ -18,7 +17,7 @@ def prompt_uses_xml(prompt: str) -> bool:
 
 
 def prompt_content_for_string_schema(
-    output_schema: Dict[str, Any], validator_map: ValidatorMap, json_path: str
+    output_schema: dict[str, Any], validator_map: ValidatorMap, json_path: str
 ) -> str:
     # NOTE: Is this actually necessary?
     # We should check how LLMs perform this this vs just sending the JSON Schema
@@ -39,7 +38,7 @@ def prompt_content_for_string_schema(
 # Supersedes Schema.transpile
 def prompt_content_for_schema(
     output_type: OutputTypes,
-    output_schema: Dict[str, Any],
+    output_schema: dict[str, Any],
     validator_map: ValidatorMap,
     json_path: str = "$",
 ) -> str:

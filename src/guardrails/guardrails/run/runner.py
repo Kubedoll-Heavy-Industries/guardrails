@@ -1,15 +1,17 @@
 import copy
+from collections.abc import Sequence
 from functools import partial
-from typing import Any, Dict, List, Optional, Sequence, Tuple, Union, cast
-
+from typing import Any, Union, cast
 
 from guardrails import validator_service
-from guardrails.actions.reask import get_reask_setup
+from guardrails.actions.reask import NonParseableReAsk, ReAsk, get_reask_setup, introspect
 from guardrails.classes.execution.guard_execution_options import GuardExecutionOptions
 from guardrails.classes.history import Call, Inputs, Iteration, Outputs
+from guardrails.classes.llm.llm_response import LLMResponse
 from guardrails.classes.output_type import OutputTypes
 from guardrails.constants import fail_status
 from guardrails.errors import ValidationError
+from guardrails.hub_telemetry.hub_tracing import trace
 from guardrails.llm_providers import (
     AsyncPromptCallableBase,
     PromptCallableBase,
@@ -20,11 +22,10 @@ from guardrails.prompt.messages import Messages
 from guardrails.run.utils import messages_source
 from guardrails.schema.rail_schema import json_schema_to_rail_output
 from guardrails.schema.validator import schema_validation
-from guardrails.hub_telemetry.hub_tracing import trace
-from guardrails.types import ModelOrListOfModels, ValidatorMap, MessageHistory
+from guardrails.telemetry import trace_call, trace_step
+from guardrails.types import MessageHistory, ModelOrListOfModels, ValidatorMap
 from guardrails.utils.exception_utils import UserFacingException
 from guardrails.utils.hub_telemetry_utils import HubTelemetry
-from guardrails.classes.llm.llm_response import LLMResponse
 from guardrails.utils.parsing_utils import (
     coerce_types,
     parse_llm_output,
@@ -33,8 +34,6 @@ from guardrails.utils.parsing_utils import (
 from guardrails.utils.prompt_utils import (
     prompt_content_for_schema,
 )
-from guardrails.actions.reask import NonParseableReAsk, ReAsk, introspect
-from guardrails.telemetry import trace_call, trace_step
 
 
 class Runner:
@@ -55,24 +54,24 @@ class Runner:
     """
 
     # Validation Inputs
-    output_schema: Dict[str, Any]
+    output_schema: dict[str, Any]
     output_type: OutputTypes
     validation_map: ValidatorMap = {}
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
     # LLM Inputs
-    messages: Optional[List[Dict[str, Union[Prompt, str]]]] = None
-    base_model: Optional[ModelOrListOfModels]
-    exec_options: Optional[GuardExecutionOptions]
+    messages: list[dict[str, Union[Prompt, str]]] | None = None
+    base_model: ModelOrListOfModels | None
+    exec_options: GuardExecutionOptions | None
 
     # LLM Calling Details
-    api: Optional[PromptCallableBase] = None
-    output: Optional[str] = None
+    api: PromptCallableBase | None = None
+    output: str | None = None
     num_reasks: int
     full_schema_reask: bool = False
 
     # Internal Metrics Collection
-    disable_tracer: Optional[bool] = True
+    disable_tracer: bool | None = True
 
     # QUESTION: Are any of these init args actually necessary for initialization?
     # ANSWER: _Maybe_ messages for Prompt initialization
@@ -81,18 +80,18 @@ class Runner:
     def __init__(
         self,
         output_type: OutputTypes,
-        output_schema: Dict[str, Any],
+        output_schema: dict[str, Any],
         num_reasks: int,
         validation_map: ValidatorMap,
         *,
-        messages: Optional[List[Dict]] = None,
-        api: Optional[PromptCallableBase] = None,
-        metadata: Optional[Dict[str, Any]] = None,
-        output: Optional[str] = None,
-        base_model: Optional[ModelOrListOfModels] = None,
+        messages: list[dict] | None = None,
+        api: PromptCallableBase | None = None,
+        metadata: dict[str, Any] | None = None,
+        output: str | None = None,
+        base_model: ModelOrListOfModels | None = None,
         full_schema_reask: bool = False,
-        disable_tracer: Optional[bool] = True,
-        exec_options: Optional[GuardExecutionOptions] = None,
+        disable_tracer: bool | None = True,
+        exec_options: GuardExecutionOptions | None = None,
     ):
         # Validation Inputs
         self.output_type = output_type
@@ -140,7 +139,7 @@ class Runner:
         self._hub_telemetry._enabled = not self._disable_tracer
 
     @trace(name="/reasks", origin="Runner.__call__")
-    def __call__(self, call_log: Call, prompt_params: Optional[Dict] = None) -> Call:
+    def __call__(self, call_log: Call, prompt_params: dict | None = None) -> Call:
         """Execute the runner by repeatedly calling step until the reask budget
         is exhausted.
 
@@ -205,13 +204,13 @@ class Runner:
     def step(
         self,
         index: int,
-        output_schema: Dict[str, Any],
+        output_schema: dict[str, Any],
         call_log: Call,
         *,
-        api: Optional[PromptCallableBase],
-        messages: Optional[List[Dict]] = None,
-        prompt_params: Optional[Dict] = None,
-        output: Optional[str] = None,
+        api: PromptCallableBase | None,
+        messages: list[dict] | None = None,
+        prompt_params: dict | None = None,
+        output: str | None = None,
     ) -> Iteration:
         """Run a full step."""
         prompt_params = prompt_params or {}
@@ -321,7 +320,7 @@ class Runner:
         self,
         call_log: Call,
         messages: MessageHistory,
-        prompt_params: Dict,
+        prompt_params: dict,
         attempt_number: int,
     ) -> MessageHistory:
         formatted_messages: MessageHistory = []
@@ -372,10 +371,10 @@ class Runner:
         call_log: Call,
         attempt_number: int,
         *,
-        messages: Optional[MessageHistory],
-        prompt_params: Optional[Dict] = None,
-        api: Optional[Union[PromptCallableBase, AsyncPromptCallableBase]],
-    ) -> Optional[MessageHistory]:
+        messages: MessageHistory | None,
+        prompt_params: dict | None = None,
+        api: Union[PromptCallableBase, AsyncPromptCallableBase] | None,
+    ) -> MessageHistory | None:
         """Prepare by running pre-processing and input validation.
 
         Returns:
@@ -394,9 +393,9 @@ class Runner:
     @trace_call
     def call(
         self,
-        messages: Optional[MessageHistory],
-        api: Optional[PromptCallableBase],
-        output: Optional[str] = None,
+        messages: MessageHistory | None,
+        api: PromptCallableBase | None,
+        output: str | None = None,
     ) -> LLMResponse:
         """Run a step.
 
@@ -423,7 +422,7 @@ class Runner:
 
         return llm_response
 
-    def parse(self, output: str, output_schema: Dict[str, Any], **kwargs):
+    def parse(self, output: str, output_schema: dict[str, Any], **kwargs):
         parsed_output, error = parse_llm_output(output, self.output_type, **kwargs)
         if parsed_output and not error and not isinstance(parsed_output, ReAsk):
             parsed_output = prune_extra_keys(parsed_output, output_schema)
@@ -436,8 +435,8 @@ class Runner:
         iteration: Iteration,
         attempt_number: int,
         parsed_output: Any,
-        output_schema: Dict[str, Any],
-        stream: Optional[bool] = False,
+        output_schema: dict[str, Any],
+        stream: bool | None = False,
         **kwargs,
     ):
         """Validate the output."""
@@ -472,7 +471,7 @@ class Runner:
     def introspect(
         self,
         validated_output: Any,
-    ) -> Tuple[Sequence[ReAsk], Optional[Union[str, Dict, List]]]:
+    ) -> tuple[Sequence[ReAsk], Union[str, dict, list] | None]:
         """Introspect the validated output."""
         if validated_output is None:
             return [], None
@@ -482,21 +481,19 @@ class Runner:
 
     def do_loop(self, attempt_number: int, reasks: Sequence[ReAsk]) -> bool:
         """Determine if we should loop again."""
-        if reasks and attempt_number < self.num_reasks:
-            return True
-        return False
+        return bool(reasks and attempt_number < self.num_reasks)
 
     def prepare_to_loop(
         self,
         reasks: Sequence[ReAsk],
-        output_schema: Dict[str, Any],
+        output_schema: dict[str, Any],
         *,
-        parsed_output: Optional[Union[str, List, Dict, ReAsk]] = None,
-        validated_output: Optional[Union[str, List, Dict, ReAsk]] = None,
-        prompt_params: Optional[Dict] = None,
-    ) -> Tuple[
-        Dict[str, Any],
-        Optional[Union[List[Dict], Messages]],
+        parsed_output: Union[str, list, dict, ReAsk] | None = None,
+        validated_output: Union[str, list, dict, ReAsk] | None = None,
+        prompt_params: dict | None = None,
+    ) -> tuple[
+        dict[str, Any],
+        Union[list[dict], Messages] | None,
     ]:
         """Prepare to loop again."""
         prompt_params = prompt_params or {}

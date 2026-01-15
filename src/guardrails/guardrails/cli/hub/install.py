@@ -1,13 +1,12 @@
 import sys
-from typing import Optional, List
 
 import typer
 
+from guardrails.cli.hub.console import console
 from guardrails.cli.hub.hub import hub_command
 from guardrails.cli.logger import logger
-from guardrails.hub_telemetry.hub_tracing import trace
-from guardrails.cli.hub.console import console
 from guardrails.cli.version import version_warnings_if_applicable
+from guardrails.hub_telemetry.hub_tracing import trace
 
 
 # Quick note: This is the command for `guardrails hub install`.  We change the name of
@@ -18,11 +17,11 @@ from guardrails.cli.version import version_warnings_if_applicable
 @hub_command.command(name="install")
 @trace(name="guardrails-cli/hub/install")
 def install_cli(
-    package_uris: List[str] = typer.Argument(
+    package_uris: list[str] = typer.Argument(
         ...,
         help="URIs to the packages to install. Example: hub://guardrails/regex_match hub://guardrails/toxic_language",
     ),
-    local_models: Optional[bool] = typer.Option(
+    local_models: bool | None = typer.Option(
         None,
         "--install-local-models/--no-install-local-models",
         help="Install local models",

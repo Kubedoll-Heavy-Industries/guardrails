@@ -1,7 +1,6 @@
 import logging
 import logging.config
 from logging import Handler, LogRecord
-from typing import Dict, List, Optional
 
 # from src.modules.otel_logger import handler as otel_handler
 
@@ -12,7 +11,7 @@ all_scopes = "all"
 
 class ScopeHandler(Handler):
     scope: str
-    scoped_logs: Dict[str, List[LogRecord]]
+    scoped_logs: dict[str, list[LogRecord]]
 
     def __init__(self, level=logging.NOTSET, scope=base_scope):
         super().__init__(level)
@@ -27,14 +26,14 @@ class ScopeHandler(Handler):
     def set_scope(self, scope: str = base_scope):
         self.scope = scope
 
-    def get_all_logs(self) -> List[LogRecord]:
+    def get_all_logs(self) -> list[LogRecord]:
         all_logs = []
         for key in self.scoped_logs:
             logs = self.scoped_logs.get(key, [])
             all_logs.extend(logs)
         return all_logs
 
-    def get_logs(self, scope: Optional[str] = None) -> List[LogRecord]:
+    def get_logs(self, scope: str | None = None) -> list[LogRecord]:
         scope = scope or self.scope
         if scope == all_scopes:
             return self.get_all_logs()
@@ -51,7 +50,7 @@ class LoggerConfig:
 
 _logger = logging.getLogger(name)
 handler = ScopeHandler()
-scoped_logs: Dict[str, List[LogRecord]] = {}
+scoped_logs: dict[str, list[LogRecord]] = {}
 logger_config = LoggerConfig()
 
 
@@ -96,9 +95,9 @@ def _setup_handler(log_level=logging.NOTSET, scope=base_scope) -> ScopeHandler:
 def get_scope_handler() -> ScopeHandler:
     global _logger
     try:
-        scope_handler: ScopeHandler = [h for h in _logger.handlers if isinstance(h, ScopeHandler)][
-            0
-        ]
+        scope_handler: ScopeHandler = next(
+            h for h in _logger.handlers if isinstance(h, ScopeHandler)
+        )
         return scope_handler
     except IndexError:
         hdlr = _setup_handler()

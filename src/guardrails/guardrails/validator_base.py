@@ -4,34 +4,38 @@
 #   - [ ] Remove validator_base.py in 0.6.x
 
 import asyncio
-from contextvars import Context, ContextVar
-from functools import partial
 import inspect
 import logging
-from collections import defaultdict
-from dataclasses import dataclass
 import re
-from string import Template
-from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Union
-from typing_extensions import deprecated
-from warnings import warn
 import warnings
+from collections import defaultdict
+from collections.abc import Callable
+from contextvars import Context, ContextVar
+from dataclasses import dataclass
+from functools import partial
+from string import Template
+from typing import Any, TypeVar, Union
+from warnings import warn
 
 import requests
 from langchain_core.runnables import Runnable
+from typing_extensions import deprecated
 
-from guardrails.settings import settings
-from guardrails.classes import ErrorSpan  # noqa
-from guardrails.classes import PassResult  # noqa
-from guardrails.classes import FailResult, ValidationResult
+from guardrails.classes import (
+    ErrorSpan,
+    FailResult,
+    PassResult,  # noqa
+    ValidationResult,
+)
 from guardrails.constants import hub
+from guardrails.hub_telemetry.hub_tracing import trace
 from guardrails.hub_token.token import VALIDATOR_HUB_SERVICE, get_jwt_token
 from guardrails.logger import logger
 from guardrails.remote_inference import remote_inference
-from guardrails.hub_telemetry.hub_tracing import trace
+from guardrails.settings import settings
 from guardrails.types.on_fail import OnFailAction
-from guardrails.utils.safe_get import safe_get
 from guardrails.utils.hub_telemetry_utils import HubTelemetry
+from guardrails.utils.safe_get import safe_get
 from guardrails.utils.tokenization_utils import (
     postproc_splits,
 )
@@ -101,15 +105,15 @@ class Validator:
 
     def __init__(
         self,
-        on_fail: Optional[Union[Callable[[Any, FailResult], Any], OnFailAction]] = None,
+        on_fail: Union[Callable[[Any, FailResult], Any], OnFailAction] | None = None,
         **kwargs,
     ):
         self._disable_telemetry = settings.rc.enable_metrics is not True
         if not self._disable_telemetry:
             self._hub_telemetry = HubTelemetry(enabled=settings.rc.enable_metrics)
 
-        self.use_local = kwargs.get("use_local", None)
-        self.validation_endpoint = kwargs.get("validation_endpoint", None)
+        self.use_local = kwargs.get("use_local")
+        self.validation_endpoint = kwargs.get("validation_endpoint")
         # NOTE: I think this is an evergreen check
         # We should test w/o an rc file,
         #   and if this doesn't raise then we should remove this.
@@ -132,7 +136,7 @@ class Validator:
         # chunking function returns empty list or list of 2 chunks
         # first chunk is the chunk to validate
         # second chunk is incomplete chunk that needs further accumulation
-        self.accumulated_chunks: List[str] = []
+        self.accumulated_chunks: list[str] = []
 
         if on_fail is None:
             on_fail = OnFailAction.EXCEPTION
@@ -158,10 +162,8 @@ class Validator:
 
     @property
     @deprecated(
-        (
-            "The `creds` attribute is deprecated and will be removed in version 0.6.x."
-            " Use `settings.rc` instead."
-        )
+        "The `creds` attribute is deprecated and will be removed in version 0.6.x."
+        " Use `settings.rc` instead."
     )
     def creds(self):
         from guardrails.classes.credentials import Credentials  # type: ignore
@@ -178,7 +180,7 @@ class Validator:
                 "the value being validated and the FailResult."
             )
         second_arg_type = on_fail_args.annotations.get(second_arg)
-        if second_arg_type == List[FailResult]:
+        if second_arg_type == list[FailResult]:
             warnings.warn(
                 "Specifying a List[FailResult] as the second argument"
                 " for a custom on_fail handler is deprecated. "
@@ -193,7 +195,7 @@ class Validator:
         else:
             self.on_fail_method = on_fail
 
-    def _validate(self, value: Any, metadata: Dict[str, Any]) -> ValidationResult:
+    def _validate(self, value: Any, metadata: dict[str, Any]) -> ValidationResult:
         """User implementable function.
 
         Validates a value and return a validation result. This method
@@ -223,7 +225,7 @@ class Validator:
         """
         raise NotImplementedError
 
-    def validate(self, value: Any, metadata: Dict[str, Any]) -> ValidationResult:
+    def validate(self, value: Any, metadata: dict[str, Any]) -> ValidationResult:
         """Do not override this function, instead implement _validate().
 
         External facing validate function. This function acts as a
@@ -233,7 +235,7 @@ class Validator:
         validation_result = self._validate(value, metadata)
         return validation_result
 
-    async def async_validate(self, value: Any, metadata: Dict[str, Any]) -> ValidationResult:
+    async def async_validate(self, value: Any, metadata: dict[str, Any]) -> ValidationResult:
         """Use this function if your validation logic requires asyncio.
 
         Guaranteed to work with AsyncGuard
@@ -267,7 +269,7 @@ class Validator:
             "set an validation_endpoint to perform inference in the validator."
         )
 
-    def _chunking_function(self, chunk: str) -> List[str]:
+    def _chunking_function(self, chunk: str) -> list[str]:
         """The strategy used for chunking accumulated text input into
         validation sets.
 
@@ -282,13 +284,13 @@ class Validator:
     def validate_stream(
         self,
         chunk: Any,
-        metadata: Dict[str, Any],
+        metadata: dict[str, Any],
         *,
-        property_path: Optional[str] = "$",
-        context_vars: Optional[ContextVar[Dict[str, ContextVar[List[str]]]]] = None,
-        context: Optional[Context] = None,
+        property_path: str | None = "$",
+        context_vars: ContextVar[dict[str, ContextVar[list[str]]]] | None = None,
+        context: Context | None = None,
         **kwargs,
-    ) -> Optional[ValidationResult]:
+    ) -> ValidationResult | None:
         """Validates a chunk emitted by an LLM. If the LLM chunk is smaller
         than the validator's chunking strategy, it will be accumulated until it
         reaches the desired size. In the meantime, the validator will return
@@ -305,8 +307,8 @@ class Validator:
         accumulated_chunks = self.accumulated_chunks
 
         # if context_vars is passed, use it to get the accumulated chunks
-        context_var: Optional[ContextVar[List[str]]] = None
-        ctx_var_map: Optional[Dict[str, ContextVar[List[str]]]] = None
+        context_var: ContextVar[list[str]] | None = None
+        ctx_var_map: dict[str, ContextVar[list[str]]] | None = None
         context_key = f"{property_path}_{self.rail_alias}"
         if context_vars and context:
             ctx_var_map = context.run(context_vars.get)
@@ -357,8 +359,8 @@ class Validator:
         return validation_result
 
     async def async_validate_stream(
-        self, chunk: Any, metadata: Dict[str, Any], **kwargs
-    ) -> Optional[ValidationResult]:
+        self, chunk: Any, metadata: dict[str, Any], **kwargs
+    ) -> ValidationResult | None:
         loop = asyncio.get_event_loop()
         validate_stream_partial = partial(self.validate_stream, chunk, metadata, **kwargs)
         return await loop.run_in_executor(None, validate_stream_partial)
@@ -507,7 +509,7 @@ class Validator:
         for different chains or calls.
     """
 
-    def with_metadata(self, metadata: Dict[str, Any]):
+    def with_metadata(self, metadata: dict[str, Any]):
         """Assigns metadata to this validator to use during validation."""
         self._metadata = metadata
         return self
@@ -521,11 +523,11 @@ class Validator:
 
 
 V = TypeVar("V", bound=Validator, covariant=True)
-validators_registry: Dict[str, Type[Validator]] = {}
+validators_registry: dict[str, type[Validator]] = {}
 types_to_validators = defaultdict(list)
 
 
-def validator_factory(name: str, validate: Callable) -> Type[Validator]:
+def validator_factory(name: str, validate: Callable) -> type[Validator]:
     def validate_wrapper(self, *args, **kwargs):
         return validate(*args, **kwargs)
 
@@ -538,8 +540,8 @@ def validator_factory(name: str, validate: Callable) -> Type[Validator]:
 
 
 def register_validator(
-    name: str, data_type: Union[str, List[str]], has_guardrails_endpoint: bool = False
-) -> Callable[[Union[Type[V], Callable]], Union[Type[V], Type[Validator]]]:
+    name: str, data_type: Union[str, list[str]], has_guardrails_endpoint: bool = False
+) -> Callable[[Union[type[V], Callable]], Union[type[V], type[Validator]]]:
     """Register a validator for a data type."""
     from guardrails.datatypes import types_registry
 
@@ -553,8 +555,8 @@ def register_validator(
         types_to_validators[dt].append(name)
 
     def decorator(
-        cls_or_func: Union[Type[V], Callable],
-    ) -> Union[Type[V], Type[Validator]]:
+        cls_or_func: Union[type[V], Callable],
+    ) -> Union[type[V], type[Validator]]:
         """Register a validator for a data type."""
         if isinstance(cls_or_func, type) and issubclass(cls_or_func, Validator):
             cls = cls_or_func
@@ -588,7 +590,7 @@ def try_to_import_hub():
 
 
 # TODO: Move this to validator_utils.py
-def get_validator_class(name: Optional[str]) -> Optional[Type[Validator]]:
+def get_validator_class(name: str | None) -> type[Validator] | None:
     if not name:
         return None
     is_hub_validator = name.startswith(hub)

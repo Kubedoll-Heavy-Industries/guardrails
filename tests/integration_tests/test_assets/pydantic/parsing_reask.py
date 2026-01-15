@@ -10,7 +10,7 @@ Extract information from this resume and return a JSON that follows the correct 
 ${gr.complete_xml_suffix}
 
 \n\nAssistant:
-"""  # noqa
+"""
 
 document = (
     """Joe Smith – 1234 5678 / joe@example.com  PRIVATE & CONFIDENTIAL
@@ -23,7 +23,7 @@ reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
 Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia
 deserunt mollit anim id est laborum."""
     ""
-)  # noqa
+)
 
 compiled_prompt = """
 
@@ -62,7 +62,7 @@ Here are examples of simple (XML, JSON) pairs that show the expected behavior:
 
 
 Assistant:
-"""  # noqa
+"""
 
 compiled_reask = """
 I was given the following response, which was not parseable as JSON.
@@ -80,7 +80,7 @@ Given below is XML that describes the information to extract from this document 
 </output>
 
 ONLY return a valid JSON object (no other text is necessary), where the key of the field in JSON is the `name` attribute of the corresponding XML, and the value is of the type specified by the corresponding XML's tag. The JSON MUST conform to the XML format, including any types and format requests e.g. requests for lists, objects and specific types. Be correct and concise. If you are unsure anywhere, enter `null`.
-"""  # noqa
+"""
 
 
 class PersonalDetails(BaseModel):
@@ -97,7 +97,7 @@ expected_llm_output = """Here is the JSON containing the requested information e
   "contact_number": "1234 5678",
   "contact_email": "joe@example.com"
 }
-```"""  # noqa
+```"""
 
 unparseable_llm_response = """Here is the JSON containing the requested information extracted from the resume:
 
@@ -106,7 +106,7 @@ unparseable_llm_response = """Here is the JSON containing the requested informat
   "name": "Joe Smith",
   "contact_number": "1234 5678",
   "contact_email": "joe@example.com"
-```"""  # noqa
+```"""
 
 expected_output = {
     "name": "Joe Smith",

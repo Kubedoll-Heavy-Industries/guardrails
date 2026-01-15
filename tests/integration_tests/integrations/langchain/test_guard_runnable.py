@@ -1,15 +1,14 @@
-from typing import Any, Optional
 import io
 import sys
+from typing import Any
 
 import pytest
 from pydantic import PrivateAttr
 
+from guardrails.classes import ValidationOutcome
+from guardrails.errors import ValidationError
 from guardrails.guard import Guard
 from guardrails.integrations.langchain.guard_runnable import GuardRunnable
-from guardrails.errors import ValidationError
-from guardrails.classes import ValidationOutcome
-
 from tests.integration_tests.test_assets.validators import ReadingTime, RegexMatch
 
 
@@ -41,7 +40,7 @@ def test_guard_as_runnable(guard_runnable: GuardRunnable, output: str, throws: b
         def invoke(
             self,
             input: LanguageModelInput,
-            config: Optional[RunnableConfig] = None,
+            config: RunnableConfig | None = None,
             **kwargs: Any,
         ) -> BaseMessage:
             return AIMessage(content=output)
@@ -72,8 +71,8 @@ def test_guard_as_runnable(guard_runnable: GuardRunnable, output: str, throws: b
 
 def test_guard_runnable_with_callback_config(guard_runnable):
     from langchain_core.callbacks import CallbackManager
-    from langchain_core.tracers import ConsoleCallbackHandler
     from langchain_core.runnables import RunnableConfig
+    from langchain_core.tracers import ConsoleCallbackHandler
 
     console_handler = ConsoleCallbackHandler()
     callback_manager = CallbackManager([console_handler])

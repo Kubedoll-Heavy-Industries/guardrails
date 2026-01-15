@@ -2,20 +2,19 @@ import logging
 import os
 from dataclasses import dataclass
 from os.path import expanduser
-from typing import Optional
 
 from guardrails.classes.generic.serializeable import Serializeable
 from guardrails.utils.casting_utils import to_bool
 
-BOOL_CONFIGS = set(["no_metrics", "enable_metrics", "use_remote_inferencing"])
+BOOL_CONFIGS = {"no_metrics", "enable_metrics", "use_remote_inferencing"}
 
 
 @dataclass
 class RC(Serializeable):
-    id: Optional[str] = None
-    token: Optional[str] = None
-    enable_metrics: Optional[bool] = True
-    use_remote_inferencing: Optional[bool] = True
+    id: str | None = None
+    token: str | None = None
+    enable_metrics: bool | None = True
+    use_remote_inferencing: bool | None = True
 
     @staticmethod
     def exists() -> bool:
@@ -24,7 +23,7 @@ class RC(Serializeable):
         return os.path.exists(guardrails_rc)
 
     @classmethod
-    def load(cls, logger: Optional[logging.Logger] = None) -> "RC":
+    def load(cls, logger: logging.Logger | None = None) -> "RC":
         try:
             if not logger:
                 logger = logging.getLogger()

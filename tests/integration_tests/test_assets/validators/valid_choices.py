@@ -1,4 +1,5 @@
-from typing import Any, Callable, Dict, List, Optional
+from collections.abc import Callable
+from typing import Any
 
 from guardrails.logger import logger
 from guardrails.validator_base import (
@@ -26,14 +27,14 @@ class ValidChoices(Validator):
         choices: The list of valid choices.
     """
 
-    def __init__(self, choices: List[Any], on_fail: Optional[Callable] = None):
+    def __init__(self, choices: list[Any], on_fail: Callable | None = None):
         super().__init__(
             on_fail=on_fail,
             choices=choices,
         )
         self._choices = choices
 
-    def validate(self, value: Any, metadata: Dict) -> ValidationResult:
+    def validate(self, value: Any, metadata: dict) -> ValidationResult:
         """Validates that a value is within a range."""
         logger.debug(f"Validating {value} is in choices {self._choices}...")
 

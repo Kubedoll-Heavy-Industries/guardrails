@@ -1,13 +1,12 @@
+import openai
 import pytest
-
-import openai  # noqa: F401
 from pydantic import BaseModel
 
 from guardrails import Guard, Validator, register_validator
 from guardrails.classes.validation.validation_result import PassResult
-from guardrails.utils.validator_utils import verify_metadata_requirements
-from guardrails.utils import args, kwargs, on_fail
 from guardrails.types import OnFailAction
+from guardrails.utils import args, kwargs, on_fail
+from guardrails.utils.validator_utils import verify_metadata_requirements
 from tests.integration_tests.test_assets.validators import (
     EndsWith,
     LowerCase,
@@ -161,7 +160,7 @@ class TestConfigure:
         mock_set_tracer_context = mocker.patch("guardrails.guard.set_tracer_context")
         mock_get_tracer_context = mocker.patch("guardrails.guard.get_tracer_context")
 
-        from guardrails.guard import Tracer, Guard
+        from guardrails.guard import Guard, Tracer
 
         guard = Guard()
         tracer = Tracer()

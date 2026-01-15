@@ -1,7 +1,9 @@
 import asyncio
-from typing import Any, Dict, Iterator, List, Optional, Tuple, cast
+from collections.abc import Iterator
+from typing import Any, cast
 
 from guardrails.actions.filter import Filter
+from guardrails.actions.reask import ReAsk
 from guardrails.actions.refrain import Refrain
 from guardrails.classes.history import Iteration
 from guardrails.classes.validation.validation_result import (
@@ -10,10 +12,9 @@ from guardrails.classes.validation.validation_result import (
     StreamValidationResult,
     ValidationResult,
 )
-from guardrails.types import ValidatorMap, OnFailAction
-from guardrails.utils.exception_utils import UserFacingException
 from guardrails.classes.validation.validator_logs import ValidatorLogs
-from guardrails.actions.reask import ReAsk
+from guardrails.types import OnFailAction, ValidatorMap
+from guardrails.utils.exception_utils import UserFacingException
 from guardrails.validator_base import Validator
 from guardrails.validator_service.validator_service_base import ValidatorServiceBase
 
@@ -23,13 +24,13 @@ class SequentialValidatorService(ValidatorServiceBase):
         self,
         validator: Validator,
         value: Any,
-        metadata: Dict,
+        metadata: dict,
         validator_logs: ValidatorLogs,
-        stream: Optional[bool] = False,
+        stream: bool | None = False,
         *,
         validation_session_id: str,
         **kwargs,
-    ) -> Optional[ValidationResult]:
+    ) -> ValidationResult | None:
         result = self.execute_validator(
             validator,
             value,
@@ -54,9 +55,9 @@ class SequentialValidatorService(ValidatorServiceBase):
         iteration: Iteration,
         validator: Validator,
         value: Any,
-        metadata: Dict,
+        metadata: dict,
         property_path: str,
-        stream: Optional[bool] = False,
+        stream: bool | None = False,
         **kwargs,
     ) -> ValidatorLogs:
         validator_logs = self.before_run_validator(iteration, validator, value, property_path)
@@ -77,8 +78,8 @@ class SequentialValidatorService(ValidatorServiceBase):
         self,
         iteration: Iteration,
         validator_map: ValidatorMap,
-        value_stream: Iterator[Tuple[Any, bool]],
-        metadata: Dict[str, Any],
+        value_stream: Iterator[tuple[Any, bool]],
+        metadata: dict[str, Any],
         absolute_property_path: str,
         reference_property_path: str,
         **kwargs,
@@ -109,8 +110,8 @@ class SequentialValidatorService(ValidatorServiceBase):
         self,
         iteration: Iteration,
         validator_map: ValidatorMap,
-        value_stream: Iterator[Tuple[Any, bool]],
-        metadata: Dict[str, Any],
+        value_stream: Iterator[tuple[Any, bool]],
+        metadata: dict[str, Any],
         absolute_property_path: str,
         reference_property_path: str,
         **kwargs,
@@ -256,8 +257,8 @@ class SequentialValidatorService(ValidatorServiceBase):
         self,
         iteration: Iteration,
         validator_map: ValidatorMap,
-        value_stream: Iterator[Tuple[Any, bool]],
-        metadata: Dict[str, Any],
+        value_stream: Iterator[tuple[Any, bool]],
+        metadata: dict[str, Any],
         absolute_property_path: str,
         reference_property_path: str,
         **kwargs,
@@ -313,39 +314,39 @@ class SequentialValidatorService(ValidatorServiceBase):
         iteration: Iteration,
         validator_map: ValidatorMap,
         value: Any,
-        metadata: Dict[str, Any],
+        metadata: dict[str, Any],
         absolute_property_path: str,
         reference_property_path: str,
-        stream: Optional[bool] = False,
+        stream: bool | None = False,
         **kwargs,
-    ) -> Tuple[Any, Dict[str, Any]]:
+    ) -> tuple[Any, dict[str, Any]]:
         # Validate the field
         validators = validator_map.get(reference_property_path, [])
         for validator in validators:
             if stream:
                 if validator.on_fail_descriptor is OnFailAction.REASK:
                     raise ValueError(
-                        """Reask is not supported for stream validation, 
+                        """Reask is not supported for stream validation,
                         only noop and exception are supported."""
                     )
                 if validator.on_fail_descriptor is OnFailAction.FIX:
                     raise ValueError(
-                        """Fix is not supported for stream validation, 
+                        """Fix is not supported for stream validation,
                         only noop and exception are supported."""
                     )
                 if validator.on_fail_descriptor is OnFailAction.FIX_REASK:
                     raise ValueError(
-                        """Fix reask is not supported for stream validation, 
+                        """Fix reask is not supported for stream validation,
                         only noop and exception are supported."""
                     )
                 if validator.on_fail_descriptor is OnFailAction.FILTER:
                     raise ValueError(
-                        """Filter is not supported for stream validation, 
+                        """Filter is not supported for stream validation,
                         only noop and exception are supported."""
                     )
                 if validator.on_fail_descriptor is OnFailAction.REFRAIN:
                     raise ValueError(
-                        """Refrain is not supported for stream validation, 
+                        """Refrain is not supported for stream validation,
                         only noop and exception are supported."""
                     )
             validator_logs = self.run_validator(
@@ -404,9 +405,9 @@ class SequentialValidatorService(ValidatorServiceBase):
         iteration: Iteration,
         absolute_path: str,
         reference_path: str,
-        stream: Optional[bool] = False,
+        stream: bool | None = False,
         **kwargs,
-    ) -> Tuple[Any, dict]:
+    ) -> tuple[Any, dict]:
         ###
         # NOTE: The way validation can be executed now is fundamentally wide open.
         #   Since validators are tracked against the JSONPaths for the
@@ -424,7 +425,7 @@ class SequentialValidatorService(ValidatorServiceBase):
 
         child_ref_path = reference_path.replace(".*", "")
         # Validate children first
-        if isinstance(value, List):
+        if isinstance(value, list):
             for index, child in enumerate(value):
                 abs_child_path = f"{absolute_path}.{index}"
                 ref_child_path = f"{child_ref_path}.*"
@@ -437,7 +438,7 @@ class SequentialValidatorService(ValidatorServiceBase):
                     ref_child_path,
                 )
                 value[index] = child_value
-        elif isinstance(value, Dict):
+        elif isinstance(value, dict):
             for key in value:
                 child = value.get(key)
                 abs_child_path = f"{absolute_path}.{key}"
@@ -467,7 +468,7 @@ class SequentialValidatorService(ValidatorServiceBase):
 
     def validate_stream(
         self,
-        value_stream: Iterator[Tuple[Any, bool]],
+        value_stream: Iterator[tuple[Any, bool]],
         metadata: dict,
         validator_map: ValidatorMap,
         iteration: Iteration,

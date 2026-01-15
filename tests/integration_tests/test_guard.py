@@ -2,27 +2,26 @@ import enum
 import importlib
 import json
 import os
-from typing import Dict, List, Optional, Union
+from typing import Union
 
 import pytest
-from pydantic import BaseModel, Field
 from guardrails_api_client import Guard as IGuard
+from pydantic import BaseModel, Field
 
 import guardrails as gd
-from guardrails.actions.reask import SkeletonReAsk
+from guardrails.actions.reask import FieldReAsk, SkeletonReAsk
 from guardrails.classes.generic.stack import Stack
 from guardrails.classes.llm.llm_response import LLMResponse
-from guardrails.classes.validation_outcome import ValidationOutcome
 from guardrails.classes.validation.validation_result import FailResult
 from guardrails.classes.validation.validator_reference import ValidatorReference
+from guardrails.classes.validation_outcome import ValidationOutcome
 from guardrails.guard import Guard
-from guardrails.actions.reask import FieldReAsk
 from tests.integration_tests.test_assets.validators import (
-    RegexMatch,
-    ValidLength,
-    ValidChoices,
     LowerCase,
     OneLine,
+    RegexMatch,
+    ValidChoices,
+    ValidLength,
 )
 
 from .mock_llm_outputs import (
@@ -198,11 +197,11 @@ def test_entity_extraction_with_reask(
     assert first.validation_response == entity_extraction.VALIDATED_OUTPUT_REASK_1
 
     # For reask validator logs
-    two_words_validator_logs = list(
+    two_words_validator_logs = [
         x
         for x in first.validator_logs
         if x.property_path == "$.fees.1.name" and x.registered_name == "two-words"
-    )
+    ]
 
     two_words_validator_log = two_words_validator_logs[0]
 
@@ -234,7 +233,7 @@ def test_entity_extraction_with_reask(
     else:
         # Second iteration is the first reask
         assert call.reask_messages.first[1]["content"] == entity_extraction.COMPILED_PROMPT_REASK
-        # FIXME: Switch back to this once field level reask schema pruning is implemented  # noqa
+        # FIXME: Switch back to this once field level reask schema pruning is implemented
         # assert call.raw_outputs.at(1) == entity_extraction.LLM_OUTPUT_REASK
         assert call.raw_outputs.at(1) == json.dumps(entity_extraction.VALIDATED_OUTPUT_REASK_2)
     assert call.guarded_output == entity_extraction.VALIDATED_OUTPUT_REASK_2
@@ -645,11 +644,11 @@ def test_entity_extraction_with_reask_with_optional_prompts(
 
     # For reask validator logs
     # TODO: Update once we add json_path to the ValidatorLog class
-    nested_validator_logs = list(
+    nested_validator_logs = [
         x
         for x in call.iterations.first.validator_logs
         if x.value_before_validation == "my chase plan"
-    )
+    ]
     nested_validator_log = nested_validator_logs[1]
 
     assert nested_validator_log.value_before_validation == "my chase plan"
@@ -667,7 +666,7 @@ def test_entity_extraction_with_reask_with_optional_prompts(
     # For re-asked prompt and output
     if expected_reask_prompt:
         assert call.reask_messages.last[1]["content"] == expected_reask_prompt
-    # FIXME: Switch back to this once field level reask schema pruning is implemented  # noqa
+    # FIXME: Switch back to this once field level reask schema pruning is implemented
     # assert call.raw_outputs.at(1) == entity_extraction.LLM_OUTPUT_REASK
     assert call.raw_outputs.at(1) == json.dumps(entity_extraction.VALIDATED_OUTPUT_REASK_2)
 
@@ -864,11 +863,11 @@ def test_sequential_validator_log_is_not_duplicated(mocker):
         # Assert one log per field validation
         # In this case, the OneLine validator should be run once per fee entry
         # because of the explanation field
-        one_line_logs = list(
+        one_line_logs = [
             x
             for x in guard.history.first.iterations.first.validator_logs
             if x.validator_name == "OneLine"
-        )
+        ]
         assert len(one_line_logs) == len(guard.history.first.validation_response.get("fees"))
 
     finally:
@@ -903,11 +902,11 @@ def test_in_memory_validator_log_is_not_duplicated(mocker):
             num_reasks=1,
         )
 
-        one_line_logs = list(
+        one_line_logs = [
             x
             for x in guard.history.first.iterations.first.validator_logs
             if x.validator_name == "OneLine"
-        )
+        ]
 
         assert len(one_line_logs) == len(guard.history.first.validation_response.get("fees"))
 
@@ -927,17 +926,17 @@ def test_enum_datatype(mocker):
     return_value = pydantic.LLM_OUTPUT_ENUM
 
     def custom_llm(
-        prompt: Optional[str] = None,
+        prompt: str | None = None,
         *args,
-        instructions: Optional[str] = None,
-        messages: Optional[List[Dict[str, str]]] = None,
+        instructions: str | None = None,
+        messages: list[dict[str, str]] | None = None,
         **kwargs,
     ) -> str:
         nonlocal return_value
         return return_value
 
     guard = gd.Guard.for_pydantic(Task)
-    _, dict_o, *rest = guard(
+    _, dict_o, *_rest = guard(
         custom_llm,
         messages=[{"role": "user", "content": "What is the status of this task?"}],
     )
@@ -1084,7 +1083,7 @@ def test_json_function_calling_tool(mocker):
         description: str
 
     class Tasks(BaseModel):
-        list: List[Task]
+        list: list[Task]
 
     guard = Guard.for_pydantic(Tasks)
     tools = [
@@ -1196,7 +1195,7 @@ class TestSerizlizationAndDeserialization:
         guard = Guard(
             name="name-case", description="Checks that a string is in Name Case format."
         ).use_many(
-            RegexMatch(regex="^(?:[A-Z][^\s]*\s?)+$", on_fail="noop"),
+            RegexMatch(regex=r"^(?:[A-Z][^\s]*\s?)+$", on_fail="noop"),
             ValidLength(1, 100, on_fail="noop"),
             ValidChoices(["Some Name", "Some Other Name"], on_fail="noop"),
         )
@@ -1241,7 +1240,7 @@ class TestSerizlizationAndDeserialization:
         guard = Guard(
             name="name-case", description="Checks that a string is in Name Case format."
         ).use_many(
-            RegexMatch(regex="^(?:[A-Z][^\s]*\s?)+$", on_fail="noop"),
+            RegexMatch(regex=r"^(?:[A-Z][^\s]*\s?)+$", on_fail="noop"),
             ValidLength(1, 100, on_fail="noop"),
             ValidChoices(["Some Name", "Some Other Name"], on_fail="noop"),
         )
@@ -1488,7 +1487,7 @@ class TestCustomLLMApi:
 
         def custom_llm(
             *args,
-            messages: Optional[List[Dict[str, str]]] = None,
+            messages: list[dict[str, str]] | None = None,
             **kwargs,
         ) -> str:
             mock_llm(
@@ -1506,11 +1505,11 @@ class TestCustomLLMApi:
             messages=[
                 {
                     "role": "system",
-                    "content": "You are a list generator.  You can generate a list of things that are not food.",  # noqa
+                    "content": "You are a list generator.  You can generate a list of things that are not food.",
                 },
                 {
                     "role": "user",
-                    "content": "Can you generate a list of 10 things that are not food?",  # noqa
+                    "content": "Can you generate a list of 10 things that are not food?",
                 },
             ],
         )
@@ -1521,11 +1520,11 @@ class TestCustomLLMApi:
             messages=[
                 {
                     "role": "system",
-                    "content": "You are a list generator.  You can generate a list of things that are not food.",  # noqa
+                    "content": "You are a list generator.  You can generate a list of things that are not food.",
                 },
                 {
                     "role": "user",
-                    "content": "Can you generate a list of 10 things that are not food?",  # noqa
+                    "content": "Can you generate a list of 10 things that are not food?",
                 },
             ],
             temperature=0,

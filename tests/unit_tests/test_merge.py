@@ -1,6 +1,6 @@
 import pytest
-from guardrails.validator_service import SequentialValidatorService
 
+from guardrails.validator_service import SequentialValidatorService
 
 validator_service = SequentialValidatorService()
 
@@ -13,7 +13,7 @@ validator_service = SequentialValidatorService()
         ("hello world", ["", "hello world"], ""),
         # test behavior on non overlapping replacements
         (
-            """John is a shitty person who works at Anthropic on Claude, 
+            """John is a shitty person who works at Anthropic on Claude,
              and lives in San Francisco""",
             [
                 """<PERSON> is a shitty person who works at Anthropic on <PERSON>,

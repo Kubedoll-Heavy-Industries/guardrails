@@ -1,21 +1,22 @@
 # Imports
 import logging
-from typing import Optional
-from guardrails.settings import settings
-from guardrails.version import GUARDRAILS_VERSION
+
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import (  # HTTP Exporter
     OTLPSpanExporter,
 )
 from opentelemetry.sdk.resources import (
-    SERVICE_NAME,
-    Resource,
-    SERVICE_VERSION,
     DEPLOYMENT_ENVIRONMENT,
+    SERVICE_NAME,
+    SERVICE_VERSION,
+    Resource,
 )
 from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import ConsoleSpanExporter, BatchSpanProcessor
-from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator
+from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
 from opentelemetry.trace.propagation import set_span_in_context
+from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator
+
+from guardrails.settings import settings
+from guardrails.version import GUARDRAILS_VERSION
 
 
 class HubTelemetry:
@@ -38,7 +39,7 @@ class HubTelemetry:
         tracer_name: str = "gr_hub",
         export_locally: bool = False,
         *,
-        enabled: Optional[bool] = None,
+        enabled: bool | None = None,
     ):
         if cls._instance is None:
             logging.debug("Creating HubTelemetry instance...")
@@ -57,7 +58,7 @@ class HubTelemetry:
         tracer_name: str,
         export_locally: bool,
         *,
-        enabled: Optional[bool] = None,
+        enabled: bool | None = None,
     ):
         """Initializes a tracer for Guardrails Hub."""
         if enabled is None:

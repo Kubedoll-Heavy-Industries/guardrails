@@ -1,10 +1,10 @@
+from guardrails.classes.llm.llm_response import LLMResponse
 from guardrails.llm_providers import (
     ArbitraryCallable,
     AsyncArbitraryCallable,
     AsyncLiteLLMCallable,
     LiteLLMCallable,
 )
-from guardrails.classes.llm.llm_response import LLMResponse
 
 from .test_assets import entity_extraction, lists_object, pydantic, python_rail, string
 
@@ -16,16 +16,16 @@ class MockLiteLLMCallableOther(LiteLLMCallable):
     def _invoke_llm(self, messages, *args, **kwargs):
         """Mock the OpenAI API call to Completion.create."""
 
-        _rail_to_compiled_prompt = {  # noqa
+        _rail_to_compiled_prompt = {
             entity_extraction.RAIL_SPEC_WITH_REASK: entity_extraction.COMPILED_PROMPT,
         }
 
         mock_llm_responses = {
             entity_extraction.COMPILED_PROMPT: entity_extraction.LLM_OUTPUT,
             entity_extraction.COMPILED_PROMPT_REASK: entity_extraction.LLM_OUTPUT_REASK,
-            entity_extraction.COMPILED_PROMPT_FULL_REASK: entity_extraction.LLM_OUTPUT_FULL_REASK,  # noqa: E501
-            entity_extraction.COMPILED_PROMPT_SKELETON_REASK_1: entity_extraction.LLM_OUTPUT_SKELETON_REASK_1,  # noqa: E501
-            entity_extraction.COMPILED_PROMPT_SKELETON_REASK_2: entity_extraction.LLM_OUTPUT_SKELETON_REASK_2,  # noqa: E501
+            entity_extraction.COMPILED_PROMPT_FULL_REASK: entity_extraction.LLM_OUTPUT_FULL_REASK,
+            entity_extraction.COMPILED_PROMPT_SKELETON_REASK_1: entity_extraction.LLM_OUTPUT_SKELETON_REASK_1,
+            entity_extraction.COMPILED_PROMPT_SKELETON_REASK_2: entity_extraction.LLM_OUTPUT_SKELETON_REASK_2,
             pydantic.COMPILED_PROMPT: pydantic.LLM_OUTPUT,
             pydantic.COMPILED_PROMPT_REASK_1: pydantic.LLM_OUTPUT_REASK_1,
             pydantic.COMPILED_PROMPT_FULL_REASK_1: pydantic.LLM_OUTPUT_FULL_REASK_1,
@@ -36,9 +36,9 @@ class MockLiteLLMCallableOther(LiteLLMCallable):
             string.COMPILED_PROMPT: string.LLM_OUTPUT,
             string.COMPILED_PROMPT_REASK: string.LLM_OUTPUT_REASK,
             string.COMPILED_LIST_PROMPT: string.LIST_LLM_OUTPUT,
-            python_rail.VALIDATOR_PARALLELISM_PROMPT_1: python_rail.VALIDATOR_PARALLELISM_RESPONSE_1,  # noqa: E501
-            python_rail.VALIDATOR_PARALLELISM_PROMPT_2: python_rail.VALIDATOR_PARALLELISM_RESPONSE_2,  # noqa: E501
-            python_rail.VALIDATOR_PARALLELISM_PROMPT_3: python_rail.VALIDATOR_PARALLELISM_RESPONSE_3,  # noqa: E501
+            python_rail.VALIDATOR_PARALLELISM_PROMPT_1: python_rail.VALIDATOR_PARALLELISM_RESPONSE_1,
+            python_rail.VALIDATOR_PARALLELISM_PROMPT_2: python_rail.VALIDATOR_PARALLELISM_RESPONSE_2,
+            python_rail.VALIDATOR_PARALLELISM_PROMPT_3: python_rail.VALIDATOR_PARALLELISM_RESPONSE_3,
             lists_object.LIST_PROMPT: lists_object.LIST_OUTPUT,
         }
 

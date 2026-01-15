@@ -1,41 +1,40 @@
 import json
-import pytest
-
 from xml.etree.ElementTree import canonicalize
 
-from guardrails.classes.validation.validator_reference import ValidatorReference
-from guardrails.classes.schema.processed_schema import ProcessedSchema
-from guardrails.schema.rail_schema import (
-    rail_file_to_schema,
-    json_schema_to_rail_output,
-)
+import pytest
+
 from guardrails.classes.output_type import OutputTypes
+from guardrails.classes.schema.processed_schema import ProcessedSchema
+from guardrails.classes.validation.validator_reference import ValidatorReference
+from guardrails.schema.rail_schema import (
+    json_schema_to_rail_output,
+    rail_file_to_schema,
+)
 from guardrails.validator_base import OnFailAction
 from tests.integration_tests.test_assets.validators import (
-    ValidChoices,
     LowerCase,
     OneLine,
     TwoWords,
+    ValidChoices,
 )
-
 
 ### JSON Schemas ###
 with open(
-    "tests/integration_tests/test_assets/json_schemas/choice_case.json", "r"
+    "tests/integration_tests/test_assets/json_schemas/choice_case.json"
 ) as choice_case_json_file:
     choice_case_json_schema = json.loads(choice_case_json_file.read())
 
 with open(
-    "tests/integration_tests/test_assets/json_schemas/choice_case_openapi.json", "r"
+    "tests/integration_tests/test_assets/json_schemas/choice_case_openapi.json"
 ) as choice_case_openapi_file:
     choice_case_openapi_schema = json.loads(choice_case_openapi_file.read())
 
 with open(
-    "tests/integration_tests/test_assets/json_schemas/credit_card_agreement.json", "r"
+    "tests/integration_tests/test_assets/json_schemas/credit_card_agreement.json"
 ) as credit_card_agreement_file:
     credit_card_agreement_schema = json.loads(credit_card_agreement_file.read())
 
-with open("tests/integration_tests/test_assets/json_schemas/string.json", "r") as string_file:
+with open("tests/integration_tests/test_assets/json_schemas/string.json") as string_file:
     string_schema = json.loads(string_file.read())
 
 
@@ -101,7 +100,7 @@ case_choice_rail = """
     </case>
   </choice>
 </output>
-""".strip()  # noqa
+""".strip()
 
 # flight_direction.required is true here because Pydantic compiles optional properties
 #   as a Union of the actual type and null but still marks it as required...
@@ -117,7 +116,7 @@ case_choice_openapi_rail = """
     </case>
   </choice>
 </output>
-""".strip()  # noqa
+""".strip()
 
 credit_card_agreement_rail = """
 <output>
@@ -131,11 +130,11 @@ credit_card_agreement_rail = """
   </list>
   <object name="interest_rates" description="What are the interest rates offered by the bank on savings and checking accounts, loans, and credit products?" required="true" />
 </output>
-""".strip()  # noqa
+""".strip()
 
 string_schema_rail = """
 <output type="string" description="Some string..." format="lower-case; two-words" />
-""".strip()  # noqa
+""".strip()
 
 ### Validator Maps ###
 case_choice_validator_map = {

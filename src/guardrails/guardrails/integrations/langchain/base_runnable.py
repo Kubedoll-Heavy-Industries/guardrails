@@ -1,8 +1,10 @@
-from copy import deepcopy
-from typing import Any, Dict, Optional, Union, cast
 import json
+from copy import deepcopy
+from typing import Any, Union, cast
+
 from langchain_core.messages import BaseMessage
 from langchain_core.runnables import Runnable, RunnableConfig
+
 from guardrails.classes.input_type import InputType
 from guardrails.classes.output_type import OT
 
@@ -13,7 +15,7 @@ class BaseRunnable(Runnable):
     def invoke(
         self,
         input: InputType,
-        config: Optional[RunnableConfig] = None,
+        config: RunnableConfig | None = None,
         **kwargs: Any,
     ) -> InputType:
         return self._call_with_config(
@@ -25,7 +27,7 @@ class BaseRunnable(Runnable):
 
         validated_output = self._validate(str_input)
 
-        if isinstance(validated_output, Dict):
+        if isinstance(validated_output, dict):
             validated_output = json.dumps(validated_output)
 
         if isinstance(input, BaseMessage):

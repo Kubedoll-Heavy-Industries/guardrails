@@ -19,8 +19,8 @@ def get_formatter(name: str, *args, **kwargs) -> BaseFormatter:
 
 
 __all__ = [
-    "get_formatter",
     "BaseFormatter",
-    "PassthroughFormatter",
     "JsonFormatter",
+    "PassthroughFormatter",
+    "get_formatter",
 ]

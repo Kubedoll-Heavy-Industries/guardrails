@@ -1,7 +1,4 @@
 from typing import (
-    Dict,
-    List,
-    Type,
     Union,
     cast,
     get_args,
@@ -14,8 +11,8 @@ from guardrails.utils.safe_get import safe_get
 
 
 def convert_pydantic_model_to_openai_fn(
-    model: Union[Type[BaseModel], Type[List[Type[BaseModel]]]],
-) -> Dict:
+    model: Union[type[BaseModel], type[list[type[BaseModel]]]],
+) -> dict:
     """Convert a Pydantic BaseModel to an OpenAI function.
 
     Args:
@@ -35,7 +32,7 @@ def convert_pydantic_model_to_openai_fn(
         # No List[List] support; we've already declared that in our types
         schema_model = safe_get(item_types, 0)
 
-    schema_model = cast(Type[BaseModel], schema_model)
+    schema_model = cast(type[BaseModel], schema_model)
 
     # Convert Pydantic model to JSON schema
     json_schema = schema_model.model_json_schema()

@@ -1,10 +1,9 @@
 from guardrails.classes.llm.llm_response import LLMResponse
 
-
 CALLABLE_FAILURE_SUFFIX = """Make sure that `fn` can be called as a function
 that accepts a prompt string, **kwargs, and returns a string.
  If you're using a custom LLM callable, please see docs
- here: https://go.guardrailsai.com/B1igEy3"""  # noqa
+ here: https://go.guardrailsai.com/B1igEy3"""
 
 
 class PromptCallableException(Exception):

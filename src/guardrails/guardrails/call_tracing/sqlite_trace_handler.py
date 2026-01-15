@@ -23,14 +23,13 @@ import datetime
 import os
 import sqlite3
 import time
+from collections.abc import Iterator
 from dataclasses import asdict
-from typing import Iterator
 
 from guardrails.call_tracing.trace_entry import GuardTraceEntry
 from guardrails.call_tracing.tracer_mixin import TracerMixin
 from guardrails.classes.validation.validator_logs import ValidatorLogs
 from guardrails.utils.casting_utils import to_string
-
 
 LOG_RETENTION_LIMIT = 100000
 TIME_BETWEEN_CLEANUPS = 10.0  # Seconds
@@ -125,9 +124,9 @@ class SQLiteTraceHandler(TracerMixin):
             self.last_cleanup = now
         self.db.execute(
             """
-            DELETE FROM guard_logs 
+            DELETE FROM guard_logs
             WHERE id < (
-                SELECT id FROM guard_logs ORDER BY id DESC LIMIT 1 OFFSET ?  
+                SELECT id FROM guard_logs ORDER BY id DESC LIMIT 1 OFFSET ?
             );
             """,
             (keep_n,),
@@ -211,10 +210,10 @@ class SQLiteTraceHandler(TracerMixin):
             for row in cursor:
                 last_idx = row["id"]
         sql = """
-            SELECT 
-                id, guard_name, start_time, end_time, prevalidate_text, 
-                postvalidate_text, exception_message 
-            FROM guard_logs 
+            SELECT
+                id, guard_name, start_time, end_time, prevalidate_text,
+                postvalidate_text, exception_message
+            FROM guard_logs
             WHERE id > ?
             ORDER BY start_time;
         """

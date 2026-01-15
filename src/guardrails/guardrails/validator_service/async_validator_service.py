@@ -1,7 +1,9 @@
 import asyncio
-from typing import Any, Awaitable, Coroutine, Dict, List, Optional, Tuple, Union
+from collections.abc import Awaitable, Coroutine
+from typing import Any, Optional, Union
 
 from guardrails.actions.filter import Filter
+from guardrails.actions.reask import FieldReAsk
 from guardrails.actions.refrain import Refrain
 from guardrails.classes.history import Iteration
 from guardrails.classes.validation.validation_result import (
@@ -9,11 +11,10 @@ from guardrails.classes.validation.validation_result import (
     PassResult,
     ValidationResult,
 )
+from guardrails.classes.validation.validator_logs import ValidatorLogs
 from guardrails.hub_telemetry.hub_tracing import async_trace
 from guardrails.telemetry.validator_tracing import trace_async_validator
-from guardrails.types import ValidatorMap, OnFailAction
-from guardrails.classes.validation.validator_logs import ValidatorLogs
-from guardrails.actions.reask import FieldReAsk
+from guardrails.types import OnFailAction, ValidatorMap
 from guardrails.validator_base import Validator
 from guardrails.validator_service.validator_service_base import (
     ValidatorRun,
@@ -29,12 +30,12 @@ class AsyncValidatorService(ValidatorServiceBase):
         self,
         validator: Validator,
         value: Any,
-        metadata: Optional[Dict],
-        stream: Optional[bool] = False,
+        metadata: dict | None,
+        stream: bool | None = False,
         *,
         validation_session_id: str,
         **kwargs,
-    ) -> Optional[ValidationResult]:
+    ) -> ValidationResult | None:
         validate_func = validator.async_validate_stream if stream else validator.async_validate
         traced_validator = trace_async_validator(
             validator_name=validator.rail_alias,
@@ -53,8 +54,8 @@ class AsyncValidatorService(ValidatorServiceBase):
         self,
         validator: Validator,
         value: Any,
-        metadata: Dict,
-        stream: Optional[bool] = False,
+        metadata: dict,
+        stream: bool | None = False,
         *,
         validation_session_id: str,
         **kwargs,
@@ -77,11 +78,11 @@ class AsyncValidatorService(ValidatorServiceBase):
         iteration: Iteration,
         validator: Validator,
         value: Any,
-        metadata: Dict,
+        metadata: dict,
         absolute_property_path: str,
-        stream: Optional[bool] = False,
+        stream: bool | None = False,
         *,
-        reference_path: Optional[str] = None,
+        reference_path: str | None = None,
         **kwargs,
     ) -> ValidatorRun:
         validator_logs = self.before_run_validator(
@@ -142,15 +143,15 @@ class AsyncValidatorService(ValidatorServiceBase):
         iteration: Iteration,
         validator_map: ValidatorMap,
         value: Any,
-        metadata: Dict,
+        metadata: dict,
         absolute_property_path: str,
         reference_property_path: str,
-        stream: Optional[bool] = False,
+        stream: bool | None = False,
         **kwargs,
     ):
         validators = validator_map.get(reference_property_path, [])
-        coroutines: List[Coroutine[Any, Any, ValidatorRun]] = []
-        validators_logs: List[ValidatorLogs] = []
+        coroutines: list[Coroutine[Any, Any, ValidatorRun]] = []
+        validators_logs: list[ValidatorLogs] = []
         for validator in validators:
             coroutines.append(
                 self.run_validator(
@@ -166,7 +167,7 @@ class AsyncValidatorService(ValidatorServiceBase):
             )
 
         results = await asyncio.gather(*coroutines)
-        reasks: List[FieldReAsk] = []
+        reasks: list[FieldReAsk] = []
         for res in results:
             validators_logs.append(res.validator_logs)
             # QUESTION: Do we still want to do this here or handle it during the merge?
@@ -206,16 +207,16 @@ class AsyncValidatorService(ValidatorServiceBase):
     async def validate_children(
         self,
         value: Any,
-        metadata: Dict,
+        metadata: dict,
         validator_map: ValidatorMap,
         iteration: Iteration,
         abs_parent_path: str,
         ref_parent_path: str,
-        stream: Optional[bool] = False,
+        stream: bool | None = False,
         **kwargs,
     ):
         async def validate_child(
-            child_value: Any, *, key: Optional[str] = None, index: Optional[int] = None
+            child_value: Any, *, key: str | None = None, index: int | None = None
         ):
             child_key = key or index
             abs_child_path = f"{abs_parent_path}.{child_key}"
@@ -237,10 +238,10 @@ class AsyncValidatorService(ValidatorServiceBase):
             return child_key, new_child_value, new_metadata
 
         coroutines = []
-        if isinstance(value, List):
+        if isinstance(value, list):
             for index, child in enumerate(value):
                 coroutines.append(validate_child(child, index=index))
-        elif isinstance(value, Dict):
+        elif isinstance(value, dict):
             for key in value:
                 child = value.get(key)
                 coroutines.append(validate_child(child, key=key))
@@ -262,12 +263,12 @@ class AsyncValidatorService(ValidatorServiceBase):
         iteration: Iteration,
         absolute_path: str,
         reference_path: str,
-        stream: Optional[bool] = False,
+        stream: bool | None = False,
         **kwargs,
     ) -> list[ValidatorRun]:
         # Then validate the parent value
         validators = validator_map.get(reference_path, [])
-        coroutines: List[Coroutine[Any, Any, ValidatorRun]] = []
+        coroutines: list[Coroutine[Any, Any, ValidatorRun]] = []
 
         for validator in validators:
             coroutines.append(
@@ -295,12 +296,12 @@ class AsyncValidatorService(ValidatorServiceBase):
         iteration: Iteration,
         absolute_path: str,
         reference_path: str,
-        stream: Optional[bool] = False,
+        stream: bool | None = False,
         **kwargs,
-    ) -> Tuple[Any, dict]:
+    ) -> tuple[Any, dict]:
         child_ref_path = reference_path.replace(".*", "")
         # Validate children first
-        if isinstance(value, List) or isinstance(value, Dict):
+        if isinstance(value, list) or isinstance(value, dict):
             await self.validate_children(
                 value,
                 metadata,
@@ -335,9 +336,9 @@ class AsyncValidatorService(ValidatorServiceBase):
         absolute_path: str,
         reference_path: str,
         loop: asyncio.AbstractEventLoop,
-        stream: Optional[bool] = False,
+        stream: bool | None = False,
         **kwargs,
-    ) -> Tuple[Any, dict]:
+    ) -> tuple[Any, dict]:
         value, metadata = loop.run_until_complete(
             self.async_validate(
                 value,

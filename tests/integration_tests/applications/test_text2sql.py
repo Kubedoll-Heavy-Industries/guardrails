@@ -28,7 +28,7 @@ def test_text2sql_with_examples(conn_str: str, schema_path: str, examples: str, 
     )
 
     if examples is not None:
-        with open(examples, "r") as f:
+        with open(examples) as f:
             examples = json.load(f)
 
     # This should not raise an exception.

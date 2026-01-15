@@ -1,8 +1,10 @@
 import asyncio
-import pytest
 from time import sleep
-from guardrails.validator_base import Validator, register_validator
+
+import pytest
+
 from guardrails.classes.validation.validation_result import PassResult
+from guardrails.validator_base import Validator, register_validator
 
 
 @register_validator(name="test/validator1", data_type="string")
@@ -67,8 +69,8 @@ class AsyncValidator3(Validator):
 class TestValidatorConcurrency:
     @pytest.mark.asyncio
     async def test_async_validate_with_sync_validators(self):
-        from guardrails.validator_service import AsyncValidatorService
         from guardrails.classes.history import Iteration
+        from guardrails.validator_service import AsyncValidatorService
 
         iteration = Iteration(
             call_id="mock_call_id",
@@ -97,8 +99,8 @@ class TestValidatorConcurrency:
         assert metadata == {"order": ["test/validator2", "test/validator3", "test/validator1"]}
 
     def test_validate_with_sync_validators(self):
-        from guardrails.validator_service import AsyncValidatorService
         from guardrails.classes.history import Iteration
+        from guardrails.validator_service import AsyncValidatorService
 
         iteration = Iteration(
             call_id="mock_call_id",
@@ -130,8 +132,8 @@ class TestValidatorConcurrency:
 
     @pytest.mark.asyncio
     async def test_async_validate_with_async_validators(self):
-        from guardrails.validator_service import AsyncValidatorService
         from guardrails.classes.history import Iteration
+        from guardrails.validator_service import AsyncValidatorService
 
         iteration = Iteration(
             call_id="mock_call_id",
@@ -166,8 +168,8 @@ class TestValidatorConcurrency:
         }
 
     def test_validate_with_async_validators(self):
-        from guardrails.validator_service import AsyncValidatorService
         from guardrails.classes.history import Iteration
+        from guardrails.validator_service import AsyncValidatorService
 
         iteration = Iteration(
             call_id="mock_call_id",
@@ -205,8 +207,8 @@ class TestValidatorConcurrency:
 
     @pytest.mark.asyncio
     async def test_async_validate_with_mixed_validators(self):
-        from guardrails.validator_service import AsyncValidatorService
         from guardrails.classes.history import Iteration
+        from guardrails.validator_service import AsyncValidatorService
 
         iteration = Iteration(
             call_id="mock_call_id",
@@ -237,8 +239,8 @@ class TestValidatorConcurrency:
         }
 
     def test_validate_with_mixed_validators(self):
-        from guardrails.validator_service import AsyncValidatorService
         from guardrails.classes.history import Iteration
+        from guardrails.validator_service import AsyncValidatorService
 
         iteration = Iteration(
             call_id="mock_call_id",

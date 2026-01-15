@@ -1,20 +1,21 @@
 import json
 import re
-from typing import Any, Dict, List
+from typing import Any
+
 import pytest
 from pydantic import BaseModel, Field
 
 from guardrails import Guard, Validator, register_validator
-from guardrails.async_guard import AsyncGuard
-from guardrails.errors import ValidationError
+from guardrails.actions.filter import Filter
 from guardrails.actions.reask import FieldReAsk
 from guardrails.actions.refrain import Refrain
-from guardrails.actions.filter import Filter
+from guardrails.async_guard import AsyncGuard
 from guardrails.classes.validation.validation_result import (
     FailResult,
     PassResult,
     ValidationResult,
 )
+from guardrails.errors import ValidationError
 from guardrails.types import OnFailAction
 from tests.integration_tests.test_assets.validators import (
     TwoWords,
@@ -23,7 +24,7 @@ from tests.integration_tests.test_assets.validators import (
 
 
 @register_validator("mycustomhellovalidator", data_type="string")
-def hello_validator(value: Any, metadata: Dict[str, Any]) -> ValidationResult:
+def hello_validator(value: Any, metadata: dict[str, Any]) -> ValidationResult:
     if "hello" in value.lower():
         return FailResult(
             error_message="Hello is too basic, try something more creative.",
@@ -206,7 +207,7 @@ def test_to_xml_attrib(min, max, expected_xml):
     assert xml_validator == expected_xml
 
 
-def custom_deprecated_on_fail_handler(value: Any, fail_results: List[FailResult]):
+def custom_deprecated_on_fail_handler(value: Any, fail_results: list[FailResult]):
     return value + " deprecated"
 
 
@@ -587,8 +588,8 @@ async def test_async_messages_validation_fix(mocker):
     [
         (
             OnFailAction.REASK,
-            "Messages validation failed: incorrect_value='What kind of pet should I get?' fail_results=[FailResult(outcome='fail', error_message='must be exactly two words', fix_value='What kind', error_spans=None, metadata=None, validated_chunk=None)] additional_properties={} path=None",  # noqa
-            "Messages validation failed: incorrect_value='What kind of pet should I get?' fail_results=[FailResult(outcome='fail', error_message='must be exactly two words', fix_value='What kind', error_spans=None, metadata=None, validated_chunk=None)] additional_properties={} path=None",  # noqa
+            "Messages validation failed: incorrect_value='What kind of pet should I get?' fail_results=[FailResult(outcome='fail', error_message='must be exactly two words', fix_value='What kind', error_spans=None, metadata=None, validated_chunk=None)] additional_properties={} path=None",
+            "Messages validation failed: incorrect_value='What kind of pet should I get?' fail_results=[FailResult(outcome='fail', error_message='must be exactly two words', fix_value='What kind', error_spans=None, metadata=None, validated_chunk=None)] additional_properties={} path=None",
         ),
         (
             OnFailAction.FILTER,
@@ -669,8 +670,8 @@ def test_input_validation_fail(
     [
         (
             OnFailAction.REASK,
-            "Messages validation failed: incorrect_value='What kind of pet should I get?' fail_results=[FailResult(outcome='fail', error_message='must be exactly two words', fix_value='What kind', error_spans=None, metadata=None, validated_chunk=None)] additional_properties={} path=None",  # noqa
-            "Messages validation failed: incorrect_value='What kind of pet should I get?' fail_results=[FailResult(outcome='fail', error_message='must be exactly two words', fix_value='What kind', error_spans=None, metadata=None, validated_chunk=None)] additional_properties={} path=None",  # noqa
+            "Messages validation failed: incorrect_value='What kind of pet should I get?' fail_results=[FailResult(outcome='fail', error_message='must be exactly two words', fix_value='What kind', error_spans=None, metadata=None, validated_chunk=None)] additional_properties={} path=None",
+            "Messages validation failed: incorrect_value='What kind of pet should I get?' fail_results=[FailResult(outcome='fail', error_message='must be exactly two words', fix_value='What kind', error_spans=None, metadata=None, validated_chunk=None)] additional_properties={} path=None",
         ),
         (
             OnFailAction.FILTER,

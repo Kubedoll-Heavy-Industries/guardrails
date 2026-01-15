@@ -1,7 +1,6 @@
 import typing as t
 
-from guardrails.prompt import Prompt, Instructions
-
+from guardrails.prompt import Instructions, Prompt
 from guardrails.types.inputs import MessageHistory
 
 try:
@@ -49,8 +48,8 @@ class TextSplitter:
         tokens_per_chunk: int = 2048,
         token_overlap: int = 512,
         buffer: int = 128,
-        prompt_template: t.Optional[Prompt] = None,
-    ) -> t.List[str]:
+        prompt_template: Prompt | None = None,
+    ) -> list[str]:
         # TODO(shreya): Add test to make sure this works correctly.
         """Split the text into chunks with token boundaries."""
 
@@ -76,7 +75,7 @@ class TextSplitter:
         prompt_vars = prompt_template.get_prompt_variables()
 
         tokens = self.tokenizer.encode(
-            str(prompt_template.format(**{var: "" for var in prompt_vars}))
+            str(prompt_template.format(**dict.fromkeys(prompt_vars, "")))
         )
         return len(tokens)
 
@@ -84,7 +83,7 @@ class TextSplitter:
         return self.split(*args, **kwds)
 
 
-def sentence_split(text: str) -> t.List[str]:
+def sentence_split(text: str) -> list[str]:
     """Split the text into sentences."""
     try:
         from nltk import sent_tokenize  # type: ignore
@@ -122,7 +121,7 @@ def read_pdf(path) -> str:
 
 def get_chunks_from_text(
     text: str, chunk_strategy: str, chunk_size: int, chunk_overlap: int
-) -> t.List[str]:
+) -> list[str]:
     """Get chunks of text from a string.
 
     Args:

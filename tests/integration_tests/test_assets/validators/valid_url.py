@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 from guardrails.logger import logger
 from guardrails.validator_base import (
@@ -23,7 +23,7 @@ class ValidURL(Validator):
     | Programmatic fix              | None                              |
     """
 
-    def validate(self, value: Any, metadata: Dict) -> ValidationResult:
+    def validate(self, value: Any, metadata: dict) -> ValidationResult:
         logger.debug(f"Validating {value} is a valid URL...")
 
         from urllib.parse import urlparse

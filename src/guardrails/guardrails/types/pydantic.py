@@ -1,12 +1,11 @@
-from typing import Any, Dict, List, Type, Union
+from typing import Any, Union
 
 from pydantic import BaseModel
 
-
-ModelOrListOfModels = Union[Type[BaseModel], Type[List[Type[BaseModel]]]]
+ModelOrListOfModels = Union[type[BaseModel], type[list[type[BaseModel]]]]
 
 ModelOrListOrDict = Union[
-    Type[BaseModel], Type[List[Type[BaseModel]]], Type[Dict[str, Type[BaseModel]]]
+    type[BaseModel], type[list[type[BaseModel]]], type[dict[str, type[BaseModel]]]
 ]
 
-ModelOrModelUnion = Union[Type[BaseModel], Union[Type[BaseModel], Any]]
+ModelOrModelUnion = Union[type[BaseModel], Union[type[BaseModel], Any]]

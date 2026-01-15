@@ -1,10 +1,11 @@
-from typing import Any, Awaitable, Callable, Dict, List, Optional
-
-from pydantic import Field
+from collections.abc import Awaitable, Callable
+from typing import Any
 
 from guardrails_api_client import CallInputs as ICallInputs
-from guardrails.classes.history.inputs import Inputs
+from pydantic import Field
+
 from guardrails.classes.generic.arbitrary_model import ArbitraryModel
+from guardrails.classes.history.inputs import Inputs
 
 
 class CallInputs(Inputs, ICallInputs, ArbitraryModel):
@@ -22,18 +23,18 @@ class CallInputs(Inputs, ICallInputs, ArbitraryModel):
             the LLM as provided by the user. Default {}.
     """
 
-    llm_api: Optional[Callable[[Any], Awaitable[Any]]] = Field(
+    llm_api: Callable[[Any], Awaitable[Any]] | None = Field(
         description="The LLM function provided by the userduring Guard.__call__ or Guard.parse.",
         default=None,
     )
-    messages: Optional[list[dict[str, str]]] = Field(
+    messages: list[dict[str, str]] | None = Field(
         description="The messages as provided by the user.", default=None
     )
-    args: List[Any] = Field(
+    args: list[Any] = Field(
         description="Additional arguments for the LLM as provided by the user.",
         default_factory=list,
     )
-    kwargs: Dict[str, Any] = Field(
+    kwargs: dict[str, Any] = Field(
         description="Additional keyword-arguments for the LLM as provided by the user.",
         default_factory=dict,
     )
@@ -54,7 +55,7 @@ class CallInputs(Inputs, ICallInputs, ArbitraryModel):
         inputs["kwargs"] = redacted_kwargs
         return ICallInputs(**inputs)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return self.to_interface().to_dict()
 
     @classmethod
@@ -73,7 +74,7 @@ class CallInputs(Inputs, ICallInputs, ArbitraryModel):
         )
 
     @classmethod
-    def from_dict(cls, obj: Dict[str, Any]):
+    def from_dict(cls, obj: dict[str, Any]):
         i_call_inputs = ICallInputs.from_dict(obj) or ICallInputs()
 
         return cls.from_interface(i_call_inputs)

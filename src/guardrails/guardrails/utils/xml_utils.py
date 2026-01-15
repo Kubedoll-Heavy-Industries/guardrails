@@ -1,4 +1,4 @@
-from typing import Optional, Union, cast
+from typing import Union, cast
 
 
 # TODO: Remove after DataTypes and ValidatorsAttr is removed
@@ -15,8 +15,8 @@ def cast_xml_to_string(xml_value: Union[memoryview, bytes, bytearray, str]) -> s
 
 
 def xml_to_string(
-    xml: Optional[Union[memoryview, bytes, bytearray, str]],
-) -> Optional[str]:
+    xml: Union[memoryview, bytes, bytearray, str] | None,
+) -> str | None:
     """Convert XML value to a string.
 
     Args:

@@ -1,7 +1,6 @@
-from typing import Any, Optional
 import io
 import sys
-
+from typing import Any
 
 import pytest
 
@@ -21,7 +20,7 @@ from tests.integration_tests.test_assets.validators import ReadingTime, RegexMat
         ("This response isn't relevant.", True, "Result must match Ice cream"),
     ],
 )
-def test_validator_runnable(output: str, throws: bool, expected_error: Optional[str]):
+def test_validator_runnable(output: str, throws: bool, expected_error: str | None):
     from langchain_core.language_models import LanguageModelInput
     from langchain_core.messages import AIMessage, BaseMessage
     from langchain_core.output_parsers import StrOutputParser
@@ -32,7 +31,7 @@ def test_validator_runnable(output: str, throws: bool, expected_error: Optional[
         def invoke(
             self,
             input: LanguageModelInput,
-            config: Optional[RunnableConfig] = None,
+            config: RunnableConfig | None = None,
             **kwargs: Any,
         ) -> BaseMessage:
             return AIMessage(content=output)
@@ -63,8 +62,8 @@ def test_validator_runnable(output: str, throws: bool, expected_error: Optional[
 
 def test_validator_runnable_with_callback_config():
     from langchain_core.callbacks import CallbackManager
-    from langchain_core.tracers import ConsoleCallbackHandler
     from langchain_core.runnables import RunnableConfig
+    from langchain_core.tracers import ConsoleCallbackHandler
 
     console_handler = ConsoleCallbackHandler()
     callback_manager = CallbackManager([console_handler])

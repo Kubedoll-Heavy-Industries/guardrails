@@ -1,22 +1,23 @@
-from typing import Any, Dict, Iterator, List, Optional, Tuple, Union, cast
+from collections.abc import Iterator
+from typing import Any, Union, cast
 
 from guardrails import validator_service
+from guardrails.actions.reask import ReAsk, SkeletonReAsk
 from guardrails.classes.history import Call, Inputs, Iteration, Outputs
 from guardrails.classes.output_type import OT, OutputTypes
 from guardrails.classes.validation_outcome import ValidationOutcome
+from guardrails.constants import pass_status
+from guardrails.hub_telemetry.hub_tracing import trace_stream
 from guardrails.llm_providers import (
     PromptCallableBase,
 )
 from guardrails.run.runner import Runner
-from guardrails.hub_telemetry.hub_tracing import trace_stream
+from guardrails.telemetry import trace_stream_step
 from guardrails.utils.parsing_utils import (
     coerce_types,
     parse_llm_output,
     prune_extra_keys,
 )
-from guardrails.actions.reask import ReAsk, SkeletonReAsk
-from guardrails.constants import pass_status
-from guardrails.telemetry import trace_stream_step
 from guardrails.utils.safe_get import safe_get
 
 
@@ -30,7 +31,7 @@ class StreamRunner(Runner):
 
     @trace_stream(name="/reasks", origin="StreamRunner.__call__")
     def __call__(
-        self, call_log: Call, prompt_params: Optional[Dict] = {}
+        self, call_log: Call, prompt_params: dict | None = {}
     ) -> Iterator[ValidationOutcome[OT]]:
         """Execute the StreamRunner.
 
@@ -67,12 +68,12 @@ class StreamRunner(Runner):
     def step(
         self,
         index: int,
-        api: Optional[PromptCallableBase],
-        messages: Optional[List[Dict]],
-        prompt_params: Dict,
-        output_schema: Dict[str, Any],
+        api: PromptCallableBase | None,
+        messages: list[dict] | None,
+        prompt_params: dict,
+        output_schema: dict[str, Any],
         call_log: Call,
-        output: Optional[str] = None,
+        output: str | None = None,
     ) -> Iterator[ValidationOutcome[OT]]:
         """Run a full step."""
         inputs = Inputs(
@@ -125,7 +126,7 @@ class StreamRunner(Runner):
         # for now, handle string and json schema differently
         if self.output_type == OutputTypes.STRING:
 
-            def prepare_chunk_generator(stream) -> Iterator[Tuple[Any, bool]]:
+            def prepare_chunk_generator(stream) -> Iterator[tuple[Any, bool]]:
                 for chunk in stream:
                     chunk_text = self.get_chunk_text(chunk, api)
                     nonlocal fragment
@@ -304,7 +305,7 @@ class StreamRunner(Runner):
                 "a generator of strings."
             )
 
-    def parse(self, output: str, output_schema: Dict[str, Any], *, verified: set, **kwargs):
+    def parse(self, output: str, output_schema: dict[str, Any], *, verified: set, **kwargs):
         """Parse the output."""
         parsed_output, error = parse_llm_output(
             output, self.output_type, stream=True, verified=verified

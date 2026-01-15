@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, List, Optional
+from typing import Any
 
 from guardrails.embedding import EmbeddingBase
 
@@ -8,7 +8,7 @@ from guardrails.embedding import EmbeddingBase
 class VectorDBBase(ABC):
     """Base class for vector databases."""
 
-    def __init__(self, embedder: EmbeddingBase, path: Optional[str] = None) -> None:
+    def __init__(self, embedder: EmbeddingBase, path: str | None = None) -> None:
         """Creates a new VectorDBBase.
 
         Args:
@@ -19,7 +19,7 @@ class VectorDBBase(ABC):
         self._path = path
 
     @abstractmethod
-    def add_vectors(self, vectors: List[List[float]]) -> None:
+    def add_vectors(self, vectors: list[list[float]]) -> None:
         """Adds a list of vectors to the store.
 
         Args:
@@ -30,7 +30,7 @@ class VectorDBBase(ABC):
         ...
 
     @abstractmethod
-    def similarity_search_vector(self, vector: List[float], k: int) -> List[int]:
+    def similarity_search_vector(self, vector: list[float], k: int) -> list[int]:
         """Searches for vectors which are similar to the given vector.
 
         Args:
@@ -41,8 +41,8 @@ class VectorDBBase(ABC):
 
     @abstractmethod
     def similarity_search_vector_with_threshold(
-        self, vector: List[float], k: int, threshold: float
-    ) -> List[int]:
+        self, vector: list[float], k: int, threshold: float
+    ) -> list[int]:
         """Searches for vectors which are similar to the given vector.
 
         Args:
@@ -52,7 +52,7 @@ class VectorDBBase(ABC):
         """
         ...
 
-    def similarity_search(self, text: str, k: int) -> List[int]:
+    def similarity_search(self, text: str, k: int) -> list[int]:
         """Searches for vectors which are similar to the given text.
         Args:
             text: Text to search for.
@@ -63,11 +63,11 @@ class VectorDBBase(ABC):
         vector = self._embedder.embed_query(text)
         return self.similarity_search_vector(vector, k)
 
-    def similarity_search_with_threshold(self, text: str, k: int, threshold: float) -> List[int]:
+    def similarity_search_with_threshold(self, text: str, k: int, threshold: float) -> list[int]:
         vector = self._embedder.embed_query(text)
         return self.similarity_search_vector_with_threshold(vector, k, threshold)
 
-    def add_texts(self, texts: List[str], ids: Optional[List[Any]] = None) -> None:
+    def add_texts(self, texts: list[str], ids: list[Any] | None = None) -> None:
         """Adds a list of texts to the store.
 
         Args:
@@ -78,14 +78,13 @@ class VectorDBBase(ABC):
         self.add_vectors(vectors)
 
     @abstractmethod
-    def save(self, path: Optional[str] = None):
+    def save(self, path: str | None = None):
         """Saves the vector database to the given path."""
         ...
 
     @classmethod
     def load(cls, path: str):
         """Loads the vector database from the given path."""
-        ...
 
     @abstractmethod
     def last_index(self) -> int:

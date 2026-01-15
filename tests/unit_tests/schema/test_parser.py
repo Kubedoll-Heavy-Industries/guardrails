@@ -1,5 +1,6 @@
 import json
 from typing import Any
+
 import pytest
 
 from guardrails.schema.parser import (
@@ -7,7 +8,6 @@ from guardrails.schema.parser import (
     get_value_from_path,
     write_value_to_path,
 )
-
 
 reader_object = {
     "a": 1,
@@ -82,21 +82,19 @@ def test_write_value_to_path(existing_value: Any, path: str, write_value: Any, e
 
 
 with open(
-    "tests/integration_tests/test_assets/json_schemas/choice_case_openapi.json", "r"
+    "tests/integration_tests/test_assets/json_schemas/choice_case_openapi.json"
 ) as choice_case_openapi_file:
     choice_case_openapi_schema = json.loads(choice_case_openapi_file.read())
 
-with open(
-    "tests/integration_tests/test_assets/json_schemas/choice_case.json", "r"
-) as choice_case_file:
+with open("tests/integration_tests/test_assets/json_schemas/choice_case.json") as choice_case_file:
     choice_case_schema = json.loads(choice_case_file.read())
 
 with open(
-    "tests/integration_tests/test_assets/json_schemas/credit_card_agreement.json", "r"
+    "tests/integration_tests/test_assets/json_schemas/credit_card_agreement.json"
 ) as credit_card_agreement_file:
     credit_card_agreement_schema = json.loads(credit_card_agreement_file.read())
 
-with open("tests/integration_tests/test_assets/json_schemas/string.json", "r") as string_file:
+with open("tests/integration_tests/test_assets/json_schemas/string.json") as string_file:
     string_schema = json.loads(string_file.read())
 
 
@@ -105,46 +103,40 @@ with open("tests/integration_tests/test_assets/json_schemas/string.json", "r") a
     [
         (
             choice_case_openapi_schema,
-            set(
-                [
-                    "$",
-                    "$.action",
-                    "$.action.chosen_action",
-                    "$.action.weapon",
-                    "$.action.flight_direction",
-                    "$.action.distance",
-                ]
-            ),
+            {
+                "$",
+                "$.action",
+                "$.action.chosen_action",
+                "$.action.weapon",
+                "$.action.flight_direction",
+                "$.action.distance",
+            },
         ),
         (
             choice_case_schema,
-            set(
-                [
-                    "$",
-                    "$.action",
-                    "$.action.chosen_action",
-                    "$.action.weapon",
-                    "$.action.flight_direction",
-                    "$.action.distance",
-                ]
-            ),
+            {
+                "$",
+                "$.action",
+                "$.action.chosen_action",
+                "$.action.weapon",
+                "$.action.flight_direction",
+                "$.action.distance",
+            },
         ),
         (
             credit_card_agreement_schema,
-            set(
-                [
-                    "$",
-                    "$.fees",
-                    "$.fees.index",
-                    "$.fees.name",
-                    "$.fees.explanation",
-                    "$.fees.value",
-                    "$.interest_rates",
-                    "$.interest_rates.*",
-                ]
-            ),
+            {
+                "$",
+                "$.fees",
+                "$.fees.index",
+                "$.fees.name",
+                "$.fees.explanation",
+                "$.fees.value",
+                "$.interest_rates",
+                "$.interest_rates.*",
+            },
         ),
-        (string_schema, set(["$"])),
+        (string_schema, {"$"}),
     ],
 )
 def test_get_all_paths(schema, expected_keys):

@@ -1,11 +1,14 @@
 from datetime import datetime
-from typing import Any, Dict, Optional
+from typing import Any
 
 from guardrails_api_client import (
     ValidatorLog as IValidatorLog,
+)
+from guardrails_api_client import (
     ValidatorLogInstanceId,
     ValidatorLogValidationResult,
 )
+
 from guardrails.classes.generic.arbitrary_model import ArbitraryModel
 from guardrails.classes.validation.validation_result import ValidationResult
 from guardrails.utils.casting_utils import to_int
@@ -30,11 +33,11 @@ class ValidatorLogs(IValidatorLog, ArbitraryModel):
     validator_name: str
     registered_name: str
     value_before_validation: Any
-    validation_result: Optional[ValidationResult] = None
-    value_after_validation: Optional[Any] = None
-    start_time: Optional[datetime] = None
-    end_time: Optional[datetime] = None
-    instance_id: Optional[int] = None
+    validation_result: ValidationResult | None = None
+    value_after_validation: Any | None = None
+    start_time: datetime | None = None
+    end_time: datetime | None = None
+    instance_id: int | None = None
     property_path: str
 
     def to_interface(self) -> IValidatorLog:
@@ -56,7 +59,7 @@ class ValidatorLogs(IValidatorLog, ArbitraryModel):
             end_time=end_time,  # type: ignore
         )
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return self.to_interface().to_dict()
 
     @classmethod
@@ -94,6 +97,6 @@ class ValidatorLogs(IValidatorLog, ArbitraryModel):
         )
 
     @classmethod
-    def from_dict(cls, obj: Dict[str, Any]) -> "ValidatorLogs":
+    def from_dict(cls, obj: dict[str, Any]) -> "ValidatorLogs":
         i_validator_log = IValidatorLog.from_dict(obj)
         return cls.from_interface(i_validator_log)  # type: ignore

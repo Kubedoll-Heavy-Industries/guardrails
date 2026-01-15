@@ -10,7 +10,7 @@ def get_template(template_name: str) -> tuple[dict, str]:
         template_file_name = template_name
         try:
             file_path = os.path.join(os.getcwd(), template_name)
-            with open(file_path, "r") as fin:
+            with open(file_path) as fin:
                 return json.load(fin), template_file_name
         except FileNotFoundError:
             raise FileNotFoundError(f"Template file {template_name} not found.")
@@ -21,7 +21,7 @@ def get_template(template_name: str) -> tuple[dict, str]:
 
     # write template to file
     out_path = os.path.join(os.getcwd(), template_file_name)
-    with open(out_path, "wt") as file_out:
+    with open(out_path, "w") as file_out:
         file_out.write(json.dumps(template, indent=4))
 
     return template, template_file_name

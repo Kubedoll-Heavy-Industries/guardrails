@@ -1,16 +1,18 @@
 import json
-from typing import Any, Dict, List, Optional
+from typing import Any
+
 from jsonschema import Draft202012Validator, ValidationError
-from referencing import Registry, jsonschema as jsonschema_ref
+from referencing import Registry
+from referencing import jsonschema as jsonschema_ref
 
 from guardrails.actions.reask import SkeletonReAsk
 from guardrails.classes.validation.validation_result import FailResult
 
 
 class SchemaValidationError(Exception):
-    fields: Dict[str, List[str]] = {}
+    fields: dict[str, list[str]] = {}
 
-    def __init__(self, *args: object, fields: Dict[str, List[str]]):
+    def __init__(self, *args: object, fields: dict[str, list[str]]):
         self.fields = fields
         super().__init__(*args)
 
@@ -19,9 +21,9 @@ def validate_against_schema(
     payload: Any,
     validator: Draft202012Validator,
     *,
-    validate_subschema: Optional[bool] = False,
+    validate_subschema: bool | None = False,
 ):
-    fields: Dict[str, List[str]] = {}
+    fields: dict[str, list[str]] = {}
     error: ValidationError
     for error in validator.iter_errors(payload):
         if validate_subschema is True and error.message.endswith("is a required property"):
@@ -34,7 +36,7 @@ def validate_against_schema(
         raise SchemaValidationError(error_message, fields=fields)
 
 
-def validate_json_schema(json_schema: Dict[str, Any]):
+def validate_json_schema(json_schema: dict[str, Any]):
     """Validates a json_schema, against the JSON Meta Schema Draft 2020-12.
 
     Raises a SchemaValidationError if invalid.
@@ -54,9 +56,9 @@ def validate_json_schema(json_schema: Dict[str, Any]):
 
 def validate_payload(
     payload: Any,
-    json_schema: Dict[str, Any],
+    json_schema: dict[str, Any],
     *,
-    validate_subschema: Optional[bool] = False,
+    validate_subschema: bool | None = False,
 ):
     """Validates a payload, against the provided JSON Schema.
 
@@ -83,7 +85,7 @@ def validate_payload(
     validate_against_schema(payload, validator, validate_subschema=validate_subschema)
 
 
-def schema_validation(llm_output: Any, output_schema: Dict[str, Any], **kwargs):
+def schema_validation(llm_output: Any, output_schema: dict[str, Any], **kwargs):
     validate_subschema = kwargs.get("validate_subschema", False)
 
     schema_error = None

@@ -1,17 +1,16 @@
-import sys
 import os
+import sys
 from string import Template
-from typing import Any, Dict, Optional
+from typing import Any
 
+import jwt
 import requests
 from guardrails_hub_types import Manifest
-import jwt
-from jwt import ExpiredSignatureError, DecodeError
+from jwt import DecodeError, ExpiredSignatureError
 
-
-from guardrails.settings import settings
 from guardrails.classes.rc import RC
 from guardrails.cli.logger import logger
+from guardrails.settings import settings
 from guardrails.version import GUARDRAILS_VERSION
 
 FIND_NEW_TOKEN = "You can find a new token at https://hub.guardrailsai.com/keys"
@@ -45,10 +44,10 @@ class HttpError(Exception):
     message: str
 
 
-def fetch(url: str, token: Optional[str], anonymousUserId: Optional[str]):
+def fetch(url: str, token: str | None, anonymousUserId: str | None):
     try:
         # For Debugging
-        # headers = { "Authorization": f"Bearer {token}", "x-anonymous-user-id": anonymousUserId, "Cache-Control": "no-cache" }  # noqa
+        # headers = { "Authorization": f"Bearer {token}", "x-anonymous-user-id": anonymousUserId, "Cache-Control": "no-cache" }
         headers = {
             "Authorization": f"Bearer {token}",
             "x-anonymous-user-id": anonymousUserId,
@@ -74,8 +73,8 @@ def fetch(url: str, token: Optional[str], anonymousUserId: Optional[str]):
 
 
 def fetch_module_manifest(
-    module_name: str, token: Optional[str], anonymousUserId: Optional[str] = None
-) -> Dict[str, Any]:
+    module_name: str, token: str | None, anonymousUserId: str | None = None
+) -> dict[str, Any]:
     namespace, validator_name = module_name.split("/", 1)
     manifest_path = validator_manifest_endpoint.safe_substitute(
         namespace=namespace, validator_name=validator_name
@@ -84,7 +83,7 @@ def fetch_module_manifest(
     return fetch(manifest_url, token, anonymousUserId)
 
 
-def get_jwt_token(rc: RC) -> Optional[str]:
+def get_jwt_token(rc: RC) -> str | None:
     token = rc.token
 
     # check for jwt expiration
@@ -98,14 +97,14 @@ def get_jwt_token(rc: RC) -> Optional[str]:
     return token
 
 
-def fetch_module(module_name: str) -> Optional[Manifest]:
+def fetch_module(module_name: str) -> Manifest | None:
     token = get_jwt_token(settings.rc)
 
     module_manifest_json = fetch_module_manifest(module_name, token, settings.rc.id)
     return Manifest.from_dict(module_manifest_json)
 
 
-def fetch_template(template_address: str) -> Dict[str, Any]:
+def fetch_template(template_address: str) -> dict[str, Any]:
     token = get_jwt_token(settings.rc)
 
     namespace, template_name = template_address.replace("hub:template://", "").split("/", 1)

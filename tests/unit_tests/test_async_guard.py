@@ -3,9 +3,9 @@ from pydantic import BaseModel
 
 from guardrails import AsyncGuard, Validator, register_validator
 from guardrails.classes.validation.validation_result import PassResult
+from guardrails.types import OnFailAction
 from guardrails.utils import args, kwargs, on_fail
 from guardrails.utils.validator_utils import verify_metadata_requirements
-from guardrails.types import OnFailAction
 from tests.integration_tests.test_assets.custom_llm import mock_async_llm
 from tests.integration_tests.test_assets.validators import (
     EndsWith,

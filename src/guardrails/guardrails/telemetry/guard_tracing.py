@@ -1,12 +1,7 @@
 import inspect
+from collections.abc import AsyncIterator, Awaitable, Callable, Coroutine, Iterator
 from typing import (
     Any,
-    AsyncIterator,
-    Awaitable,
-    Callable,
-    Coroutine,
-    Iterator,
-    Optional,
     Union,
 )
 
@@ -14,19 +9,19 @@ try:
     from openinference.semconv.trace import SpanAttributes  # type: ignore
 except ImportError:
     SpanAttributes = None
-from opentelemetry import context, trace
-from opentelemetry.trace import StatusCode, Tracer, Span, Link, get_tracer
+import sys
 
-from guardrails.settings import settings
+from opentelemetry import context, trace
+from opentelemetry.trace import Link, Span, StatusCode, Tracer, get_tracer
+
 from guardrails.classes.generic.stack import Stack
 from guardrails.classes.history.call import Call
 from guardrails.classes.output_type import OT
 from guardrails.classes.validation_outcome import ValidationOutcome
-from guardrails.telemetry.open_inference import trace_operation
+from guardrails.settings import settings
 from guardrails.telemetry.common import add_user_attributes
+from guardrails.telemetry.open_inference import trace_operation
 from guardrails.version import GUARDRAILS_VERSION
-
-import sys
 
 if sys.version_info.minor < 10:
     from guardrails.utils.polyfills import anext
@@ -168,7 +163,7 @@ def trace_guard_execution(
     guard_name: str,
     history: Stack[Call],
     _execute_fn: Callable[..., Union[ValidationOutcome[OT], Iterator[ValidationOutcome[OT]]]],
-    tracer: Optional[Tracer] = None,
+    tracer: Tracer | None = None,
     *args,
     **kwargs,
 ) -> Union[ValidationOutcome[OT], Iterator[ValidationOutcome[OT]]]:
@@ -247,7 +242,7 @@ async def trace_async_guard_execution(
             ],
         ],
     ],
-    tracer: Optional[Tracer] = None,
+    tracer: Tracer | None = None,
     *args,
     **kwargs,
 ) -> Union[

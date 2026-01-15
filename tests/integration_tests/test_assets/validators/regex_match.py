@@ -1,6 +1,7 @@
 import re
 import string
-from typing import Any, Callable, Dict, Optional
+from collections.abc import Callable
+from typing import Any
 
 import rstr
 
@@ -28,13 +29,13 @@ class RegexMatch(Validator):
     Args:
         regex: Str regex pattern
         match_type: Str in {"search", "fullmatch"} for a regex search or full-match option
-    """  # noqa
+    """
 
     def __init__(
         self,
         regex: str,
-        match_type: Optional[str] = None,
-        on_fail: Optional[Callable] = None,
+        match_type: str | None = None,
+        on_fail: Callable | None = None,
     ):
         # todo -> something forces this to be passed as kwargs and therefore xml-ized.
         # match_types = ["fullmatch", "search"]
@@ -53,7 +54,7 @@ class RegexMatch(Validator):
         self._regex = regex
         self._match_type = match_type
 
-    def validate(self, value: Any, metadata: Dict) -> ValidationResult:
+    def validate(self, value: Any, metadata: dict) -> ValidationResult:
         p = re.compile(self._regex)
         """Validates that value matches the provided regular expression."""
         # Pad matching string on either side for fix

@@ -1,16 +1,17 @@
 import pytest
-from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
 from opentelemetry.sdk.trace.export import SimpleSpanProcessor
+from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
 
 
 @pytest.fixture(autouse=True)
 def reset_singletons():
-    from guardrails.utils.hub_telemetry_utils import HubTelemetry
+    from opentelemetry import trace
+
     from guardrails.telemetry.default_otel_collector_tracer_mod import (
         DefaultOtelCollectorTracer,
     )
     from guardrails.telemetry.default_otlp_tracer_mod import DefaultOtlpTracer
-    from opentelemetry import trace
+    from guardrails.utils.hub_telemetry_utils import HubTelemetry
 
     HubTelemetry._instance = None
     DefaultOtelCollectorTracer._instance = None
@@ -37,8 +38,8 @@ class TestTelemetry:
             return_value=hub_exporter,
         )
 
-        from guardrails.telemetry import default_otel_collector_tracer
         from guardrails import Guard
+        from guardrails.telemetry import default_otel_collector_tracer
         from tests.integration_tests.test_assets.validators import LowerCase
 
         default_otel_collector_tracer()
@@ -139,8 +140,8 @@ class TestTelemetry:
             return_value=hub_processor,
         )
 
-        from guardrails.telemetry import default_otel_collector_tracer
         from guardrails import Guard
+        from guardrails.telemetry import default_otel_collector_tracer
         from tests.integration_tests.test_assets.validators import LowerCase
 
         default_otel_collector_tracer()

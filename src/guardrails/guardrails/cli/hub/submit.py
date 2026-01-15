@@ -26,7 +26,7 @@ def submit(
             filepath = f"./{package_name}.py"
 
         target = os.path.abspath(filepath)
-        with open(target, "r") as validator_file:
+        with open(target) as validator_file:
             content = validator_file.read()
 
             post_validator_submit(package_name, content)
@@ -43,7 +43,7 @@ def submit(
         guardrails hub install hub://guardrails/${package_name}
 
         The Guardrails AI team will be in touch with you soon regarding the status of your submission.
-        """  # noqa
+        """
         ).safe_substitute({"package_name": snake_case(package_name)})
         logger.log(level=LEVELS.get("SUCCESS"), msg=success_message)  # type: ignore
 

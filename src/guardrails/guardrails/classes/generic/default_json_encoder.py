@@ -1,7 +1,8 @@
-from datetime import datetime
 from dataclasses import asdict, is_dataclass
-from pydantic import BaseModel
+from datetime import datetime
 from json import JSONEncoder
+
+from pydantic import BaseModel
 
 
 class DefaultJSONEncoder(JSONEncoder):

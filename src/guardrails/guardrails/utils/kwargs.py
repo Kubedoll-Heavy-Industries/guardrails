@@ -1,5 +1,5 @@
-from typing import Any, Dict
+from typing import Any
 
 
-def kwargs(**kwargs) -> Dict[str, Any]:
+def kwargs(**kwargs) -> dict[str, Any]:
     return kwargs

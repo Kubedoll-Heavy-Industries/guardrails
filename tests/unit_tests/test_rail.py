@@ -200,7 +200,7 @@ def test_rail_with_messages():
 <messages>
     <message role="system">You are a helpful assistant.</message>
     <message role="user">Tell me a joke.</message>
-    <message role="system">Be brief and concise. 
+    <message role="system">Be brief and concise.
     It should not be longer than 1-2 sentences.</message>
 </messages>
 </rail>

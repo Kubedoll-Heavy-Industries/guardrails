@@ -7,9 +7,9 @@ from guardrails.classes.output_type import OutputTypes
 from guardrails.llm_providers import AsyncLiteLLMCallable, LiteLLMCallable
 from guardrails.run import AsyncRunner, Runner
 from guardrails.types.on_fail import OnFailAction
+from tests.integration_tests.test_assets.validators.two_words import TwoWords
 
 from .test_assets import string
-from tests.integration_tests.test_assets.validators.two_words import TwoWords
 
 PROMPT = string.COMPILED_PROMPT
 INSTRUCTIONS = """You are a helpful assistant, and you are helping me
@@ -101,7 +101,7 @@ async def test_sync_async_step_equivalence(mocker):
         1,
         OUTPUT_SCHEMA,
         call_log,
-        api=LiteLLMCallable(**{"temperature": 0}),
+        api=LiteLLMCallable(temperature=0),
         messages=[
             {"role": "system", "content": INSTRUCTIONS},
             {"role": "user", "content": PROMPT},
@@ -115,7 +115,7 @@ async def test_sync_async_step_equivalence(mocker):
         1,
         OUTPUT_SCHEMA,
         call_log,
-        api=AsyncLiteLLMCallable(**{"temperature": 0}),
+        api=AsyncLiteLLMCallable(temperature=0),
         messages=[
             {"role": "system", "content": INSTRUCTIONS},
             {"role": "user", "content": PROMPT},

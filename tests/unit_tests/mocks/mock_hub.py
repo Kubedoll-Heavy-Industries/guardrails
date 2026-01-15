@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 from guardrails.validator_base import (
     PassResult,
@@ -10,5 +10,5 @@ from guardrails.validator_base import (
 
 @register_validator(name="mock-validator", data_type="string")
 class MockValidator(Validator):
-    def validate(self, value: Any, metadata: Dict) -> ValidationResult:
+    def validate(self, value: Any, metadata: dict) -> ValidationResult:
         return PassResult()

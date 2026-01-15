@@ -1,25 +1,22 @@
-from builtins import id as object_id
 import contextvars
 import inspect
-from opentelemetry import context as otel_context
+from builtins import id as object_id
+from collections.abc import AsyncIterator, Awaitable, Callable, Sequence
 from typing import (
     Any,
-    AsyncIterator,
-    Awaitable,
-    Callable,
-    Dict,
     Generic,
-    List,
     Optional,
-    Sequence,
     Union,
     cast,
 )
 
 from guardrails_api_client.models import (
     ValidatePayload,
+)
+from guardrails_api_client.models import (
     ValidationOutcome as IValidationOutcome,
 )
+from opentelemetry import context as otel_context
 
 from guardrails import Guard
 from guardrails.classes import OT, ValidationOutcome
@@ -27,6 +24,7 @@ from guardrails.classes.history import Call
 from guardrails.classes.history.call_inputs import CallInputs
 from guardrails.classes.output_type import OutputTypes
 from guardrails.classes.schema.processed_schema import ProcessedSchema
+from guardrails.hub_telemetry.hub_tracing import async_trace
 from guardrails.llm_providers import get_async_llm_ask, model_is_supported_server_side
 from guardrails.logger import set_scope
 from guardrails.run import AsyncRunner, AsyncStreamRunner
@@ -37,10 +35,9 @@ from guardrails.stores.context import (
     set_tracer,
     set_tracer_context,
 )
-from guardrails.hub_telemetry.hub_tracing import async_trace
+from guardrails.telemetry import trace_async_guard_execution, wrap_with_otel_context
 from guardrails.types.pydantic import ModelOrListOfModels
 from guardrails.types.validator import UseManyValidatorSpec, UseValidatorSpec
-from guardrails.telemetry import trace_async_guard_execution, wrap_with_otel_context
 from guardrails.utils.validator_utils import verify_metadata_requirements
 from guardrails.validator_base import Validator
 
@@ -68,10 +65,10 @@ class AsyncGuard(Guard, Generic[OT]):
         schema: ProcessedSchema,
         rail: str,
         *,
-        num_reasks: Optional[int] = None,
-        tracer: Optional[Tracer] = None,
-        name: Optional[str] = None,
-        description: Optional[str] = None,
+        num_reasks: int | None = None,
+        tracer: Tracer | None = None,
+        name: str | None = None,
+        description: str | None = None,
     ):
         guard = super()._for_rail_schema(
             schema,
@@ -84,21 +81,21 @@ class AsyncGuard(Guard, Generic[OT]):
         if schema.output_type == OutputTypes.STRING:
             return cast(AsyncGuard[str], guard)
         elif schema.output_type == OutputTypes.LIST:
-            return cast(AsyncGuard[List], guard)
+            return cast(AsyncGuard[list], guard)
         else:
-            return cast(AsyncGuard[Dict], guard)
+            return cast(AsyncGuard[dict], guard)
 
     @classmethod
     def for_pydantic(
         cls,
         output_class: ModelOrListOfModels,
         *,
-        messages: Optional[List[Dict]] = None,
-        num_reasks: Optional[int] = None,
-        reask_messages: Optional[List[Dict]] = None,
-        tracer: Optional[Tracer] = None,
-        name: Optional[str] = None,
-        description: Optional[str] = None,
+        messages: list[dict] | None = None,
+        num_reasks: int | None = None,
+        reask_messages: list[dict] | None = None,
+        tracer: Tracer | None = None,
+        name: str | None = None,
+        description: str | None = None,
     ):
         guard = super().for_pydantic(
             output_class,
@@ -110,22 +107,22 @@ class AsyncGuard(Guard, Generic[OT]):
             description=description,
         )
         if guard._output_type == OutputTypes.LIST:
-            return cast(AsyncGuard[List], guard)
+            return cast(AsyncGuard[list], guard)
         else:
-            return cast(AsyncGuard[Dict], guard)
+            return cast(AsyncGuard[dict], guard)
 
     @classmethod
     def for_string(
         cls,
         validators: Sequence[Validator],
         *,
-        string_description: Optional[str] = None,
-        messages: Optional[List[Dict]] = None,
-        reask_messages: Optional[List[Dict]] = None,
-        num_reasks: Optional[int] = None,
-        tracer: Optional[Tracer] = None,
-        name: Optional[str] = None,
-        description: Optional[str] = None,
+        string_description: str | None = None,
+        messages: list[dict] | None = None,
+        reask_messages: list[dict] | None = None,
+        num_reasks: int | None = None,
+        tracer: Tracer | None = None,
+        name: str | None = None,
+        description: str | None = None,
     ):
         guard = super().for_string(
             validators,
@@ -140,7 +137,7 @@ class AsyncGuard(Guard, Generic[OT]):
         return cast(AsyncGuard[str], guard)
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional["AsyncGuard"]:
+    def from_dict(cls, obj: dict[str, Any] | None) -> Optional["AsyncGuard"]:
         guard = super().from_dict(obj)
         return cast(AsyncGuard, guard)
 
@@ -165,13 +162,13 @@ class AsyncGuard(Guard, Generic[OT]):
     async def _execute(
         self,
         *args,
-        llm_api: Optional[Callable[..., Awaitable[Any]]] = None,
-        llm_output: Optional[str] = None,
-        prompt_params: Optional[Dict] = None,
-        num_reasks: Optional[int] = None,
-        messages: Optional[List[Dict]] = None,
-        metadata: Optional[Dict],
-        full_schema_reask: Optional[bool] = None,
+        llm_api: Callable[..., Awaitable[Any]] | None = None,
+        llm_output: str | None = None,
+        prompt_params: dict | None = None,
+        num_reasks: int | None = None,
+        messages: list[dict] | None = None,
+        metadata: dict | None,
+        full_schema_reask: bool | None = None,
         **kwargs,
     ) -> Union[
         ValidationOutcome[OT],
@@ -191,13 +188,13 @@ class AsyncGuard(Guard, Generic[OT]):
         async def __exec(
             self: AsyncGuard,
             *args,
-            llm_api: Optional[Callable[..., Awaitable[Any]]],
-            llm_output: Optional[str] = None,
-            prompt_params: Optional[Dict] = None,
-            num_reasks: Optional[int] = None,
-            messages: Optional[List[Dict]] = None,
-            metadata: Optional[Dict] = None,
-            full_schema_reask: Optional[bool] = None,
+            llm_api: Callable[..., Awaitable[Any]] | None,
+            llm_output: str | None = None,
+            prompt_params: dict | None = None,
+            num_reasks: int | None = None,
+            messages: list[dict] | None = None,
+            metadata: dict | None = None,
+            full_schema_reask: bool | None = None,
             **kwargs,
         ) -> Union[
             ValidationOutcome[OT],
@@ -292,14 +289,14 @@ class AsyncGuard(Guard, Generic[OT]):
     async def _exec(
         self,
         *args,
-        llm_api: Optional[Callable[[Any], Awaitable[Any]]],
-        llm_output: Optional[str] = None,
+        llm_api: Callable[[Any], Awaitable[Any]] | None,
+        llm_output: str | None = None,
         call_log: Call,
-        prompt_params: Dict,  # Should be defined at this point
+        prompt_params: dict,  # Should be defined at this point
         num_reasks: int = 0,  # Should be defined at this point
-        metadata: Dict,  # Should be defined at this point
+        metadata: dict,  # Should be defined at this point
         full_schema_reask: bool = False,  # Should be defined at this point
-        messages: Optional[List[Dict]],
+        messages: list[dict] | None,
         **kwargs,
     ) -> Union[
         ValidationOutcome[OT],
@@ -378,13 +375,13 @@ class AsyncGuard(Guard, Generic[OT]):
     @async_trace(name="/guard_call", origin="AsyncGuard.__call__")
     async def __call__(
         self,
-        llm_api: Optional[Callable[..., Awaitable[Any]]] = None,
+        llm_api: Callable[..., Awaitable[Any]] | None = None,
         *args,
-        prompt_params: Optional[Dict] = None,
-        num_reasks: Optional[int] = 1,
-        messages: Optional[List[Dict]] = None,
-        metadata: Optional[Dict] = None,
-        full_schema_reask: Optional[bool] = None,
+        prompt_params: dict | None = None,
+        num_reasks: int | None = 1,
+        messages: list[dict] | None = None,
+        metadata: dict | None = None,
+        full_schema_reask: bool | None = None,
         **kwargs,
     ) -> Union[
         ValidationOutcome[OT],
@@ -443,11 +440,11 @@ class AsyncGuard(Guard, Generic[OT]):
         self,
         llm_output: str,
         *args,
-        metadata: Optional[Dict] = None,
-        llm_api: Optional[Callable[..., Awaitable[Any]]] = None,
-        num_reasks: Optional[int] = None,
-        prompt_params: Optional[Dict] = None,
-        full_schema_reask: Optional[bool] = None,
+        metadata: dict | None = None,
+        llm_api: Callable[..., Awaitable[Any]] | None = None,
+        num_reasks: int | None = None,
+        prompt_params: dict | None = None,
+        full_schema_reask: bool | None = None,
         **kwargs,
     ) -> Awaitable[ValidationOutcome[OT]]:
         """Alternate flow to using AsyncGuard where the llm_output is known.
@@ -496,12 +493,12 @@ class AsyncGuard(Guard, Generic[OT]):
         )
 
     async def _stream_server_call(
-        self, *, payload: Dict[str, Any]
+        self, *, payload: dict[str, Any]
     ) -> AsyncIterator[ValidationOutcome[OT]]:
         # TODO: Once server side supports async streaming, this function will need to
         # yield async generators, not generators
         if self._api_client:
-            validation_output: Optional[IValidationOutcome] = None
+            validation_output: IValidationOutcome | None = None
             response = self._api_client.stream_validate(
                 guard=self,  # type: ignore
                 payload=ValidatePayload.from_dict(payload),  # type: ignore

@@ -1,16 +1,17 @@
 # TODO Temp to update once generated class is in
-from typing import Iterator, List
+from collections.abc import Iterator
+
+from guardrails_api_client import ValidationSummary as IValidationSummary
 
 from guardrails.classes.generic.arbitrary_model import ArbitraryModel
 from guardrails.classes.validation.validation_result import FailResult
 from guardrails.classes.validation.validator_logs import ValidatorLogs
-from guardrails_api_client import ValidationSummary as IValidationSummary
 
 
 class ValidationSummary(IValidationSummary, ArbitraryModel):
     @staticmethod
     def _generate_summaries_from_validator_logs(
-        validator_logs: List[ValidatorLogs],
+        validator_logs: list[ValidatorLogs],
     ) -> Iterator["ValidationSummary"]:
         """Generate a list of ValidationSummary objects from a list of
         ValidatorLogs objects.
@@ -34,8 +35,8 @@ class ValidationSummary(IValidationSummary, ArbitraryModel):
 
     @staticmethod
     def from_validator_logs(
-        validator_logs: List[ValidatorLogs],
-    ) -> List["ValidationSummary"]:
+        validator_logs: list[ValidatorLogs],
+    ) -> list["ValidationSummary"]:
         summaries = []
         for summary in ValidationSummary._generate_summaries_from_validator_logs(validator_logs):
             summaries.append(summary)
@@ -43,8 +44,8 @@ class ValidationSummary(IValidationSummary, ArbitraryModel):
 
     @staticmethod
     def from_validator_logs_only_fails(
-        validator_logs: List[ValidatorLogs],
-    ) -> List["ValidationSummary"]:
+        validator_logs: list[ValidatorLogs],
+    ) -> list["ValidationSummary"]:
         summaries = []
         for summary in ValidationSummary._generate_summaries_from_validator_logs(validator_logs):
             if summary.failure_reason:

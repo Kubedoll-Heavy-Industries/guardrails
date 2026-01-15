@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from functools import cached_property
 from itertools import islice
-from typing import Callable, List, Optional
 
 from guardrails.utils.openai_utils import OpenAIClient
 
@@ -11,9 +11,9 @@ class EmbeddingBase(ABC):
 
     def __init__(
         self,
-        model: Optional[str] = None,
-        encoding_name: Optional[str] = None,
-        max_tokens: Optional[int] = None,
+        model: str | None = None,
+        encoding_name: str | None = None,
+        max_tokens: int | None = None,
     ):
         try:
             import numpy  # noqa: F401
@@ -28,18 +28,18 @@ class EmbeddingBase(ABC):
         self._max_tokens = max_tokens
 
     @abstractmethod
-    def embed(self, texts: List[str]) -> List[List[float]]:
+    def embed(self, texts: list[str]) -> list[list[float]]:
         """Embeds a list of texts and returns a list of vectors of floats."""
         ...
 
     @abstractmethod
-    def embed_query(self, query: str) -> List[float]:
+    def embed_query(self, query: str) -> list[float]:
         """Embeds a single query and returns a vector of floats."""
         ...
 
     def _len_safe_get_embedding(
-        self, text, embedder: Callable[[str], List[float]], average=True
-    ) -> List[float]:
+        self, text, embedder: Callable[[str], list[float]], average=True
+    ) -> list[float]:
         """Gets the embedding for a text, but splits it into chunks if it is
         too long.
 
@@ -114,26 +114,26 @@ class OpenAIEmbedding(EmbeddingBase):
         model: str = "text-embedding-ada-002",
         encoding_name: str = "cl100k_base",
         max_tokens: int = 8191,
-        api_key: Optional[str] = None,
-        api_base: Optional[str] = None,
+        api_key: str | None = None,
+        api_base: str | None = None,
     ):
         super().__init__(model, encoding_name, max_tokens)
         self._model = model
         self.api_key = api_key
         self.api_base = api_base
 
-    def embed(self, texts: List[str]) -> List[List[float]]:
+    def embed(self, texts: list[str]) -> list[list[float]]:
         embeddings = []
         for text in texts:
             embeddings.append(super()._len_safe_get_embedding(text, self.embed_query))
 
         return embeddings
 
-    def embed_query(self, query: str) -> List[float]:
+    def embed_query(self, query: str) -> list[float]:
         resp = self._get_embedding([query])
         return resp[0]
 
-    def _get_embedding(self, texts: List[str]) -> List[List[float]]:
+    def _get_embedding(self, texts: list[str]) -> list[list[float]]:
         client = OpenAIClient(
             api_key=self.api_key,
             api_base=self.api_base,
@@ -165,12 +165,12 @@ class ManifestEmbedding(EmbeddingBase):
     def __init__(
         self,
         client_name: str = "openai",
-        client_connection: Optional[str] = None,
-        cache_name: Optional[str] = None,
-        cache_connection: Optional[str] = None,
-        engine: Optional[str] = "text-embedding-ada-002",
-        encoding_name: Optional[str] = "cl100k_base",
-        max_tokens: Optional[int] = 8191,
+        client_connection: str | None = None,
+        cache_name: str | None = None,
+        cache_connection: str | None = None,
+        engine: str | None = "text-embedding-ada-002",
+        encoding_name: str | None = "cl100k_base",
+        max_tokens: int | None = 8191,
     ):
         try:
             from manifest import Manifest  # type: ignore
@@ -194,18 +194,18 @@ class ManifestEmbedding(EmbeddingBase):
         manifest_args = {k: v for k, v in manifest_args.items() if v is not None}
         self._manifest = Manifest(**manifest_args)
 
-    def embed(self, texts: List[str]) -> List[List[float]]:
+    def embed(self, texts: list[str]) -> list[list[float]]:
         embeddings = []
         for text in texts:
             embeddings.append(super()._len_safe_get_embedding(text, self.embed_query))
 
         return embeddings
 
-    def embed_query(self, query: str) -> List[float]:
+    def embed_query(self, query: str) -> list[float]:
         resp = self._get_embedding([query])
         return resp[0]
 
-    def _get_embedding(self, texts: List[str]) -> List[List[float]]:
+    def _get_embedding(self, texts: list[str]) -> list[list[float]]:
         embeddings = self._manifest.run(texts)
         return embeddings  # type: ignore
 

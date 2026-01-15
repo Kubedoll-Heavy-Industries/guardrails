@@ -1,16 +1,17 @@
-from typing import Any, AsyncIterator, Callable, Dict, Iterator, List, Optional, cast
+import warnings
+from collections.abc import AsyncIterator, Callable, Iterator
+from typing import Any, cast
 
 import openai
 
-import warnings
 from guardrails.classes.llm.llm_response import LLMResponse
+from guardrails.telemetry import trace_llm_call, trace_operation
 from guardrails.utils.openai_utils.base import BaseOpenAIClient
 from guardrails.utils.openai_utils.streaming_utils import (
     num_tokens_from_messages,
     num_tokens_from_string,
 )
 from guardrails.utils.safe_get import safe_get
-from guardrails.telemetry import trace_llm_call, trace_operation
 
 
 def get_static_openai_create_func():
@@ -45,27 +46,27 @@ def get_static_openai_chat_acreate_func():
     return None
 
 
-def is_static_openai_create_func(llm_api: Optional[Callable]) -> bool:
+def is_static_openai_create_func(llm_api: Callable | None) -> bool:
     try:
         return llm_api == openai.completions.create
     except openai.OpenAIError:
         return False
 
 
-def is_static_openai_chat_create_func(llm_api: Optional[Callable]) -> bool:
+def is_static_openai_chat_create_func(llm_api: Callable | None) -> bool:
     try:
         return llm_api == openai.chat.completions.create
     except openai.OpenAIError:
         return False
 
 
-def is_static_openai_acreate_func(llm_api: Optional[Callable]) -> bool:
+def is_static_openai_acreate_func(llm_api: Callable | None) -> bool:
     # Because the static version of this does not exist in OpenAI 1.x
     # Can we just drop these checks?
     return False
 
 
-def is_static_openai_chat_acreate_func(llm_api: Optional[Callable]) -> bool:
+def is_static_openai_chat_acreate_func(llm_api: Callable | None) -> bool:
     # Because the static version of this does not exist in OpenAI 1.x
     # Can we just drop these checks?
     return False
@@ -85,8 +86,8 @@ class OpenAIClientV1(BaseOpenAIClient):
     def create_embedding(
         self,
         model: str,
-        input: List[str],
-    ) -> List[List[float]]:
+        input: list[str],
+    ) -> list[list[float]]:
         embeddings = self.client.embeddings.create(
             model=model,
             input=input,
@@ -134,14 +135,14 @@ class OpenAIClientV1(BaseOpenAIClient):
         if stream:
             # If stream is defined and set to True,
             # openai returns a generator
-            openai_response = cast(Iterator[Dict[str, Any]], openai_response)
+            openai_response = cast(Iterator[dict[str, Any]], openai_response)
 
             # Simply return the generator wrapped in an LLMResponse
             return LLMResponse(output="", stream_output=openai_response)
 
         # If stream is not defined or is set to False,
         # return default behavior
-        openai_response = cast(Dict[str, Any], openai_response)
+        openai_response = cast(dict[str, Any], openai_response)
         if not openai_response.choices:
             raise ValueError("No choices returned from OpenAI")
         if openai_response.usage is None:
@@ -155,11 +156,11 @@ class OpenAIClientV1(BaseOpenAIClient):
         return LLMResponse(
             output=openai_response.choices[0].text,  # type: ignore
             prompt_token_count=openai_response.usage.prompt_tokens,  # type: ignore
-            response_token_count=openai_response.usage.completion_tokens,  # noqa: E501 # type: ignore
+            response_token_count=openai_response.usage.completion_tokens,  # type: ignore
         )
 
     def create_chat_completion(
-        self, model: str, messages: List[Any], *args, **kwargs
+        self, model: str, messages: list[Any], *args, **kwargs
     ) -> LLMResponse:
         trace_operation(
             input_mime_type="application/json",
@@ -173,7 +174,7 @@ class OpenAIClientV1(BaseOpenAIClient):
         function_calling_tools = [
             tool.get("function")
             for tool in kwargs.get("tools", [])
-            if isinstance(tool, Dict) and tool.get("type") == "function"
+            if isinstance(tool, dict) and tool.get("type") == "function"
         ]
         trace_llm_call(
             input_messages=messages,
@@ -205,14 +206,14 @@ class OpenAIClientV1(BaseOpenAIClient):
         if stream:
             # If stream is defined and set to True,
             # openai returns a generator object
-            openai_response = cast(Iterator[Dict[str, Any]], openai_response)
+            openai_response = cast(Iterator[dict[str, Any]], openai_response)
 
             # Simply return the generator wrapped in an LLMResponse
             return LLMResponse(output="", stream_output=openai_response)
 
         # If stream is not defined or is set to False,
         # extract string from response
-        openai_response = cast(Dict[str, Any], openai_response)
+        openai_response = cast(dict[str, Any], openai_response)
         if not openai_response.choices:
             raise ValueError("No choices returned from OpenAI")
         if not openai_response.choices[0].message:
@@ -242,7 +243,7 @@ class OpenAIClientV1(BaseOpenAIClient):
         return LLMResponse(
             output=output,
             prompt_token_count=openai_response.usage.prompt_tokens,  # type: ignore
-            response_token_count=openai_response.usage.completion_tokens,  # noqa: E501 # type: ignore
+            response_token_count=openai_response.usage.completion_tokens,  # type: ignore
         )
 
 
@@ -257,8 +258,8 @@ class AsyncOpenAIClientV1(BaseOpenAIClient):
     async def create_embedding(
         self,
         model: str,
-        input: List[str],
-    ) -> List[List[float]]:
+        input: list[str],
+    ) -> list[list[float]]:
         embeddings = await self.client.embeddings.create(
             model=model,
             input=input,
@@ -288,7 +289,7 @@ class AsyncOpenAIClientV1(BaseOpenAIClient):
             # If stream is defined and set to True,
             # openai returns a generator object
             complete_output = ""
-            openai_response = cast(AsyncIterator[Dict[str, Any]], openai_response)
+            openai_response = cast(AsyncIterator[dict[str, Any]], openai_response)
             async for response in openai_response:
                 complete_output += response["choices"][0]["text"]
 
@@ -309,7 +310,7 @@ class AsyncOpenAIClientV1(BaseOpenAIClient):
 
         # If stream is not defined or is set to False,
         # extract string from response
-        openai_response = cast(Dict[str, Any], openai_response)
+        openai_response = cast(dict[str, Any], openai_response)
         if not openai_response.choices:
             raise ValueError("No choices returned from OpenAI")
         if openai_response.usage is None:
@@ -317,11 +318,11 @@ class AsyncOpenAIClientV1(BaseOpenAIClient):
         return LLMResponse(
             output=openai_response.choices[0].text,  # type: ignore
             prompt_token_count=openai_response.usage.prompt_tokens,  # type: ignore
-            response_token_count=openai_response.usage.completion_tokens,  # noqa: E501 # type: ignore
+            response_token_count=openai_response.usage.completion_tokens,  # type: ignore
         )
 
     async def create_chat_completion(
-        self, model: str, messages: List[Any], *args, **kwargs
+        self, model: str, messages: list[Any], *args, **kwargs
     ) -> LLMResponse:
         response = await self.client.chat.completions.create(
             model=model, messages=messages, *args, **kwargs
@@ -338,7 +339,7 @@ class AsyncOpenAIClientV1(BaseOpenAIClient):
         self,
         stream: bool,
         openai_response: Any,
-        prompt: List[Any],
+        prompt: list[Any],
         model: str,
     ) -> LLMResponse:
         """Construct an LLMResponse from an OpenAI response.
@@ -350,7 +351,7 @@ class AsyncOpenAIClientV1(BaseOpenAIClient):
             # If stream is defined and set to True,
             # openai returns a generator object
             collected_messages = []
-            openai_response = cast(AsyncIterator[Dict[str, Any]], openai_response)
+            openai_response = cast(AsyncIterator[dict[str, Any]], openai_response)
             async for chunk in openai_response:
                 chunk_message = chunk["choices"][0]["delta"]
                 collected_messages.append(chunk_message)  # save the message
@@ -374,7 +375,7 @@ class AsyncOpenAIClientV1(BaseOpenAIClient):
 
         # If stream is not defined or is set to False,
         # Extract string from response
-        openai_response = cast(Dict[str, Any], openai_response)
+        openai_response = cast(dict[str, Any], openai_response)
         if not openai_response.choices:
             raise ValueError("No choices returned from OpenAI")
         if not openai_response.choices[0].message:
@@ -399,5 +400,5 @@ class AsyncOpenAIClientV1(BaseOpenAIClient):
         return LLMResponse(
             output=output,
             prompt_token_count=openai_response.usage.prompt_tokens,  # type: ignore
-            response_token_count=openai_response.usage.completion_tokens,  # noqa: E501 # type: ignore
+            response_token_count=openai_response.usage.completion_tokens,  # type: ignore
         )

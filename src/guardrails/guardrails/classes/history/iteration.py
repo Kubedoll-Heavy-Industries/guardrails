@@ -1,21 +1,23 @@
-from typing import Any, Dict, List, Optional, Sequence, Union
 from builtins import id as object_id
+from collections.abc import Sequence
+from typing import Any, Union
+
+from guardrails_api_client import Iteration as IIteration
 from pydantic import Field
 from rich.console import Group
 from rich.panel import Panel
 from rich.pretty import pretty_repr
 from rich.table import Table
 
-from guardrails_api_client import Iteration as IIteration
+from guardrails.actions.reask import ReAsk
+from guardrails.classes.generic.arbitrary_model import ArbitraryModel
 from guardrails.classes.generic.stack import Stack
 from guardrails.classes.history.inputs import Inputs
 from guardrails.classes.history.outputs import Outputs
-from guardrails.classes.generic.arbitrary_model import ArbitraryModel
-from guardrails.logger import get_scope_handler
-from guardrails.prompt import Prompt, Instructions
-from guardrails.classes.validation.validator_logs import ValidatorLogs
-from guardrails.actions.reask import ReAsk
 from guardrails.classes.validation.validation_result import ErrorSpan
+from guardrails.classes.validation.validator_logs import ValidatorLogs
+from guardrails.logger import get_scope_handler
+from guardrails.prompt import Instructions, Prompt
 
 
 class Iteration(IIteration, ArbitraryModel):
@@ -43,8 +45,8 @@ class Iteration(IIteration, ArbitraryModel):
         self,
         call_id: str,
         index: int,
-        inputs: Optional[Inputs] = None,
-        outputs: Optional[Outputs] = None,
+        inputs: Inputs | None = None,
+        outputs: Outputs | None = None,
     ):
         iteration_id = str(object_id(self))
         inputs = inputs or Inputs()
@@ -68,7 +70,7 @@ class Iteration(IIteration, ArbitraryModel):
         return Stack(*[log.getMessage() for log in scoped_logs])
 
     @property
-    def tokens_consumed(self) -> Optional[int]:
+    def tokens_consumed(self) -> int | None:
         """Returns the total number of tokens consumed during this
         iteration."""
         input_tokens = self.prompt_tokens_consumed
@@ -77,7 +79,7 @@ class Iteration(IIteration, ArbitraryModel):
             return (input_tokens or 0) + (output_tokens or 0)
 
     @property
-    def prompt_tokens_consumed(self) -> Optional[int]:
+    def prompt_tokens_consumed(self) -> int | None:
         """Returns the number of prompt/input tokens consumed during this
         iteration."""
         response = self.outputs.llm_response_info
@@ -85,7 +87,7 @@ class Iteration(IIteration, ArbitraryModel):
             return response.prompt_token_count
 
     @property
-    def completion_tokens_consumed(self) -> Optional[int]:
+    def completion_tokens_consumed(self) -> int | None:
         """Returns the number of completion/output tokens consumed during this
         iteration."""
         response = self.outputs.llm_response_info
@@ -93,7 +95,7 @@ class Iteration(IIteration, ArbitraryModel):
             return response.response_token_count
 
     @property
-    def raw_output(self) -> Optional[str]:
+    def raw_output(self) -> str | None:
         """The exact output from the LLM."""
         response = self.outputs.llm_response_info
         if response is not None and response.output:
@@ -102,13 +104,13 @@ class Iteration(IIteration, ArbitraryModel):
             return self.outputs.raw_output
 
     @property
-    def parsed_output(self) -> Optional[Union[str, List, Dict]]:
+    def parsed_output(self) -> Union[str, list, dict] | None:
         """The output from the LLM after undergoing parsing but before
         validation."""
         return self.outputs.parsed_output
 
     @property
-    def validation_response(self) -> Optional[Union[ReAsk, str, List, Dict]]:
+    def validation_response(self) -> Union[ReAsk, str, list, dict] | None:
         """The response from a single stage of validation.
 
         Validation response is the output of a single stage of validation
@@ -120,7 +122,7 @@ class Iteration(IIteration, ArbitraryModel):
         return self.outputs.validation_response
 
     @property
-    def guarded_output(self) -> Optional[Union[str, List, Dict]]:
+    def guarded_output(self) -> Union[str, list, dict] | None:
         """Any valid values after undergoing validation.
 
         Some values in the validated output may be "fixed" values that
@@ -139,7 +141,7 @@ class Iteration(IIteration, ArbitraryModel):
         return self.outputs.reasks
 
     @property
-    def validator_logs(self) -> List[ValidatorLogs]:
+    def validator_logs(self) -> list[ValidatorLogs]:
         """The results of each individual validation performed on the LLM
         response during this iteration."""
         if self.inputs.stream:
@@ -152,24 +154,24 @@ class Iteration(IIteration, ArbitraryModel):
         return self.outputs.validator_logs
 
     @property
-    def error(self) -> Optional[str]:
+    def error(self) -> str | None:
         """The error message from any exception that raised and interrupted
         this iteration."""
         return self.outputs.error
 
     @property
-    def exception(self) -> Optional[Exception]:
+    def exception(self) -> Exception | None:
         """The exception that interrupted this iteration."""
         return self.outputs.exception
 
     @property
-    def failed_validations(self) -> List[ValidatorLogs]:
+    def failed_validations(self) -> list[ValidatorLogs]:
         """The validator logs for any validations that failed during this
         iteration."""
         return self.outputs.failed_validations
 
     @property
-    def error_spans_in_output(self) -> List[ErrorSpan]:
+    def error_spans_in_output(self) -> list[ErrorSpan]:
         """The error spans from the LLM response.
 
         These indices are relative to the complete LLM output.
@@ -187,7 +189,7 @@ class Iteration(IIteration, ArbitraryModel):
     @property
     def rich_group(self) -> Group:
         def create_messages_table(
-            messages: Optional[List[Dict[str, Union[str, Prompt, Instructions]]]],
+            messages: list[dict[str, Union[str, Prompt, Instructions]]] | None,
         ) -> Union[str, Table]:
             if messages is None:
                 return "No messages."
@@ -229,7 +231,7 @@ class Iteration(IIteration, ArbitraryModel):
             outputs=self.outputs.to_interface(),
         )
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return self.to_interface().to_dict()
 
     @classmethod
@@ -246,7 +248,7 @@ class Iteration(IIteration, ArbitraryModel):
         return iteration
 
     @classmethod
-    def from_dict(cls, obj: Dict[str, Any]) -> "Iteration":
+    def from_dict(cls, obj: dict[str, Any]) -> "Iteration":
         id = obj.get("id", "0")
         call_id = obj.get("callId", obj.get("call_id", "0"))
         index = obj.get("index", 0)

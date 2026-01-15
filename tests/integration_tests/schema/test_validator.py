@@ -1,10 +1,11 @@
 import json
 
 import pytest
+
 from guardrails.schema.validator import SchemaValidationError, validate_payload
 
 with open(
-    "tests/integration_tests/test_assets/json_schemas/choice_case.json", "r"
+    "tests/integration_tests/test_assets/json_schemas/choice_case.json"
 ) as choice_case_json_file:
     schema = json.loads(choice_case_json_file.read())
 
@@ -80,7 +81,7 @@ class TestValidatePayload:
         )
         assert schema_error.fields == {
             "$.action": [
-                "[{'chosen_action': 'flight', 'flight_direction': 'north', 'distance': '2'}] is not of type 'object'"  # noqa
+                "[{'chosen_action': 'flight', 'flight_direction': 'north', 'distance': '2'}] is not of type 'object'"
             ]
         }
 

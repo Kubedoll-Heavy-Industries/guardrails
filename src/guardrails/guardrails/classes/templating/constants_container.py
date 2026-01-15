@@ -1,4 +1,5 @@
 import os
+
 from lxml import etree as ET
 
 
@@ -12,7 +13,7 @@ class ConstantsContainer:
         self_dirname = os.path.dirname(self_file_path)
         constants_file = os.path.abspath(os.path.join(self_dirname, "..", "constants.xml"))
 
-        with open(constants_file, "r") as f:
+        with open(constants_file) as f:
             xml = f.read()
 
         parser = ET.XMLParser(encoding="utf-8", resolve_entities=False)

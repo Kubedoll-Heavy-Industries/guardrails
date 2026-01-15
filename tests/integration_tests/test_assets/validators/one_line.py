@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 from guardrails.logger import logger
 from guardrails.validator_base import (
@@ -24,7 +24,7 @@ class OneLine(Validator):
     | Programmatic fix              | Keep the first line, delete other text |
     """
 
-    def validate(self, value: Any, metadata: Dict) -> ValidationResult:
+    def validate(self, value: Any, metadata: dict) -> ValidationResult:
         logger.debug(f"Validating {value} is a single line...")
 
         if len(value.splitlines()) > 1:

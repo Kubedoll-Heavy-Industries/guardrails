@@ -2,7 +2,7 @@ import logging
 import os
 
 os.environ["COLOREDLOGS_LEVEL_STYLES"] = (
-    "spam=white,faint;success=green,bold;debug=magenta;verbose=blue;notice=cyan,bold;warning=yellow;error=red;critical=background=red"  # noqa
+    "spam=white,faint;success=green,bold;debug=magenta;verbose=blue;notice=cyan,bold;warning=yellow;error=red;critical=background=red"
 )
 LEVELS = {
     "SPAM": 5,

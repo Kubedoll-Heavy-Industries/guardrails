@@ -1,18 +1,18 @@
-from contextlib import contextmanager
 import contextlib
-from string import Template
-from typing import Callable, cast, List
-
 import importlib.metadata
+from collections.abc import Callable
+from contextlib import contextmanager
+from string import Template
+from typing import cast
 
-from guardrails.hub.validator_package_service import (
-    ValidatorPackageService,
-    ValidatorModuleType,
-)
 from guardrails.classes.rc import RC
-
 from guardrails.cli.hub.console import console
-from guardrails.cli.logger import LEVELS, logger as cli_logger
+from guardrails.cli.logger import LEVELS
+from guardrails.cli.logger import logger as cli_logger
+from guardrails.hub.validator_package_service import (
+    ValidatorModuleType,
+    ValidatorPackageService,
+)
 
 
 class LocalModelFlagNotSet(Exception):
@@ -174,12 +174,12 @@ def install(
 
 
 def install_multiple(
-    package_uris: List[str],
+    package_uris: list[str],
     install_local_models=None,
     quiet: bool = True,
     upgrade: bool = False,  # Add the upgrade parameter here
     install_local_models_confirm: Callable = default_local_models_confirm,
-) -> List[ValidatorModuleType]:
+) -> list[ValidatorModuleType]:
     """Install multiple validator packages from hub URIs.
 
     Args:

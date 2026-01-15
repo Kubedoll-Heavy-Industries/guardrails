@@ -1,6 +1,8 @@
 from operator import attrgetter
-from typing import Any, List
+from typing import Any
+
 from guardrails_api_client.models import Reask
+
 from guardrails.actions.filter import Filter
 from guardrails.actions.refrain import Refrain
 from guardrails.call_tracing.trace_handler import TraceHandler
@@ -79,7 +81,7 @@ def trace_validator_result(
 # We want to encourage users to utilize the validator spans
 #   instead of the events on the step span
 def trace_validation_result(
-    validation_logs: List[ValidatorLogs],
+    validation_logs: list[ValidatorLogs],
     attempt_number: int,
     current_span=None,
 ):

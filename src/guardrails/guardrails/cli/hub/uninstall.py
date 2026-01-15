@@ -1,15 +1,14 @@
 import os
 import sys
-from typing import List, Literal
+from typing import Literal
 
 import typer
-
-from guardrails.cli.hub.hub import hub_command
-from guardrails.cli.logger import LEVELS, logger
-from guardrails.cli.server.hub_client import get_validator_manifest
 from guardrails_hub_types import Manifest
 
+from guardrails.cli.hub.hub import hub_command
 from guardrails.cli.hub.utils import pip_process
+from guardrails.cli.logger import LEVELS, logger
+from guardrails.cli.server.hub_client import get_validator_manifest
 from guardrails.hub_telemetry.hub_tracing import trace
 
 from .console import console
@@ -31,7 +30,7 @@ def remove_line(file_path: str, line_content: str):
 def remove_from_hub_inits(manifest: Manifest, site_packages: str):
     from guardrails.hub.validator_package_service import ValidatorPackageService
 
-    exports: List[str] = manifest.exports or []
+    exports: list[str] = manifest.exports or []
     sorted_exports = sorted(exports, reverse=True)
 
     validator_id = manifest.id

@@ -1,16 +1,16 @@
 import copy
 from string import Template
-from typing import Dict, cast, Optional, Tuple
+from typing import cast
 
 from guardrails.classes.output_type import OutputTypes
 from guardrails.llm_providers import (
-    LiteLLMCallable,
     AsyncLiteLLMCallable,
+    LiteLLMCallable,
     PromptCallableBase,
 )
+from guardrails.prompt.instructions import Instructions
 from guardrails.prompt.prompt import Prompt
 from guardrails.types.inputs import MessageHistory
-from guardrails.prompt.instructions import Instructions
 
 
 def messages_source(messages: MessageHistory) -> MessageHistory:
@@ -23,15 +23,15 @@ def messages_source(messages: MessageHistory) -> MessageHistory:
             else msg["content"]
         )
         msg_copy["content"] = content
-        messages_copy.append(cast(Dict[str, str], msg_copy))
+        messages_copy.append(cast(dict[str, str], msg_copy))
     return messages_copy
 
 
 def preprocess_prompt_for_string_output(
     prompt_callable: PromptCallableBase,
-    instructions: Optional[Instructions],
+    instructions: Instructions | None,
     prompt: Prompt,
-) -> Tuple[Optional[Instructions], Prompt]:
+) -> tuple[Instructions | None, Prompt]:
     if isinstance(prompt_callable, LiteLLMCallable) or isinstance(
         prompt_callable, AsyncLiteLLMCallable
     ):
@@ -49,10 +49,10 @@ def preprocess_prompt_for_string_output(
 
 def preprocess_prompt_for_json_output(
     prompt_callable: PromptCallableBase,
-    instructions: Optional[Instructions],
+    instructions: Instructions | None,
     prompt: Prompt,
     use_xml: bool,
-) -> Tuple[Optional[Instructions], Prompt]:
+) -> tuple[Instructions | None, Prompt]:
     if isinstance(prompt_callable, LiteLLMCallable) or isinstance(
         prompt_callable, AsyncLiteLLMCallable
     ):
@@ -75,11 +75,11 @@ def preprocess_prompt_for_json_output(
 
 def preprocess_prompt(
     prompt_callable: PromptCallableBase,
-    instructions: Optional[Instructions],
+    instructions: Instructions | None,
     prompt: Prompt,
     output_type: OutputTypes,
     use_xml: bool,
-) -> Tuple[Optional[Instructions], Prompt]:
+) -> tuple[Instructions | None, Prompt]:
     if output_type == OutputTypes.STRING:
         return preprocess_prompt_for_string_output(prompt_callable, instructions, prompt)
     return preprocess_prompt_for_json_output(prompt_callable, instructions, prompt, use_xml)

@@ -1,34 +1,30 @@
-from functools import wraps
 import inspect
 import sys
+from collections.abc import AsyncIterator, Awaitable, Callable, Coroutine, Iterator
+from functools import wraps
 from typing import (
     Any,
-    AsyncIterator,
-    Awaitable,
-    Callable,
-    Coroutine,
-    Iterator,
     Union,
 )
 
-from guardrails import Guard, AsyncGuard, settings
+from guardrails import AsyncGuard, Guard, settings
+from guardrails.classes.generic.stack import Stack
+from guardrails.classes.history.iteration import Iteration
+from guardrails.classes.llm.llm_response import LLMResponse
+from guardrails.classes.output_type import OT
 from guardrails.classes.validation.validation_result import ValidationResult
-from guardrails.run import Runner, StreamRunner, AsyncRunner, AsyncStreamRunner
-from guardrails.validator_base import Validator
-from guardrails.version import GUARDRAILS_VERSION
+from guardrails.classes.validation_outcome import ValidationOutcome
+from guardrails.run import AsyncRunner, AsyncStreamRunner, Runner, StreamRunner
 from guardrails.telemetry.guard_tracing import (
     add_guard_attributes,
-    trace_stream_guard,
     trace_async_stream_guard,
+    trace_stream_guard,
 )
-from guardrails.telemetry.runner_tracing import add_step_attributes, add_call_attributes
+from guardrails.telemetry.runner_tracing import add_call_attributes, add_step_attributes
 from guardrails.telemetry.validator_tracing import add_validator_attributes
-from guardrails.classes.generic.stack import Stack
-from guardrails.classes.llm.llm_response import LLMResponse
-from guardrails.classes.history.iteration import Iteration
-from guardrails.classes.output_type import OT
-from guardrails.classes.validation_outcome import ValidationOutcome
 from guardrails.utils.safe_get import safe_get
+from guardrails.validator_base import Validator
+from guardrails.version import GUARDRAILS_VERSION
 
 try:
     import mlflow
@@ -58,30 +54,30 @@ class MlFlowInstrumentor:
         mlflow.set_experiment(self.experiment_name)
 
         wrapped_guard_execute = self._instrument_guard(Guard._execute)
-        setattr(Guard, "_execute", wrapped_guard_execute)
+        Guard._execute = wrapped_guard_execute
 
         wrapped_async_guard_execute = self._instrument_async_guard(AsyncGuard._execute)
-        setattr(AsyncGuard, "_execute", wrapped_async_guard_execute)
+        AsyncGuard._execute = wrapped_async_guard_execute
 
         wrapped_runner_step = self._instrument_runner_step(Runner.step)
-        setattr(Runner, "step", wrapped_runner_step)
+        Runner.step = wrapped_runner_step
 
         wrapped_stream_runner_step = self._instrument_stream_runner_step(StreamRunner.step)
-        setattr(StreamRunner, "step", wrapped_stream_runner_step)
+        StreamRunner.step = wrapped_stream_runner_step
 
         wrapped_async_runner_step = self._instrument_async_runner_step(AsyncRunner.async_step)
-        setattr(AsyncRunner, "async_step", wrapped_async_runner_step)
+        AsyncRunner.async_step = wrapped_async_runner_step
 
         wrapped_async_stream_runner_step = self._instrument_async_stream_runner_step(
             AsyncStreamRunner.async_step  # type: ignore
         )
-        setattr(AsyncStreamRunner, "async_step", wrapped_async_stream_runner_step)
+        AsyncStreamRunner.async_step = wrapped_async_stream_runner_step
 
         wrapped_runner_call = self._instrument_runner_call(Runner.call)
-        setattr(Runner, "call", wrapped_runner_call)
+        Runner.call = wrapped_runner_call
 
         wrapped_async_runner_call = self._instrument_async_runner_call(AsyncRunner.async_call)
-        setattr(AsyncRunner, "async_call", wrapped_async_runner_call)
+        AsyncRunner.async_call = wrapped_async_runner_call
 
         import guardrails
 
@@ -91,12 +87,12 @@ class MlFlowInstrumentor:
             export = getattr(guardrails.hub, validator_name)  # type: ignore
             if isinstance(export, type) and issubclass(export, Validator):
                 wrapped_validator_validate = self._instrument_validator_validate(export.validate)
-                setattr(export, "validate", wrapped_validator_validate)
+                export.validate = wrapped_validator_validate
 
                 wrapped_validator_async_validate = self._instrument_validator_async_validate(
                     export.async_validate
                 )
-                setattr(export, "async_validate", wrapped_validator_async_validate)
+                export.async_validate = wrapped_validator_async_validate
 
                 setattr(guardrails.hub, validator_name, export)  # type: ignore
 
@@ -239,7 +235,7 @@ class MlFlowInstrumentor:
                     step_span.set_status(status=SpanStatusCode.ERROR)
                     exception = e
                 finally:
-                    call = safe_get(args, 8, kwargs.get("call_log", None))
+                    call = safe_get(args, 8, kwargs.get("call_log"))
                     iteration = call.iterations.last if call else None
                     add_step_attributes(step_span, iteration, *args, **kwargs)  # type: ignore
                     if exception:
@@ -303,7 +299,7 @@ class MlFlowInstrumentor:
                     step_span.set_status(status=SpanStatusCode.ERROR)
                     exception = e
                 finally:
-                    call = safe_get(args, 3, kwargs.get("call_log", None))
+                    call = safe_get(args, 3, kwargs.get("call_log"))
                     iteration = call.iterations.last if call else None
                     add_step_attributes(step_span, iteration, *args, **kwargs)  # type: ignore
                     if exception:

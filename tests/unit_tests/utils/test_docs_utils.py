@@ -10,7 +10,7 @@ from guardrails.utils.docs_utils import (  # sentence_split,
 
 class MockTokenizer:
     def encode(self, text):
-        return [token_id for token_id in range(1, len(text) + 1)]
+        return list(range(1, len(text) + 1))
 
     def decode(self, tokens):
         return " ".join([str(token_id) for token_id in tokens])

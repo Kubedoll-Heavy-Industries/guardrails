@@ -1,17 +1,16 @@
+import contextlib
 import hashlib
 from abc import ABC, abstractmethod
 from collections import namedtuple
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from pydantic import Field
 
 from guardrails.vectordb import VectorDBBase
 
-try:
+with contextlib.suppress(ImportError):
     from sqlalchemy.exc import IntegrityError
-except ImportError:
-    pass
 
 
 @dataclass
@@ -24,8 +23,8 @@ class Document:
     """
 
     id: str
-    pages: Dict[int, str]
-    metadata: Dict[Any, Any] = Field(default_factory=dict)
+    pages: dict[int, str]
+    metadata: dict[Any, Any] = Field(default_factory=dict)
 
 
 # PageCoordinates is a datastructure that points to the location
@@ -42,7 +41,7 @@ class Page:
 
     cordinates: PageCoordinates
     text: str
-    metadata: Dict[Any, Any]
+    metadata: dict[Any, Any]
 
 
 class DocumentStoreBase(ABC):
@@ -52,7 +51,7 @@ class DocumentStoreBase(ABC):
     The store can be queried by text for similar documents.
     """
 
-    def __init__(self, vector_db: VectorDBBase, path: Optional[str] = None): ...
+    def __init__(self, vector_db: VectorDBBase, path: str | None = None): ...
 
     @abstractmethod
     def add_document(self, document: Document) -> None:
@@ -67,7 +66,7 @@ class DocumentStoreBase(ABC):
         ...
 
     @abstractmethod
-    def search(self, query: str, k: int = 4) -> List[Page]:
+    def search(self, query: str, k: int = 4) -> list[Page]:
         """Searches for pages which contain the text similar to the query.
 
         Args:
@@ -80,7 +79,7 @@ class DocumentStoreBase(ABC):
         ...
 
     @abstractmethod
-    def add_text(self, text: str, meta: Dict[Any, Any]) -> str:
+    def add_text(self, text: str, meta: dict[Any, Any]) -> str:
         """Adds a text to the store.
         Args:
             text: Text to add.
@@ -92,7 +91,7 @@ class DocumentStoreBase(ABC):
         ...
 
     @abstractmethod
-    def add_texts(self, texts: Dict[str, Dict[Any, Any]]) -> List[str]:
+    def add_texts(self, texts: dict[str, dict[Any, Any]]) -> list[str]:
         """Adds a list of texts to the store.
         Args:
             texts: List of texts to add, and their associalted metadata.
@@ -119,7 +118,7 @@ try:
         """EphemeralDocumentStore is a document store that stores the documents
         on local disk and use a ephemeral vector store like Faiss."""
 
-        def __init__(self, vector_db: VectorDBBase, path: Optional[str] = None):
+        def __init__(self, vector_db: VectorDBBase, path: str | None = None):
             """Creates a new EphemeralDocumentStore.
 
             Args:
@@ -139,7 +138,7 @@ try:
                 return
             self._vector_db.add_texts(list(document.pages.values()))
 
-        def add_text(self, text: str, meta: Dict[Any, Any]) -> str:
+        def add_text(self, text: str, meta: dict[Any, Any]) -> str:
             hash = hashlib.md5()
             hash.update(text.encode("utf-8"))
             hash.update(str(meta).encode("utf-8"))
@@ -149,26 +148,26 @@ try:
             self.add_document(doc)
             return doc.id
 
-        def add_texts(self, texts: Dict[str, Dict[Any, Any]]) -> List[str]:
+        def add_texts(self, texts: dict[str, dict[Any, Any]]) -> list[str]:
             doc_ids = []
             for text, meta in texts.items():
                 doc_id = self.add_text(text, meta)
                 doc_ids.append(doc_id)
             return doc_ids
 
-        def search(self, query: str, k: int = 4) -> List[Page]:
+        def search(self, query: str, k: int = 4) -> list[Page]:
             vector_db_indexes = self._vector_db.similarity_search(query, k)
             filtered_ids = list(filter(lambda x: x != -1, vector_db_indexes))
             return self._storage.get_pages_for_for_indexes(filtered_ids)
 
-        def search_with_threshold(self, query: str, threshold: float, k: int = 4) -> List[Page]:
+        def search_with_threshold(self, query: str, threshold: float, k: int = 4) -> list[Page]:
             vector_db_indexes = self._vector_db.similarity_search_with_threshold(
                 query, k, threshold
             )
             filtered_ids = list(filter(lambda x: x != -1, vector_db_indexes))
             return self._storage.get_pages_for_for_indexes(filtered_ids)
 
-        def flush(self, path: Optional[str] = None):
+        def flush(self, path: str | None = None):
             self._vector_db.save(path)
 
     Base = declarative_base()
@@ -183,12 +182,12 @@ try:
         vector_index: Mapped[int] = mapped_column(sqlalchemy.Integer)  # type: ignore
 
     class RealSQLMetadataStore:
-        def __init__(self, path: Optional[str] = None):
+        def __init__(self, path: str | None = None):
             conn = f"sqlite:///{path}" if path is not None else "sqlite://"
             self._engine = sqlalchemy.create_engine(conn)  # type: ignore
             RealSqlDocument.metadata.create_all(self._engine, checkfirst=True)
 
-        def add_docs(self, docs: List[Document], vdb_last_index: int):
+        def add_docs(self, docs: list[Document], vdb_last_index: int):
             vector_id = vdb_last_index
             with Session(self._engine) as session:
                 for doc in docs:
@@ -206,8 +205,8 @@ try:
 
                 session.commit()
 
-        def get_pages_for_for_indexes(self, indexes: List[int]) -> List[Page]:
-            pages: List[Page] = []
+        def get_pages_for_for_indexes(self, indexes: list[int]) -> list[Page]:
+            pages: list[Page] = []
             with Session(self._engine) as session:
                 for index in indexes:
                     query = sqlalchemy.select(RealSqlDocument).where(

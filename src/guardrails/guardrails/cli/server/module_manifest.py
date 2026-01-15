@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from pydash.strings import snake_case
 
@@ -18,22 +18,22 @@ class Contributor(Serializeable):
 @dataclass
 class Repository(Serializeable):
     url: str
-    branch: Optional[str] = None
+    branch: str | None = None
 
 
 @dataclass
 class ModuleTags(Serializeable):
-    content_type: Optional[List[str]] = field(default_factory=list)
-    validation_category: Optional[List[str]] = field(default_factory=list)
-    process_requirements: Optional[List[str]] = field(default_factory=list)
-    has_guardrails_endpoint: Optional[bool] = field(default_factory=bool)
+    content_type: list[str] | None = field(default_factory=list)
+    validation_category: list[str] | None = field(default_factory=list)
+    process_requirements: list[str] | None = field(default_factory=list)
+    has_guardrails_endpoint: bool | None = field(default_factory=bool)
 
 
 @dataclass
 class ModelAuth(Serializeable):
     type: str
     name: str
-    displayName: Optional[str] = None
+    displayName: str | None = None
 
 
 @dataclass
@@ -41,21 +41,21 @@ class ModuleManifest(Serializeable):
     id: str
     name: str
     author: Contributor
-    maintainers: List[Contributor]
+    maintainers: list[Contributor]
     repository: Repository
     namespace: str
     package_name: str
     module_name: str
-    exports: List[str]
-    tags: Optional[ModuleTags] = None
-    requires_auth: Optional[bool] = True
-    post_install: Optional[str] = None
-    index: Optional[str] = None
-    required_model_auth: Optional[List[ModelAuth]] = field(default_factory=list)
+    exports: list[str]
+    tags: ModuleTags | None = None
+    requires_auth: bool | None = True
+    post_install: str | None = None
+    index: str | None = None
+    required_model_auth: list[ModelAuth] | None = field(default_factory=list)
 
     # @override
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]):
+    def from_dict(cls, data: dict[str, Any]):
         init_kwargs = {snake_case(k): data.get(k) for k in data}
         init_kwargs["encoder"] = init_kwargs.get("encoder", SerializeableJSONEncoder)
         author = init_kwargs.pop("author", {})

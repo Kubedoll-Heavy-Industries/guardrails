@@ -1,5 +1,3 @@
-# ruff: noqa: E501
-
 import json
 import os
 import subprocess
@@ -54,7 +52,9 @@ def test_cli():
 
         validated_output_path = os.path.join(tmpdir, "validated_output")
 
-        subprocess.run(["guardrails", "hub", "install", "hub://guardrails/valid_range", "--quiet"])
+        subprocess.run(
+            ["guardrails", "hub", "install", "hub://guardrails/valid_range", "--quiet"], check=False
+        )
 
         # Run the cli command
         result = subprocess.run(
@@ -66,6 +66,7 @@ def test_cli():
                 "--out",
                 validated_output_path,
             ],
+            check=False,
             capture_output=True,
             text=True,
         )
@@ -75,6 +76,6 @@ def test_cli():
         assert result.returncode == 0
 
         # Check that the output file is correct
-        with open(validated_output_path, "r") as f:
+        with open(validated_output_path) as f:
             validated_output = json.load(f)
             assert validated_output == json.loads(LLM_OUTPUT)

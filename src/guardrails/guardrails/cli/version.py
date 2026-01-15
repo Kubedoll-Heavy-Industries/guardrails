@@ -5,7 +5,6 @@ import requests
 import semver
 from rich.console import Console
 
-
 GUARDRAILS_PACKAGE_NAME = "guardrails-ai"
 
 

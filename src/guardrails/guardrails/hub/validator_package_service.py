@@ -1,29 +1,26 @@
 import importlib
 import os
-from pathlib import Path
 import re
 import subprocess
 import sys
-
-from typing import List, Literal, Optional
+from pathlib import Path
 from types import ModuleType
+from typing import Literal
+
+from guardrails_hub_types import Manifest
 from packaging.utils import canonicalize_name  # PEP 503
 
-from guardrails.logger import logger as guardrails_logger
-
-
 from guardrails.cli.hub.utils import PipProcessError, pip_process_with_custom_exception
-from guardrails_hub_types import Manifest
 from guardrails.cli.server.hub_client import get_validator_manifest
+from guardrails.logger import logger as guardrails_logger
 from guardrails.settings import settings
-
 
 json_format: Literal["json"] = "json"
 string_format: Literal["string"] = "string"
 
 
 class ValidatorModuleType(ModuleType):
-    __validator_exports__: List[str]
+    __validator_exports__: list[str]
 
 
 class FailedPackageInspection(Exception):
@@ -104,7 +101,7 @@ class ValidatorPackageService:
     @staticmethod
     def add_to_hub_inits(manifest: Manifest, site_packages: str):
         validator_id = manifest.id
-        exports: List[str] = manifest.exports or []
+        exports: list[str] = manifest.exports or []
         sorted_exports = sorted(exports, reverse=True)
 
         import_path = ValidatorPackageService.get_import_path_from_validator_id(validator_id)
@@ -137,7 +134,7 @@ class ValidatorPackageService:
             # wasn't able to import the module
             raise FailedToLocateModule(
                 f"""
-                    The module {package_name} could not be found in 
+                    The module {package_name} could not be found in
                     the current environment.
                 """
             ) from e
@@ -186,23 +183,21 @@ class ValidatorPackageService:
                 subprocess.check_output(command)
             except subprocess.CalledProcessError as exc:
                 logger.error(
-                    (
-                        f"Failed to run post install script for {manifest.id}\n"
-                        f"Exit code: {exc.returncode}\n"
-                        f"stdout: {exc.output}"
-                    )
+                    f"Failed to run post install script for {manifest.id}\n"
+                    f"Exit code: {exc.returncode}\n"
+                    f"stdout: {exc.output}"
                 )
                 raise FailedPackageInstallationPostInstall(
                     f"Failed to run post install script for {manifest.id}\n"
                 )
             except Exception as e:
                 logger.error(
-                    f"An unexpected exception occurred while running the post install script for {manifest.id}!",  # noqa
+                    f"An unexpected exception occurred while running the post install script for {manifest.id}!",
                     e,
                 )
                 raise FailedPackageInstallationPostInstall(
                     f"""
-                    An unexpected exception occurred while running the post install 
+                    An unexpected exception occurred while running the post install
                     script for {manifest.id}!
                     """
                 )
@@ -222,7 +217,7 @@ class ValidatorPackageService:
     @staticmethod
     def install_hub_module(
         validator_id: str,
-        validator_version: Optional[str] = "",
+        validator_version: str | None = "",
         quiet: bool = False,
         upgrade: bool = False,
         logger=guardrails_logger,
@@ -267,12 +262,10 @@ class ValidatorPackageService:
                 stdout = e.stdout
                 returncode = e.returncode
                 logger.error(
-                    (
-                        f"Failed to {action} {package}\n"
-                        f"Exit code: {returncode}\n"
-                        f"stderr: {(stderr or '').strip()}\n"
-                        f"stdout: {(stdout or '').strip()}"
-                    )
+                    f"Failed to {action} {package}\n"
+                    f"Exit code: {returncode}\n"
+                    f"stderr: {(stderr or '').strip()}\n"
+                    f"stdout: {(stdout or '').strip()}"
                 )
                 raise
             except Exception as e:

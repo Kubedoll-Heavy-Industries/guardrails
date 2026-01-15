@@ -1,5 +1,3 @@
-from typing import List, Optional
-
 from guardrails_api_client.models.model_schema import ModelSchema
 from guardrails_api_client.models.simple_types import SimpleTypes
 from guardrails_api_client.models.validation_type import ValidationType
@@ -11,10 +9,10 @@ from guardrails.validator_base import Validator
 
 
 def primitive_to_schema(
-    validators: List[Validator],
+    validators: list[Validator],
     *,
     type: SimpleTypes = SimpleTypes.STRING,
-    description: Optional[str] = None,
+    description: str | None = None,
 ) -> ProcessedSchema:
     processed_schema = ProcessedSchema(validators=[], validator_map={})
 

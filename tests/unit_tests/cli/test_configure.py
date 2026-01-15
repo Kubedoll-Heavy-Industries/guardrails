@@ -1,6 +1,7 @@
 from unittest.mock import call, patch
 
 import pytest
+
 from tests.unit_tests.mocks.mock_file import MockFile
 
 

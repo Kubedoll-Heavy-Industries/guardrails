@@ -1,38 +1,32 @@
 import json
+from collections.abc import AsyncIterator, Awaitable, Callable, Iterator
 from functools import wraps
-from typing import (
-    AsyncIterator,
-    Awaitable,
-    Callable,
-    Iterator,
-    Optional,
-)
 
 try:
     from openinference.semconv.trace import SpanAttributes  # type: ignore
 except ImportError:
     SpanAttributes = None
 
+import sys
+
 from opentelemetry import context, trace
-from opentelemetry.trace import StatusCode, Span
+from opentelemetry.trace import Span, StatusCode
 
 from guardrails.classes.history.iteration import Iteration
 from guardrails.classes.llm.llm_response import LLMResponse
-from guardrails.settings import settings
 from guardrails.classes.output_type import OT
 from guardrails.classes.validation_outcome import ValidationOutcome
+from guardrails.settings import settings
 from guardrails.stores.context import get_guard_name
 from guardrails.telemetry.common import (
-    get_tracer,
     add_user_attributes,
-    serialize,
+    get_tracer,
     recursive_key_operation,
     redact,
+    serialize,
 )
 from guardrails.utils.safe_get import safe_get
 from guardrails.version import GUARDRAILS_VERSION
-
-import sys
 
 if sys.version_info.minor < 10:
     from guardrails.utils.polyfills import anext
@@ -43,7 +37,7 @@ if sys.version_info.minor < 10:
 
 
 # TODO: Track input arguments and outputs explicitly as named attributes
-def add_step_attributes(step_span: Span, response: Optional[Iteration], *args, **kwargs):
+def add_step_attributes(step_span: Span, response: Iteration | None, *args, **kwargs):
     step_number = safe_get(args, 1, kwargs.get("index", 0))
     guard_name = get_guard_name()
 
@@ -131,7 +125,7 @@ def trace_stream_step_generator(
             step_span.set_status(status=StatusCode.ERROR, description=str(e))
             exception = e
         finally:
-            call = safe_get(args, 8, kwargs.get("call_log", None))
+            call = safe_get(args, 8, kwargs.get("call_log"))
             iteration = call.iterations.last if call else None
             add_step_attributes(step_span, iteration, *args, **kwargs)
             add_user_attributes(step_span)
@@ -213,7 +207,7 @@ async def trace_async_stream_step_generator(
             step_span.set_status(status=StatusCode.ERROR, description=str(e))
             exception = e
         finally:
-            call = safe_get(args, 3, kwargs.get("call_log", None))
+            call = safe_get(args, 3, kwargs.get("call_log"))
             iteration = call.iterations.last if call else None
             add_step_attributes(step_span, iteration, *args, **kwargs)
             if exception:
@@ -246,7 +240,7 @@ def trace_async_stream_step(
 
 
 # TODO: Track input arguments and outputs explicitly as named attributes
-def add_call_attributes(call_span: Span, response: Optional[LLMResponse], *args, **kwargs):
+def add_call_attributes(call_span: Span, response: LLMResponse | None, *args, **kwargs):
     guard_name = get_guard_name()
 
     call_span.set_attribute("guardrails.version", GUARDRAILS_VERSION)

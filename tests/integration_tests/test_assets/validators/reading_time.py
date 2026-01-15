@@ -1,4 +1,5 @@
-from typing import Any, Callable, Dict, Optional
+from collections.abc import Callable
+from typing import Any
 
 from guardrails.logger import logger
 from guardrails.validator_base import (
@@ -28,14 +29,14 @@ class ReadingTime(Validator):
         reading_time: The maximum reading time in minutes.
     """
 
-    def __init__(self, reading_time: int, on_fail: Optional[Callable] = None):
+    def __init__(self, reading_time: int, on_fail: Callable | None = None):
         super().__init__(
             on_fail=on_fail,
             reading_time=reading_time,
         )
         self._max_time = reading_time
 
-    def validate(self, value: Any, metadata: Dict) -> ValidationResult:
+    def validate(self, value: Any, metadata: dict) -> ValidationResult:
         logger.debug(f"Validating {value} can be read in less than {self._max_time} minutes...")
 
         # Estimate the reading time of the string

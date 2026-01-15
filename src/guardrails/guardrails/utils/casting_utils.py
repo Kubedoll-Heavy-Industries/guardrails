@@ -1,8 +1,8 @@
-from typing import Any, Optional
 import warnings
+from typing import Any
 
 
-def to_int(v: Any) -> Optional[int]:
+def to_int(v: Any) -> int | None:
     try:
         int_value = int(v)
         return int_value
@@ -10,7 +10,7 @@ def to_int(v: Any) -> Optional[int]:
         return None
 
 
-def to_float(v: Any) -> Optional[float]:
+def to_float(v: Any) -> float | None:
     try:
         float_value = float(v)
         return float_value
@@ -18,7 +18,7 @@ def to_float(v: Any) -> Optional[float]:
         return None
 
 
-def to_string(v: Any) -> Optional[str]:
+def to_string(v: Any) -> str | None:
     try:
         str_value = str(v)
         return str_value
@@ -26,7 +26,7 @@ def to_string(v: Any) -> Optional[str]:
         return None
 
 
-def to_bool(value: str) -> Optional[bool]:
+def to_bool(value: str) -> bool | None:
     if value.lower() == "true":
         return True
     if value.lower() == "false":

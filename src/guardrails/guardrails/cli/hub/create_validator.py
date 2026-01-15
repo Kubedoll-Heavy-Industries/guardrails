@@ -1,4 +1,3 @@
-# ruff: noqa: E501
 import os
 from datetime import date
 from string import Template
@@ -19,7 +18,7 @@ If your validator is complex or requires additional post-installation steps, con
 
 The template repository can be found here: https://github.com/guardrails-ai/validator-template
 \"""
-    
+
 from typing import Any, Callable, Dict, Optional
 
 from guardrails.validator_base import (
@@ -44,7 +43,7 @@ class ${class_name}(Validator):
 
     # Description
     {FIXME: A brief description of what your validator does.}
-    
+
     ## (Optional) Intended Use
     {FIXME: Optionally, include a brief description of the intended use of your validator, including any limitations or constraints.}
 
@@ -98,7 +97,7 @@ class ${class_name}(Validator):
         on_fail: Optional[Callable] = None,
     ):
         \"""Initializes a new instance of the ${class_name} class.
-        
+
         Args:
             arg_1 (str): FIXME: Describe the purpose of this argument.
             on_fail`** *(str, Callable)*: The policy to enact when a validator fails.  If `str`, must be one of `reask`, `fix`, `filter`, `refrain`, `noop`, `exception` or `fix_reask`. Otherwise, must be a function that is called when the validator fails.
@@ -108,7 +107,7 @@ class ${class_name}(Validator):
 
     def validate(self, value: Any, metadata: Dict) -> ValidationResult:
         \"""Validates that {fill in how you validator interacts with the passed value}.
-        
+
         Args:
             value (Any): The value to validate.
             metadata (Dict): The metadata to validate against.
@@ -118,7 +117,7 @@ class ${class_name}(Validator):
             | --- | --- |
             | a | b |
         \"""
-        
+
         # Add your custom validator logic here and return a PassResult or FailResult accordingly.
         if value != "pass": # FIXME
             return FailResult(

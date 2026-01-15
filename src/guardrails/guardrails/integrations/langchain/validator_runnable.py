@@ -1,6 +1,6 @@
+from guardrails.errors import ValidationError
 from guardrails.integrations.langchain.base_runnable import BaseRunnable
 from guardrails.validator_base import FailResult, Validator
-from guardrails.errors import ValidationError
 
 
 class ValidatorRunnable(BaseRunnable):
@@ -14,6 +14,6 @@ class ValidatorRunnable(BaseRunnable):
         response = self.validator.validate(input, self.validator._metadata)
         if isinstance(response, FailResult):
             raise ValidationError(
-                (f"The response from the LLM failed validation! {response.error_message}")
+                f"The response from the LLM failed validation! {response.error_message}"
             )
         return input

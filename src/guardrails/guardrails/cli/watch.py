@@ -7,10 +7,10 @@ from dataclasses import asdict
 import rich
 import typer
 
-from guardrails.settings import settings
-from guardrails.cli.guardrails import guardrails as gr_cli
 from guardrails.call_tracing import GuardTraceEntry, TraceHandler
+from guardrails.cli.guardrails import guardrails as gr_cli
 from guardrails.cli.telemetry import trace_if_enabled
+from guardrails.settings import settings
 
 
 @gr_cli.command(name="watch")

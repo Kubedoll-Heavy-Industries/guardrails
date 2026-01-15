@@ -1,5 +1,5 @@
-from typing import Any, List
+from typing import Any
 
 
-def args(*args: Any) -> List[Any]:
+def args(*args: Any) -> list[Any]:
     return list(args)

@@ -1,9 +1,7 @@
+from collections.abc import AsyncGenerator
 from functools import wraps
 from typing import (
     Any,
-    Dict,
-    Optional,
-    AsyncGenerator,
 )
 
 from opentelemetry.trace import Span
@@ -12,13 +10,13 @@ from opentelemetry.trace.propagation import set_span_in_context
 from guardrails.classes.validation.validation_result import ValidationResult
 from guardrails.hub_token.token import VALIDATOR_HUB_SERVICE
 from guardrails.types.primitives import PrimitiveTypes
-from guardrails.utils.safe_get import safe_get
 from guardrails.utils.hub_telemetry_utils import HubTelemetry
+from guardrails.utils.safe_get import safe_get
 
 
 def get_guard_call_attributes(
-    attrs: Dict[str, Any], origin: str, *args, **kwargs
-) -> Dict[str, Any]:
+    attrs: dict[str, Any], origin: str, *args, **kwargs
+) -> dict[str, Any]:
     attrs["stream"] = kwargs.get("stream", False)
 
     guard_self = safe_get(args, 0)
@@ -33,7 +31,7 @@ def get_guard_call_attributes(
         )
         return attrs
 
-    llm_api_str = ""  # noqa
+    llm_api_str = ""
     llm_api = kwargs.get("llm_api")
     if origin in ["Guard.__call__", "AsyncGuard.__call__"]:
         llm_api = safe_get(args, 1, llm_api)
@@ -47,7 +45,7 @@ def get_guard_call_attributes(
     return attrs
 
 
-def get_validator_inference_attributes(attrs: Dict[str, Any], *args, **kwargs) -> Dict[str, Any]:
+def get_validator_inference_attributes(attrs: dict[str, Any], *args, **kwargs) -> dict[str, Any]:
     validator_self = safe_get(args, 0)
     if validator_self is not None:
         used_guardrails_endpoint = (
@@ -64,8 +62,8 @@ def get_validator_inference_attributes(attrs: Dict[str, Any], *args, **kwargs) -
 
 
 def get_validator_usage_attributes(
-    attrs: Dict[str, Any], response, *args, **kwargs
-) -> Dict[str, Any]:
+    attrs: dict[str, Any], response, *args, **kwargs
+) -> dict[str, Any]:
     # We're wrapping a wrapped function,
     #   so the first arg is the validator service
     validator_self = safe_get(args, 1)
@@ -83,7 +81,7 @@ def get_validator_usage_attributes(
 
 def add_attributes(
     span: Span,
-    attrs: Dict[str, Any],
+    attrs: dict[str, Any],
     name: str,
     origin: str,
     *args,
@@ -111,7 +109,7 @@ def add_attributes(
 def trace(
     *,
     name: str,
-    origin: Optional[str] = None,
+    origin: str | None = None,
     **attrs,
 ):
     def decorator(fn):
@@ -123,7 +121,7 @@ def trace(
                     name,
                     context=hub_telemetry.extract_current_context(),
                     set_status_on_exception=True,
-                ) as span:  # noqa
+                ) as span:
                     context = set_span_in_context(span)
                     hub_telemetry.inject_current_context(context=context)
                     nonlocal origin
@@ -143,7 +141,7 @@ def trace(
 def async_trace(
     *,
     name: str,
-    origin: Optional[str] = None,
+    origin: str | None = None,
 ):
     def decorator(fn):
         @wraps(fn)
@@ -154,7 +152,7 @@ def async_trace(
                     name,
                     context=hub_telemetry.extract_current_context(),
                     set_status_on_exception=True,
-                ) as span:  # noqa
+                ) as span:
                     context = set_span_in_context(span)
                     hub_telemetry.inject_current_context(context=context)
 
@@ -172,14 +170,13 @@ def async_trace(
 
 def _run_gen(fn, *args, **kwargs):
     gen = fn(*args, **kwargs)
-    for item in gen:
-        yield item
+    yield from gen
 
 
 def trace_stream(
     *,
     name: str,
-    origin: Optional[str] = None,
+    origin: str | None = None,
     **attrs,
 ):
     def decorator(fn):
@@ -191,7 +188,7 @@ def trace_stream(
                     name,
                     context=hub_telemetry.extract_current_context(),
                     set_status_on_exception=True,
-                ) as span:  # noqa
+                ) as span:
                     context = set_span_in_context(span)
                     hub_telemetry.inject_current_context(context=context)
 
@@ -216,7 +213,7 @@ async def _run_async_gen(fn, *args, **kwargs) -> AsyncGenerator[Any, None]:
 def async_trace_stream(
     *,
     name: str,
-    origin: Optional[str] = None,
+    origin: str | None = None,
     **attrs,
 ):
     def decorator(fn):
@@ -228,7 +225,7 @@ def async_trace_stream(
                     name,
                     context=hub_telemetry.extract_current_context(),
                     set_status_on_exception=True,
-                ) as span:  # noqa
+                ) as span:
                     context = set_span_in_context(span)
                     hub_telemetry.inject_current_context(context=context)
 

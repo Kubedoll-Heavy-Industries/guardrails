@@ -1,11 +1,10 @@
-from typing import Dict
 import pytest
 
 import guardrails as gd
 from guardrails import register_validator
 from guardrails.classes.llm.llm_response import LLMResponse
-from guardrails.validator_base import OnFailAction
 from guardrails.classes.validation.validation_result import FailResult, ValidationResult
+from guardrails.validator_base import OnFailAction
 from tests.integration_tests.test_assets.custom_llm import mock_async_llm, mock_llm
 
 from .test_assets import pydantic, string
@@ -132,7 +131,7 @@ def test_reask_prompt_instructions(mocker):
     )
 
     @register_validator(name="always_fail", data_type="string")
-    def always_fail(value: str, metadata: Dict) -> ValidationResult:
+    def always_fail(value: str, metadata: dict) -> ValidationResult:
         return FailResult(error_message=f"Value {value} should fail.")
 
     # We don't support tuple syntax for for_string and never have

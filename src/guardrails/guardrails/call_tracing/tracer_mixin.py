@@ -5,7 +5,7 @@ of acting as a 'noop' when we want to benchmark performance of a tracer.
 """
 
 import os
-from typing import Iterator
+from collections.abc import Iterator
 
 from guardrails.call_tracing.trace_entry import GuardTraceEntry
 from guardrails.classes.validation.validator_logs import ValidatorLogs

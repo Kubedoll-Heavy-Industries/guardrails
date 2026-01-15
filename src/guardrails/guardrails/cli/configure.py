@@ -2,17 +2,16 @@ import os
 import sys
 import uuid
 from os.path import expanduser
-from typing import Optional
 
 import typer
 
-from guardrails.settings import settings
 from guardrails.cli.guardrails import guardrails
-from guardrails.cli.logger import LEVELS, logger
 from guardrails.cli.hub.console import console
+from guardrails.cli.logger import LEVELS, logger
 from guardrails.cli.server.hub_client import AuthenticationError, get_auth
 from guardrails.cli.telemetry import trace_if_enabled
 from guardrails.cli.version import version_warnings_if_applicable
+from guardrails.settings import settings
 
 DEFAULT_TOKEN = ""
 DEFAULT_ENABLE_METRICS = True
@@ -20,9 +19,9 @@ DEFAULT_USE_REMOTE_INFERENCING = True
 
 
 def save_configuration_file(
-    token: Optional[str],
-    enable_metrics: Optional[bool],
-    use_remote_inferencing: Optional[bool] = DEFAULT_USE_REMOTE_INFERENCING,
+    token: str | None,
+    enable_metrics: bool | None,
+    use_remote_inferencing: bool | None = DEFAULT_USE_REMOTE_INFERENCING,
 ) -> None:
     if token is None:
         token = DEFAULT_TOKEN
@@ -35,7 +34,7 @@ def save_configuration_file(
     guardrails_rc = os.path.join(home, ".guardrailsrc")
     with open(guardrails_rc, "w", encoding="utf-8") as rc_file:
         lines = [
-            f"id={str(uuid.uuid4())}{os.linesep}",
+            f"id={uuid.uuid4()!s}{os.linesep}",
             f"token={token}{os.linesep}",
             f"enable_metrics={str(enable_metrics).lower()}{os.linesep}",
             f"use_remote_inferencing={str(use_remote_inferencing).lower()}",
@@ -56,24 +55,24 @@ def _get_default_token() -> str:
 
 @guardrails.command()
 def configure(
-    enable_metrics: Optional[bool] = typer.Option(
+    enable_metrics: bool | None = typer.Option(
         DEFAULT_ENABLE_METRICS,
         "--enable-metrics/--disable-metrics",
         help="Opt out of anonymous metrics collection.",
         prompt="Enable anonymous metrics reporting?",
     ),
-    token: Optional[str] = typer.Option(
+    token: str | None = typer.Option(
         None,
         "--token",
         help="API Key for Guardrails. If not provided, you will be prompted for it.",
     ),
-    remote_inferencing: Optional[bool] = typer.Option(
+    remote_inferencing: bool | None = typer.Option(
         DEFAULT_USE_REMOTE_INFERENCING,
         "--enable-remote-inferencing/--disable-remote-inferencing",
         help="Opt in to remote inferencing. If not provided, you will be prompted for it.",
         prompt="Do you wish to use remote inferencing?",
     ),
-    clear_token: Optional[bool] = typer.Option(
+    clear_token: bool | None = typer.Option(
         False,
         "--clear-token",
         help="Clear the existing token from the configuration file.",

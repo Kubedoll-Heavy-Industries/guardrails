@@ -1,9 +1,9 @@
 import json
 
-from guardrails.classes.validation.validator_reference import ValidatorReference
-from guardrails.classes.schema.processed_schema import ProcessedSchema
-from guardrails.schema.pydantic_schema import pydantic_model_to_schema
 from guardrails.classes.output_type import OutputTypes
+from guardrails.classes.schema.processed_schema import ProcessedSchema
+from guardrails.classes.validation.validator_reference import ValidatorReference
+from guardrails.schema.pydantic_schema import pydantic_model_to_schema
 from guardrails.validator_base import OnFailAction
 from tests.integration_tests.test_assets.pydantic_models.fight_or_flight import (
     FightOrFlight,
@@ -16,7 +16,6 @@ class TestPydanticSchema:
     def test_choice_case_happy_path(self):
         with open(
             "tests/integration_tests/test_assets/json_schemas/choice_case_openapi.json",
-            "r",
         ) as choice_case_json_file:
             expected_schema = json.loads(choice_case_json_file.read())
 

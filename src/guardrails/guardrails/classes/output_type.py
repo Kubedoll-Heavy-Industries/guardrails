@@ -1,9 +1,10 @@
 # TODO: Move this file to guardrails.types
 from enum import Enum
-from typing import Any, Dict, List, Optional, TypeVar, Union
+from typing import Any, TypeVar, Union
+
 from guardrails_api_client import SimpleTypes
 
-OT = TypeVar("OT", str, List, Dict)
+OT = TypeVar("OT", str, list, dict)
 
 
 # TODO: Move this to types.py
@@ -14,7 +15,7 @@ class OutputTypes(str, Enum):
     DICT = "dict"
 
     @staticmethod
-    def get(key: Optional[Union[str, "OutputTypes"]], default=None):
+    def get(key: Union[str, "OutputTypes"] | None, default=None):
         try:
             if not key:
                 return default
@@ -25,7 +26,7 @@ class OutputTypes(str, Enum):
             return default
 
     @classmethod
-    def __from_json_schema__(cls, json_schema: Dict[str, Any]) -> "OutputTypes":
+    def __from_json_schema__(cls, json_schema: dict[str, Any]) -> "OutputTypes":
         if not json_schema:
             return cls("str")
 
@@ -41,14 +42,14 @@ class OutputTypes(str, Enum):
         if all_of:
             return cls("dict")
 
-        one_of: List[Dict[str, Any]] = [
+        one_of: list[dict[str, Any]] = [
             s for s in json_schema.get("oneOf", []) if isinstance(s, dict) and "type" in s
         ]
         if one_of:
             first_sub_schema = one_of[0]
             return cls.__from_json_schema__(first_sub_schema)
 
-        any_of: List[Dict[str, Any]] = [
+        any_of: list[dict[str, Any]] = [
             s for s in json_schema.get("anyOf", []) if isinstance(s, dict) and "type" in s
         ]
         if any_of:

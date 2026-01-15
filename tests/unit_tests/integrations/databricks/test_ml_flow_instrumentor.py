@@ -1,13 +1,14 @@
 from asyncio import Future
-import pytest
 from unittest.mock import MagicMock
 
-from guardrails.guard import Guard
+import pytest
+
 from guardrails.async_guard import AsyncGuard
 from guardrails.classes.history.call import Call
 from guardrails.classes.history.iteration import Iteration
 from guardrails.classes.llm.llm_response import LLMResponse
 from guardrails.classes.validation_outcome import ValidationOutcome
+from guardrails.guard import Guard
 from guardrails.run.async_runner import AsyncRunner
 from guardrails.run.async_stream_runner import AsyncStreamRunner
 from guardrails.run.runner import Runner

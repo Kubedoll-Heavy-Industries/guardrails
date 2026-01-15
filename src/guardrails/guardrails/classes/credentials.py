@@ -1,12 +1,12 @@
 import logging
 from dataclasses import dataclass
-from typing import Optional
+
 from typing_extensions import deprecated
 
 from guardrails.classes.generic.serializeable import SerializeableJSONEncoder
 from guardrails.classes.rc import RC
 
-BOOL_CONFIGS = set(["no_metrics", "enable_metrics", "use_remote_inferencing"])
+BOOL_CONFIGS = {"no_metrics", "enable_metrics", "use_remote_inferencing"}
 
 
 @deprecated(
@@ -18,10 +18,10 @@ BOOL_CONFIGS = set(["no_metrics", "enable_metrics", "use_remote_inferencing"])
 )
 @dataclass
 class Credentials(RC):
-    no_metrics: Optional[bool] = False
+    no_metrics: bool | None = False
 
     @staticmethod
-    def _to_bool(value: str) -> Optional[bool]:
+    def _to_bool(value: str) -> bool | None:
         if value.lower() == "true":
             return True
         if value.lower() == "false":
@@ -33,7 +33,7 @@ class Credentials(RC):
         return RC.exists()
 
     @staticmethod
-    def from_rc_file(logger: Optional[logging.Logger] = None) -> "Credentials":  # type: ignore
+    def from_rc_file(logger: logging.Logger | None = None) -> "Credentials":  # type: ignore
         rc = RC.load(logger)
         return Credentials(  # type: ignore
             id=rc.id,

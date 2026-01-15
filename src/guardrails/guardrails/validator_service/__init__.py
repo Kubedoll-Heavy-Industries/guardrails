@@ -1,7 +1,8 @@
 import asyncio
 import os
-from typing import Any, Iterator, Optional, Tuple
 import warnings
+from collections.abc import Iterator
+from typing import Any
 
 from guardrails.actions.filter import apply_filters
 from guardrails.actions.refrain import apply_refrain
@@ -10,16 +11,15 @@ from guardrails.classes.output_type import OutputTypes
 from guardrails.classes.validation.validation_result import (
     StreamValidationResult,
 )
-from guardrails.types import ValidatorMap
 from guardrails.telemetry.legacy_validator_tracing import trace_validation_result
-
-# Keep this imported for backwards compatibility
-from guardrails.validator_service.validator_service_base import ValidatorServiceBase  # noqa
+from guardrails.types import ValidatorMap
 from guardrails.validator_service.async_validator_service import AsyncValidatorService
 from guardrails.validator_service.sequential_validator_service import (
     SequentialValidatorService,
 )
 
+# Keep this imported for backwards compatibility
+from guardrails.validator_service.validator_service_base import ValidatorServiceBase  # noqa
 
 try:
     import uvloop  # type: ignore
@@ -64,8 +64,8 @@ def validate(
     metadata: dict,
     validator_map: ValidatorMap,
     iteration: Iteration,
-    disable_tracer: Optional[bool] = True,
-    path: Optional[str] = None,
+    disable_tracer: bool | None = True,
+    path: str | None = None,
     **kwargs,
 ):
     if path is None:
@@ -95,12 +95,12 @@ def validate(
 
 
 def validate_stream(
-    value_stream: Iterator[Tuple[Any, bool]],
+    value_stream: Iterator[tuple[Any, bool]],
     metadata: dict,
     validator_map: ValidatorMap,
     iteration: Iteration,
-    disable_tracer: Optional[bool] = True,
-    path: Optional[str] = None,
+    disable_tracer: bool | None = True,
+    path: str | None = None,
     **kwargs,
 ) -> Iterator[StreamValidationResult]:
     if path is None:
@@ -117,11 +117,11 @@ async def async_validate(
     metadata: dict,
     validator_map: ValidatorMap,
     iteration: Iteration,
-    disable_tracer: Optional[bool] = True,
-    path: Optional[str] = None,
-    stream: Optional[bool] = False,
+    disable_tracer: bool | None = True,
+    path: str | None = None,
+    stream: bool | None = False,
     **kwargs,
-) -> Tuple[Any, dict]:
+) -> tuple[Any, dict]:
     if path is None:
         path = "$"
     validator_service = AsyncValidatorService(disable_tracer)

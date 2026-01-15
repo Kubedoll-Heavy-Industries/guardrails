@@ -1,18 +1,18 @@
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
+from collections.abc import Callable
+from typing import Any, Union
 
 from guardrails.validator_base import Validator
 
-
-PydanticValidatorTuple = Tuple[Union[Validator, str, Callable], str]
+PydanticValidatorTuple = tuple[Union[Validator, str, Callable], str]
 PydanticValidatorSpec = Union[Validator, PydanticValidatorTuple]
 
-UseValidatorSpec = Union[Validator, Type[Validator]]
+UseValidatorSpec = Union[Validator, type[Validator]]
 
-UseManyValidatorTuple = Tuple[
-    Type[Validator],
-    Optional[Union[List[Any], Dict[str, Any]]],
-    Optional[Dict[str, Any]],
+UseManyValidatorTuple = tuple[
+    type[Validator],
+    Union[list[Any], dict[str, Any]] | None,
+    dict[str, Any] | None,
 ]
 UseManyValidatorSpec = Union[Validator, UseManyValidatorTuple]
 
-ValidatorMap = Dict[str, List[Validator]]
+ValidatorMap = dict[str, list[Validator]]

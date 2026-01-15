@@ -1,4 +1,5 @@
-from typing import Any, Dict
+from typing import Any
+
 from guardrails_api_client import ValidatorReference as IValidatorReference
 
 from guardrails.utils.serialization_utils import to_dict
@@ -32,7 +33,7 @@ class ValidatorReference(IValidatorReference):
             kwargs=interface.kwargs,
         )
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         ref_dict = super().to_dict()
 
         # serialize args and kwargs

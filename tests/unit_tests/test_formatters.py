@@ -1,5 +1,3 @@
-from typing import List
-
 from pydantic import BaseModel
 
 from guardrails.formatters.json_formatter import _jsonschema_to_jsonformer
@@ -10,7 +8,7 @@ def test_basic_schema_conversion():
         my_age: int
         my_height_in_nanometers: float
         my_name: str
-        my_friends: List[str]
+        my_friends: list[str]
 
     out_schema = _jsonschema_to_jsonformer(Simple.model_json_schema())
     assert out_schema["type"] == "object"
@@ -27,7 +25,7 @@ def test_nested_schema_conversion():
 
     class Nested(BaseModel):
         best_dog: Simple
-        good_dogs: List[Simple]  # May cause OoM if enumerated.  Consider generator.
+        good_dogs: list[Simple]  # May cause OoM if enumerated.  Consider generator.
 
     out = _jsonschema_to_jsonformer(Nested.model_json_schema())
     assert out["type"] == "object"

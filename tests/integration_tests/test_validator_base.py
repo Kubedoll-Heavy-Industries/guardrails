@@ -1,4 +1,5 @@
-from typing import Any, Callable, Dict, Optional, Union
+from collections.abc import Callable
+from typing import Any, Union
 
 import pytest
 
@@ -14,7 +15,7 @@ from guardrails.validator_base import (
 
 @register_validator("failure", "string")
 class FailureValidator(Validator):
-    def validate(self, value: Any, metadata: Dict[str, Any]) -> ValidationResult:
+    def validate(self, value: Any, metadata: dict[str, Any]) -> ValidationResult:
         return FailResult(
             error_message=("Failed cuz this is the failure validator"),
             fix_value="FIXED",
@@ -72,13 +73,13 @@ class MyValidator(Validator):
     def __init__(
         self,
         an_instance_attr: str,
-        on_fail: Optional[Union[Callable, str]] = None,
+        on_fail: Union[Callable, str] | None = None,
         **kwargs,
     ):
         self.an_instance_attr = an_instance_attr
         super().__init__(on_fail=on_fail, an_instance_attr=an_instance_attr, **kwargs)
 
-    def validate(self, value: Any, metadata: Dict[str, Any]) -> ValidationResult:
+    def validate(self, value: Any, metadata: dict[str, Any]) -> ValidationResult:
         return PassResult()
 
 

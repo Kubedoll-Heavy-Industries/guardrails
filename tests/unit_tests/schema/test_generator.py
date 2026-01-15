@@ -1,5 +1,7 @@
 from decimal import Decimal
+
 import pytest
+
 from guardrails.schema.generator import gen_num
 
 

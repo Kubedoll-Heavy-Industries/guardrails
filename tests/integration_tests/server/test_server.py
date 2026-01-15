@@ -15,8 +15,8 @@ Optional:
 
 import openai
 import pytest
-from guardrails import AsyncGuard, Guard
 
+from guardrails import AsyncGuard, Guard
 
 # Mark all tests in this module as integration tests
 pytestmark = pytest.mark.integration
