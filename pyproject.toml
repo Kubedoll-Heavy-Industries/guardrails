@@ -24,7 +24,7 @@ dev = [
 
 [tool.ruff]
 line-length = 100
-target-version = "py312"
+target-version = "py310"  # minimum supported version
 exclude = ["docs-graveyard", "docs"]
 
 [tool.ruff.lint]
@@ -84,6 +84,7 @@ ignore = [
     "PLW2901", # redefined-loop-name: often intentional in data processing
     # === Performance (Style Preference) ===
     "PERF102", # use dict.values(): sometimes keys are needed for debugging
+    "PERF203", # try-except in loop: required for iterator consumption
     "PERF401", # use list comprehension: readability preference
     "PERF402", # use list.copy: readability preference
     "PERF403", # use dict comprehension: readability preference

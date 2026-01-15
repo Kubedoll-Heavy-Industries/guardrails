@@ -47,7 +47,7 @@ def test_get_jwt_token():
     # Create a JWT that expires in the future
     secret_key = "secret"
     timedelta = datetime.timedelta(seconds=1000)
-    expiration = datetime.datetime.now(tz=datetime.UTC) + timedelta
+    expiration = datetime.datetime.now(tz=datetime.timezone.utc) + timedelta
     valid_jwt = jwt.encode({"exp": expiration}, secret_key, algorithm="HS256")
     rc = RC.from_dict({"token": valid_jwt})
 
@@ -56,7 +56,7 @@ def test_get_jwt_token():
 
     # Test with an expired JWT
     with pytest.raises(ExpiredTokenError) as e:
-        expired = datetime.datetime.now(tz=datetime.UTC) - timedelta
+        expired = datetime.datetime.now(tz=datetime.timezone.utc) - timedelta
         expired_jwt = jwt.encode({"exp": expired}, secret_key, algorithm="HS256")
         get_jwt_token(RC.from_dict({"token": expired_jwt}))
 
